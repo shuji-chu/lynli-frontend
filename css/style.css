@@ -470,3 +470,4 @@ body::before {
 /* 强制所有文本在浅色模式下清晰 */
 .page-title, h2, h3, h4 { color: #111827 !important; }
 .kpi-val { color: #1f2937 !important; }
+.btn-sm { width: auto !important; margin: 0 4px 0 0 !important; padding: 4px 8px !important; font-size: 12px !important; }
