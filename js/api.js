@@ -1,4 +1,6 @@
-const BASE_URL = 'https://spider.lynli.me';
+// 删除了域名，走 Vercel 代理
+const BASE_URL = ''; 
+
 const getHeaders = () => {
     const token = localStorage.getItem('lynli_token');
     return {
