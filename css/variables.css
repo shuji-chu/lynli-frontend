@@ -1,38 +1,32 @@
 :root {
-  --brand-primary: #4f46e5;
-  --brand-gradient: linear-gradient(135deg, #4f46e5, #0ea5e9);
-  --bg-glass: rgba(255, 255, 255, 0.6);
-  --border-glass: rgba(255, 255, 255, 0.9);
-  --text-main: #111827;
-  --text-muted: #4b5563;
-  --shadow-glass: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
+  /* 品牌主色：极简克莱因蓝 */
+  --brand-primary: #2563eb; 
+  --brand-hover: #1d4ed8;
+  
+  /* 背景色：极浅的灰白底色，带一点点蓝调，极其干净 */
+  --bg-body: #f8fafc;
+  --bg-card: #ffffff;
+  
+  /* 文字色：主标题深黑，副标题浅灰 */
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  
+  /* 边框与阴影：大厂标配的极浅边框+柔和弥散阴影 */
+  --border-light: #e2e8f0;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+  
+  --radius-md: 12px;
+  --radius-lg: 16px;
 }
 
 body {
-  /* 纯 CSS 手搓的高级灰紫渐变背景，不依赖任何图片，永远不卡加载！ */
-  background: 
-    radial-gradient(circle at 15% 50%, rgba(200, 210, 255, 0.6), transparent 40%),
-    radial-gradient(circle at 85% 30%, rgba(230, 200, 255, 0.5), transparent 40%),
-    radial-gradient(circle at 50% 90%, rgba(180, 220, 255, 0.4), transparent 50%),
-    linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%) !important;
-  background-size: cover !important;
+  background-color: var(--bg-body);
   color: var(--text-main);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
   margin: 0;
   height: 100dvh;
   overflow: hidden;
-}
-
-/* 彻底做干净，不需要遮罩了，直接用背景色 */
-body::before {
-  display: none !important;
-}
-
-/* 极高质感的磨砂玻璃卡片 */
-.card, .table-container, .login-box-new, .sidebar, .topbar {
-  background: rgba(255, 255, 255, 0.55) !important;
-  backdrop-filter: blur(24px) !important;
-  -webkit-backdrop-filter: blur(24px) !important;
-  border: 1px solid rgba(255, 255, 255, 1) !important;
-  box-shadow: var(--shadow-glass) !important;
+  -webkit-font-smoothing: antialiased;
 }
