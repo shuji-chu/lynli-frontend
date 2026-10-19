@@ -1,21 +1,32 @@
-export function renderSettings() {
-    return `
-        <div class="fade-in max-w-3xl bg-white rounded-xl shadow-sm border border-gray-100 p-8">
-            <h3 class="text-xl font-bold mb-6">系统与权限配置</h3>
-            <div class="space-y-6">
-                <div class="flex items-center justify-between border-b border-gray-100 pb-4">
-                    <div><div class="font-medium">API 网关地址</div><div class="text-sm text-gray-400">用于前后端通信</div></div>
-                    <input type="text" value="https://spider.lynli.me" class="border border-gray-200 rounded px-4 py-2 text-sm bg-gray-50" disabled>
-                </div>
-                <div class="flex items-center justify-between border-b border-gray-100 pb-4">
-                    <div><div class="font-medium">超级管理员</div><div class="text-sm text-gray-400">拥有所有权限（发货、对账、群发）</div></div>
-                    <button class="text-blue-600 text-sm font-medium">编辑</button>
-                </div>
-                <div class="flex items-center justify-between border-b border-gray-100 pb-4">
-                    <div><div class="font-medium">运营人员角色</div><div class="text-sm text-gray-400">仅可查看报表和商品库，无法操作发货</div></div>
-                    <button class="text-blue-600 text-sm font-medium">编辑</button>
+import { api } from '../api.js';
+export async function renderSettings(container) {
+    const user = JSON.parse(localStorage.getItem('user_info') || '{}');
+    container.innerHTML = `
+        <div class="max-w-2xl mx-auto bg-white rounded-3xl shadow-sm border border-slate-200 p-6 md:p-8">
+            <h2 class="text-lg font-bold text-slate-800 mb-6 border-b pb-4">个人设置</h2>
+            <div class="flex items-center gap-6 mb-8">
+                <img id="set-avatar-preview" src="${user.avatar}" class="w-20 h-20 rounded-2xl bg-slate-100 border border-slate-200 object-cover">
+                <div>
+                    <p class="text-xs text-slate-400 mt-2">当前角色：<span class="text-blue-600 font-bold">${user.role === 'admin' ? '超级管理员' : '普通员工'}</span></p>
                 </div>
             </div>
+            <form id="settingsForm" class="space-y-5">
+                <div><label class="block text-sm font-medium text-slate-700 mb-1">账号 (不可修改)</label><input type="text" value="${user.username}" disabled class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-500 cursor-not-allowed outline-none"></div>
+                <div><label class="block text-sm font-medium text-slate-700 mb-1">昵称</label><input type="text" id="set-nickname" value="${user.nickname}" class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/50 outline-none"></div>
+                <div><label class="block text-sm font-medium text-slate-700 mb-1">头像 URL</label><input type="text" id="set-avatar" value="${user.avatar}" class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/50 outline-none"></div>
+                <button type="submit" class="w-full py-3 bg-blue-600 text-white font-bold rounded-xl shadow-lg hover:bg-blue-700 transition active:scale-95">保存修改</button>
+            </form>
         </div>
     `;
+    document.getElementById('settingsForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const newNick = document.getElementById('set-nickname').value;
+        const newAvatar = document.getElementById('set-avatar').value;
+        const res = await api.updateProfile(newNick, newAvatar);
+        if(res.code === 200) {
+            localStorage.setItem('user_info', JSON.stringify(res.user));
+            alert('设置已更新！');
+            window.location.reload();
+        } else alert(res.msg);
+    });
 }
