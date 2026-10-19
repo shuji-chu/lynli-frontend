@@ -2,17 +2,16 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>LYNLI 管理控制台</title>
-  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
   <style>
     :root { --bg: #070b14; --sur: rgba(17,24,39,0.7); --line: rgba(255,255,255,0.08); --text: #e8edf7; --dim: #8b97ad; --pri: #3b82f6; }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, sans-serif; }
     body { background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; }
     
     /* 登录页 */
-    #login-view { height: 100vh; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at top right, rgba(59,130,246,0.15), transparent 40%); }
-    .login-box { width: 90%; max-width: 400px; background: var(--sur); padding: 30px; border-radius: 20px; border: 1px solid var(--line); box-shadow: 0 30px 60px -20px rgba(0,0,0,0.8); backdrop-filter: blur(20px); }
+    #login-view { height: 100vh; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at top right, rgba(59,130,246,0.15), transparent 40%); padding: 20px; }
+    .login-box { width: 100%; max-width: 400px; background: var(--sur); padding: 30px; border-radius: 20px; border: 1px solid var(--line); box-shadow: 0 30px 60px -20px rgba(0,0,0,0.8); backdrop-filter: blur(20px); }
     .login-box h1 { font-size: 26px; letter-spacing: 2px; margin-bottom: 5px; background: linear-gradient(90deg,#fff,#b8c4dd); -webkit-background-clip:text; color:transparent; }
     .login-box p { color: var(--dim); font-size: 13px; margin-bottom: 24px; }
     .field { margin-bottom: 16px; }
@@ -22,14 +21,18 @@
     .btn { width: 100%; padding: 12px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); border: none; border-radius: 8px; color: #fff; font-weight: bold; cursor: pointer; margin-top: 10px; }
     
     /* 主界面 */
-    #app-view { display: none; height: 100vh; }
-    .layout { display: flex; height: 100%; }
-    .sidebar { width: 240px; background: rgba(9,13,22,0.95); border-right: 1px solid var(--line); padding: 20px 10px; display: flex; flex-direction: column; }
+    #app-view { display: none; height: 100vh; width: 100%; }
+    .layout { display: flex; height: 100%; width: 100%; flex-direction: row; }
+    
+    /* 侧边栏 */
+    .sidebar { width: 240px; flex-shrink: 0; background: rgba(9,13,22,0.95); border-right: 1px solid var(--line); padding: 20px 10px; display: flex; flex-direction: column; }
     .sidebar h2 { font-size: 18px; padding: 0 10px 20px; border-bottom: 1px solid var(--line); margin-bottom: 15px; letter-spacing: 2px; }
-    .nav-item { padding: 12px; border-radius: 8px; color: var(--dim); cursor: pointer; margin-bottom: 5px; font-size: 14px; transition: 0.2s; }
-    .nav-item:hover, .nav-item.active { background: rgba(59,130,246,0.15); color: var(--pri); border-left: 3px solid var(--pri); }
-    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-    .topbar { padding: 20px; border-bottom: 1px solid var(--line); font-size: 18px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+    .nav-item { padding: 12px; border-radius: 8px; color: var(--dim); cursor: pointer; margin-bottom: 5px; font-size: 14px; transition: 0.2s; border-left: 3px solid transparent; }
+    .nav-item:hover, .nav-item.active { background: rgba(59,130,246,0.15); color: var(--pri); border-left-color: var(--pri); }
+    
+    /* 右侧主体 */
+    .main { flex: 1; display: flex; flex-direction: column; min-width: 0; width: 100%; }
+    .topbar { padding: 15px 20px; border-bottom: 1px solid var(--line); font-size: 18px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
     .user-info { font-size: 13px; color: var(--dim); font-weight: normal; display: flex; align-items: center; gap: 10px;}
     .avatar { width: 30px; height: 30px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); border-radius: 50%; display: grid; place-items: center; font-size: 12px; color: #fff; font-weight: bold;}
     .content { padding: 20px; overflow-y: auto; flex: 1; }
@@ -41,6 +44,19 @@
     .table { width: 100%; border-collapse: collapse; }
     .table th, .table td { padding: 12px; border-bottom: 1px solid var(--line); text-align: left; font-size: 14px; }
     .table th { color: var(--dim); font-weight: normal; }
+
+    /* ============ 手机端适配 ============ */
+    @media (max-width: 768px) {
+      .layout { flex-direction: column; }
+      .sidebar { width: 100%; height: auto; flex-direction: row; overflow-x: auto; padding: 10px; border-right: none; border-bottom: 1px solid var(--line); align-items: center; }
+      .sidebar h2 { display: none; }
+      .nav-item { margin-bottom: 0; margin-right: 8px; white-space: nowrap; border-left: none; border-bottom: 3px solid transparent; padding: 8px 12px; }
+      .nav-item.active { border-left: none; border-bottom-color: var(--pri); }
+      .kpi-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+      .kpi-val { font-size: 22px; }
+      .card { padding: 15px; }
+      .topbar { padding: 12px 15px; font-size: 16px; }
+    }
   </style>
 </head>
 <body>
@@ -130,25 +146,33 @@
         } else if (page === 'orders') {
           const res = await fetch("https://spider.lynli.me/api/orders");
           const { data } = await res.json();
-          content.innerHTML = `
-            <div class="card">
-              <table class="table">
-                <thead><tr><th>订单号</th><th>买家</th><th>金额</th><th>状态</th></tr></thead>
-                <tbody>${data.map(o => `<tr><td>${o.id}</td><td>${o.buyer}</td><td>¥${o.amount}</td><td>${o.status}</td></tr>`).join('')}</tbody>
-              </table>
-            </div>
-          `;
+          if(data.length === 0) {
+            content.innerHTML = '<div class="card" style="text-align:center;color:var(--dim);">暂无订单数据</div>';
+          } else {
+            content.innerHTML = `
+              <div class="card" style="overflow-x:auto;">
+                <table class="table">
+                  <thead><tr><th>订单号</th><th>买家</th><th>金额</th><th>状态</th></tr></thead>
+                  <tbody>${data.map(o => `<tr><td>${o.id}</td><td>${o.buyer}</td><td>¥${o.amount}</td><td>${o.status}</td></tr>`).join('')}</tbody>
+                </table>
+              </div>
+            `;
+          }
         } else if (page === 'products') {
           const res = await fetch("https://spider.lynli.me/api/products");
           const { data } = await res.json();
-          content.innerHTML = `
-            <div class="card">
-              <table class="table">
-                <thead><tr><th>商品名称</th><th>成本</th><th>售价</th><th>库存</th></tr></thead>
-                <tbody>${data.map(p => `<tr><td>${p.title}</td><td>¥${p.cost}</td><td>¥${p.price}</td><td>${p.stock}</td></tr>`).join('')}</tbody>
-              </table>
-            </div>
-          `;
+          if(data.length === 0) {
+             content.innerHTML = '<div class="card" style="text-align:center;color:var(--dim);">暂无商品，请去AI选品抓取。</div>';
+          } else {
+            content.innerHTML = `
+              <div class="card" style="overflow-x:auto;">
+                <table class="table">
+                  <thead><tr><th>商品名称</th><th>成本</th><th>售价</th><th>库存</th></tr></thead>
+                  <tbody>${data.map(p => `<tr><td>${p.title}</td><td>¥${p.cost}</td><td>¥${p.price}</td><td>${p.stock}</td></tr>`).join('')}</tbody>
+                </table>
+              </div>
+            `;
+          }
         } else if (page === 'spider') {
           content.innerHTML = '<div class="card">AI选品模块，输入关键词开始抓取。</div>';
         }
