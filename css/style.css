@@ -345,3 +345,28 @@ body.light-mode .card { background: rgba(255, 255, 255, 0.6); border: 1px solid 
   .bs-panel { height: 100%; overflow-y: auto; }
   .bs-card { flex: 1; }
 }
+
+/* 修复主界面无法上下滑动的问题 */
+body, #app { height: 100dvh; overflow: hidden; } /* 使用 dvh 适配手机浏览器地址栏 */
+.layout { display: flex; height: 100dvh; width: 100%; position: relative; overflow: hidden; }
+
+.main { 
+  flex: 1; 
+  display: flex; 
+  flex-direction: column; 
+  min-width: 0; 
+  height: 100dvh; /* 强制限定高度 */
+  overflow: hidden; 
+}
+
+.content { 
+  padding: 20px; 
+  padding-bottom: 80px; /* 底部留白，防止被浏览器底栏或 AI 悬浮球挡住 */
+  overflow-y: auto; /* 核心：允许内部垂直滚动 */
+  -webkit-overflow-scrolling: touch; /* 手机端丝滑滚动 */
+  flex: 1; 
+  min-height: 0; /* 核心：防止 flex 子项被内容撑开，强制触发内部滚动 */
+}
+
+/* 隐藏丑陋的滚动条，但保留滚动功能 */
+.content::-webkit-scrollbar { width: 0; display: none; }
