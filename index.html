@@ -3,76 +3,107 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <title>LYNLI 商家中心</title>
+    <title>LYNLI 商家运营中心</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: -apple-system, sans-serif; background-color: #f3f4f6; overflow-x: hidden; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #f8fafc; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
         
+        /* 登录页 */
+        #login-screen { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); }
+        .glass-card { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); }
+
         /* 顶部导航 */
-        .top-bar { position: fixed; top: 0; left: 0; right: 0; height: 56px; background: #fff; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); z-index: 50; }
-        .menu-btn { display: block; font-size: 24px; background: none; border: none; cursor: pointer; color: #334155; }
+        .top-bar { position: fixed; top: 0; left: 0; right: 0; height: 60px; background: rgba(255,255,255,0.9); backdrop-filter: blur(12px); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; border-b: 1px solid #f1f5f9; z-index: 50; }
         
         /* 侧边栏 */
-        .sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: 250px; background: #0f172a; color: #94a3b8; z-index: 100; transform: translateX(-100%); transition: transform 0.3s ease; }
-        .sidebar.open { transform: translateX(0); }
-        .sidebar-header { height: 56px; display: flex; align-items: center; padding: 0 20px; color: #fff; font-weight: bold; font-size: 18px; border-bottom: 1px solid #1e293b; }
-        .nav-item { display: block; padding: 14px 20px; color: #94a3b8; text-decoration: none; font-size: 14px; transition: 0.2s; }
-        .nav-item.active { background: #2563eb; color: #fff; }
+        .sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: 260px; background: #ffffff; border-right: 1px solid #f1f5f9; z-index: 100; transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .sidebar.open { transform: translateX(0); box-shadow: 20px 0 40px rgba(0,0,0,0.05); }
+        .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 20px; margin: 4px 12px; border-radius: 10px; color: #64748b; text-decoration: none; font-size: 14px; font-weight: 500; transition: all 0.2s; }
+        .nav-item:hover { background: #f8fafc; color: #0f172a; }
+        .nav-item.active { background: #eff6ff; color: #2563eb; font-weight: 600; }
+        .nav-item svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; }
         
-        /* 遮罩层 */
-        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 90; display: none; }
-        .overlay.open { display: block; }
+        /* 遮罩 */
+        .overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px); z-index: 90; display: none; opacity: 0; transition: opacity 0.3s; }
+        .overlay.open { display: block; opacity: 1; }
         
         /* 主内容区 */
-        .main-content { padding: 72px 16px 20px 16px; transition: margin-left 0.3s ease; }
+        .main-content { padding: 80px 16px 30px 16px; }
         
-        /* 提示框 */
-        #toast-box { position: fixed; top: 70px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; gap: 10px; width: 80%; max-width: 300px; }
-        .toast { background: #1e293b; color: white; padding: 12px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-size: 14px; text-align: center; animation: fadeIn 0.3s; }
+        /* 卡片质感 */
+        .stat-card { background: #ffffff; border-radius: 16px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; position: relative; overflow: hidden; }
+        .card { background: #ffffff; border-radius: 16px; padding: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; margin-bottom: 16px; }
         
+        /* 电脑端适配 */
         @media (min-width: 768px) {
-            .menu-btn { display: none; }
-            .sidebar { transform: translateX(0); }
-            .main-content { margin-left: 250px; padding: 80px 30px 30px 30px; }
+            .sidebar { transform: translateX(0); box-shadow: none; }
+            .main-content { margin-left: 260px; padding: 90px 40px 40px 40px; }
             .overlay { display: none !important; }
+            .menu-btn { display: none; }
         }
         
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-        .fade-in { animation: fadeIn 0.3s; }
-        
-        .card { background: #fff; border-radius: 12px; padding: 16px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 12px; }
+        .fade-in { animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
-    <div id="toast-box"></div>
-
-    <div id="login-screen" style="position: fixed; inset: 0; background: #fff; z-index: 999; display: flex; align-items: center; justify-content: center; padding: 20px;">
-        <div class="card" style="width: 100%; max-width: 350px; text-align: center;">
-            <h2 style="margin-bottom: 20px;">LYNLI 商家中心</h2>
-            <button onclick="window.handleLogin()" style="background:#2563eb; color:#fff; padding:12px; width:100%; border:none; border-radius:8px;">一键进入</button>
+    <!-- 登录页 -->
+    <div id="login-screen" class="fixed inset-0 z-[999] flex items-center justify-center p-6">
+        <div class="glass-card w-full max-w-sm rounded-3xl p-8 text-center shadow-2xl">
+            <div class="w-16 h-16 bg-blue-600 rounded-2xl mx-auto mb-6 flex items-center justify-center shadow-lg shadow-blue-500/30">
+                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            </div>
+            <h2 class="text-2xl font-bold text-white mb-2">LYNLI Console</h2>
+            <p class="text-slate-400 text-sm mb-8">无货源智能电商中枢</p>
+            <button onclick="window.handleLogin()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-4 rounded-xl transition-all shadow-lg shadow-blue-500/30">
+                安全登录
+            </button>
         </div>
     </div>
 
-    <div id="sidebar" class="sidebar">
-        <div class="sidebar-header">LYNLI PRO</div>
-        <a href="#" data-target="dashboard" class="nav-item active">📊 数据大盘</a>
-        <a href="#" data-target="orders" class="nav-item">📦 订单与物流</a>
-        <a href="#" data-target="products" class="nav-item">🏷️ 商品库</a>
-        <a href="#" data-target="spider" class="nav-item">🕷️ AI 选品</a>
-        <a href="#" data-target="users" class="nav-item">👥 会员列表</a>
+    <!-- 侧边栏 -->
+    <div id="sidebar" class="sidebar pt-6">
+        <div class="px-8 pb-8 flex items-center gap-3">
+            <div class="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center text-white font-bold">L</div>
+            <span class="font-bold text-xl text-slate-900 tracking-tight">LYNLI PRO</span>
+        </div>
+        <a href="#" data-target="dashboard" class="nav-item active">
+            <svg viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+            数据大盘
+        </a>
+        <a href="#" data-target="orders" class="nav-item">
+            <svg viewBox="0 0 24 24"><path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+            订单与物流
+        </a>
+        <a href="#" data-target="products" class="nav-item">
+            <svg viewBox="0 0 24 24"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+            商品库
+        </a>
+        <a href="#" data-target="spider" class="nav-item">
+            <svg viewBox="0 0 24 24"><path d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5"/></svg>
+            AI 智能选品
+        </a>
+        <a href="#" data-target="users" class="nav-item">
+            <svg viewBox="0 0 24 24"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+            会员列表
+        </a>
     </div>
     <div id="overlay" class="overlay" onclick="toggleSidebar()"></div>
 
+    <!-- 顶部栏 -->
     <div class="top-bar">
-        <div style="display: flex; align-items: center; gap: 12px;">
-            <button class="menu-btn" onclick="toggleSidebar()">☰</button>
-            <span id="breadcrumb" style="font-weight: bold; color: #334155;">数据大盘</span>
+        <div class="flex items-center gap-3">
+            <button class="menu-btn text-slate-600" onclick="toggleSidebar()">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+            </button>
+            <span id="breadcrumb" class="font-bold text-slate-800 text-lg tracking-tight">数据大盘</span>
         </div>
-        <img src="https://api.dicebear.com/7.x/adventurer/svg?seed=Admin" style="width: 32px; height: 32px; border-radius: 50%;">
+        <img src="https://api.dicebear.com/7.x/adventurer/svg?seed=Admin" class="w-9 h-9 rounded-full ring-2 ring-slate-100">
     </div>
 
+    <!-- 主内容 -->
     <div class="main-content" id="page-content"></div>
 
     <script type="module" src="./js/main.js"></script>

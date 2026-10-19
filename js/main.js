@@ -1,21 +1,9 @@
 import { api } from './api.js';
 
-// 手机端侧边栏控制
 window.toggleSidebar = () => {
     document.getElementById('sidebar').classList.toggle('open');
     document.getElementById('overlay').classList.toggle('open');
 };
-
-// 提示框
-function toast(msg, isError = false) {
-    const box = document.getElementById('toast-box');
-    const el = document.createElement('div');
-    el.className = 'toast';
-    if(isError) el.style.background = '#ef4444';
-    el.innerText = msg;
-    box.appendChild(el);
-    setTimeout(() => el.remove(), 3000);
-}
 
 window.handleLogin = () => {
     document.getElementById('login-screen').style.display = 'none';
@@ -24,51 +12,67 @@ window.handleLogin = () => {
 
 window.doPublish = async (id) => {
     const p = prompt("设置零售价:");
-    if(p) { await api.post('/api/shop/publish', {id, price: p}); toast('上架成功'); switchPage('spider'); }
+    if(p) { await api.post('/api/shop/publish', {id, price: p}); switchPage('spider'); }
 };
 
 window.doShip = async (trade_no) => {
     const t = prompt("请输入快递单号:"); 
-    if(t){ await api.post('/api/shop/ship', {trade_no, tracking_no:t}); toast('发货成功'); switchPage('orders'); }
+    if(t){ await api.post('/api/shop/ship', {trade_no, tracking_no:t}); switchPage('orders'); }
 };
 
 window.startCrawl = async () => {
     const kw = document.getElementById('crawl-kw').value;
-    if(!kw) return toast('请输入关键词', true);
-    document.getElementById('draft-list').innerHTML = '<div style="text-align:center; padding:20px; color:#2563eb;">正在抓取数据...</div>';
+    if(!kw) return alert('请输入关键词');
+    document.getElementById('draft-list').innerHTML = '<div style="text-align:center; padding:20px; color:#2563eb; font-weight:bold;">正在通过 AI 抓取...</div>';
     await api.post('/api/spider/start', { keyword: kw });
     setTimeout(() => switchPage('spider'), 3000);
 };
 
 async function switchPage(pageId) {
-    // 菜单高亮
     document.querySelectorAll('.nav-item').forEach(el => {
         if (el.dataset.target === pageId) el.classList.add('active');
         else el.classList.remove('active');
     });
-    // 手机端自动收起侧边栏
     if(window.innerWidth < 768) {
         document.getElementById('sidebar').classList.remove('open');
         document.getElementById('overlay').classList.remove('open');
     }
-    document.getElementById('breadcrumb').innerText = pageId.toUpperCase();
+    document.getElementById('breadcrumb').innerText = pageId === 'dashboard' ? '数据大盘' : (pageId === 'orders' ? '订单与物流' : (pageId === 'spider' ? 'AI 智能选品' : '商品库'));
 
     const content = document.getElementById('page-content');
-    content.innerHTML = '<div style="text-align:center; padding:40px; color:#64748b;">数据加载中...</div>';
+    content.innerHTML = '<div style="text-align:center; padding:40px; color:#94a3b8;">加载数据中...</div>';
 
     try {
         if (pageId === 'dashboard') {
             const res = await api.get('/api/admin/stats');
             const d = res.data || {sales:0,orders:0,users:0};
             content.innerHTML = `<div class="fade-in">
-                <div class="card"><div style="color:#64748b; font-size:12px;">总销售额</div><div style="font-size:24px; font-weight:bold; color:#2563eb;">¥${d.sales}</div></div>
-                <div class="card"><div style="color:#64748b; font-size:12px;">总订单</div><div style="font-size:24px; font-weight:bold; color:#ea580c;">${d.orders}</div></div>
-                <div class="card"><div style="color:#64748b; font-size:12px;">会员数</div><div style="font-size:24px; font-weight:bold;">${d.users}</div></div>
-                <div class="card" style="height:250px;" id="ch"></div>
+                <div class="stat-card mb-4">
+                    <div class="text-slate-400 text-xs font-medium mb-1">总销售额 (已发货)</div>
+                    <div class="text-3xl font-extrabold text-slate-900">¥${d.sales.toLocaleString()}</div>
+                    <div class="absolute bottom-0 right-0 w-24 h-24 bg-blue-50 rounded-full mix-blend-multiply filter blur-xl opacity-70"></div>
+                </div>
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div class="stat-card">
+                        <div class="text-slate-400 text-xs font-medium mb-1">总订单</div>
+                        <div class="text-2xl font-bold text-slate-800">${d.orders}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="text-slate-400 text-xs font-medium mb-1">会员总数</div>
+                        <div class="text-2xl font-bold text-slate-800">${d.users}</div>
+                    </div>
+                </div>
+                <div class="card h-[300px] p-4" id="ch"></div>
             </div>`;
             setTimeout(()=>{
                 let c = echarts.init(document.getElementById('ch'));
-                c.setOption({tooltip:{trigger:'axis'},xAxis:{type:'category',data:['一','二','三','四','五','六','日']},yAxis:{type:'value'},series:[{data:[150,230,224,218,135,147,260],type:'line',smooth:true,itemStyle:{color:'#2563eb'}}]});
+                c.setOption({
+                    grid: {top: 20, right: 10, bottom: 20, left: 30},
+                    tooltip:{trigger:'axis'},
+                    xAxis:{type:'category',data:['一','二','三','四','五','六','日'], axisLine:{lineStyle:{color:'#e2e8f0'}}, axisLabel:{color:'#64748b'}},
+                    yAxis:{type:'value', splitLine:{lineStyle:{color:'#f1f5f9'}}, axisLabel:{color:'#64748b'}},
+                    series:[{data:[150,230,224,218,135,147,260],type:'line',smooth:true, symbolSize:6, itemStyle:{color:'#3b82f6'}, areaStyle:{color: new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(59,130,246,0.2)'},{offset:1,color:'rgba(59,130,246,0)'}])}}]
+                });
             },100);
         } 
         else if (pageId === 'orders') {
@@ -77,68 +81,69 @@ async function switchPage(pageId) {
             content.innerHTML = `<div class="fade-in">${
                 orders.map(o=>`
                 <div class="card">
-                    <div style="display:flex; justify-content:space-between; border-bottom:1px solid #f1f5f9; padding-bottom:10px; margin-bottom:10px;">
-                        <span style="font-weight:bold; font-size:14px;">${o.trade_no}</span>
-                        <span style="font-size:12px; color:${o.status===0?'#ea580c':'#16a34a'};">${o.status===0?'待发货':'已发货'}</span>
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="font-bold text-slate-800 text-sm">${o.trade_no}</span>
+                        <span class="text-xs px-2.5 py-1 rounded-md font-medium ${o.status===0?'bg-orange-50 text-orange-600':'bg-green-50 text-green-600'}">${o.status===0?'待发货':'已发货'}</span>
                     </div>
-                    <div style="font-size:13px; color:#64748b; margin-bottom:10px; line-height:1.5;">
-                        收件人：${o.receiver} (${o.phone})<br>地址：${o.address}
+                    <div class="text-sm text-slate-500 mb-4 bg-slate-50 p-3 rounded-lg">
+                        <p><span class="text-slate-400">收件人：</span>${o.receiver} (${o.phone})</p>
+                        <p class="mt-1"><span class="text-slate-400">地址：</span>${o.address}</p>
                     </div>
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <b style="color:#ef4444; font-size:18px;">¥${o.total_amount}</b>
-                        ${o.status===0?`<button onclick="window.doShip('${o.trade_no}')" style="background:#2563eb; color:#fff; border:none; padding:8px 16px; border-radius:6px;">去发货</button>`:`<span style="font-size:12px; color:#64748b;">单号: ${o.tracking_no}</span>`}
+                    <div class="flex justify-between items-center">
+                        <span class="text-xl font-bold text-slate-900">¥${o.total_amount}</span>
+                        ${o.status===0?`<button onclick="window.doShip('${o.trade_no}')" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium active:scale-95 transition">去发货</button>`:`<span class="text-xs text-slate-400 font-medium">单号: ${o.tracking_no}</span>`}
                     </div>
-                </div>`).join('') || '暂无订单'
+                </div>`).join('') || '<div style="text-align:center; padding:40px; color:#94a3b8;">暂无订单</div>'
             }</div>`;
         }
         else if (pageId === 'products') {
             const res = await api.get('/api/shop/products');
             content.innerHTML = `<div class="fade-in">${
                 res.data.map(p=>`
-                <div class="card" style="display:flex; gap:12px; padding:12px;">
-                    <img src="${p.image}" style="width:80px; height:80px; object-fit:cover; border-radius:8px;">
-                    <div style="flex:1; display:flex; flex-direction:column; justify-content:space-between;">
-                        <div style="font-weight:bold; font-size:14px; line-height:1.2;">${p.name}</div>
-                        <div style="display:flex; justify-content:space-between; align-items:flex-end;">
-                            <span style="font-size:12px; color:#94a3b8;">成本:¥${p.cost_price}</span>
-                            <b style="color:#ef4444;">¥${p.price}</b>
+                <div class="card flex gap-4 items-center">
+                    <img src="${p.image}" class="w-20 h-20 object-cover rounded-xl bg-slate-100">
+                    <div class="flex-1">
+                        <div class="font-bold text-slate-800 text-sm leading-snug mb-2 line-clamp-2">${p.name}</div>
+                        <div class="flex justify-between items-end">
+                            <span class="text-xs text-slate-400">成本: ¥${p.cost_price}</span>
+                            <span class="font-bold text-slate-900 text-lg">¥${p.price}</span>
                         </div>
                     </div>
-                </div>`).join('') || '暂无商品'
+                </div>`).join('') || '<div style="text-align:center; padding:40px; color:#94a3b8;">暂无商品</div>'
             }</div>`;
         }
         else if (pageId === 'users') {
             const res = await api.get('/api/admin/users');
             content.innerHTML = `<div class="fade-in">${
                 res.data.map(u=>`
-                <div class="card" style="display:flex; align-items:center; gap:12px;">
-                    <img src="${u.avatar||'https://api.dicebear.com/7.x/adventurer/svg?seed=fallback'}" style="width:40px; height:40px; border-radius:50%;">
+                <div class="card flex items-center gap-4">
+                    <img src="${u.avatar||'https://api.dicebear.com/7.x/adventurer/svg?seed=fallback'}" class="w-12 h-12 rounded-full bg-slate-100 ring-2 ring-slate-50">
                     <div>
-                        <div style="font-weight:bold;">${u.nickname||'未命名'}</div>
-                        <div style="font-size:12px; color:#64748b;">${u.email}</div>
+                        <div class="font-bold text-slate-800">${u.nickname||'未命名'}</div>
+                        <div class="text-xs text-slate-400 mt-0.5">${u.email}</div>
                     </div>
-                </div>`).join('') || '暂无用户'
+                </div>`).join('') || '<div style="text-align:center; padding:40px; color:#94a3b8;">暂无用户</div>'
             }</div>`;
         }
         else if (pageId === 'spider') {
             const res = await api.get('/api/spider/list');
             content.innerHTML = `<div class="fade-in">
-                <div class="card" style="display:flex; gap:10px; padding:12px;">
-                    <input type="text" id="crawl-kw" placeholder="输入关键词..." style="flex:1; border:none; background:#f8fafc; padding:10px; border-radius:6px; outline:none;">
-                    <button onclick="window.startCrawl()" style="background:#2563eb; color:#fff; border:none; padding:0 16px; border-radius:6px;">抓取</button>
+                <div class="card flex gap-3 p-3">
+                    <input type="text" id="crawl-kw" placeholder="输入商品关键词..." class="flex-1 bg-slate-50 border-none px-4 py-3 rounded-xl outline-none text-sm focus:ring-2 focus:ring-blue-100 transition">
+                    <button onclick="window.startCrawl()" class="bg-slate-900 text-white px-6 py-3 rounded-xl font-medium text-sm active:scale-95 transition">抓取</button>
                 </div>
                 <div id="draft-list">
                     ${(res.data||[]).map(d=>`
-                    <div class="card" style="display:flex; gap:12px; padding:12px;">
-                        <img src="${(d.image_url||'').replace('http://','https://')}" style="width:80px; height:80px; object-fit:cover; border-radius:8px;">
-                        <div style="flex:1; display:flex; flex-direction:column; justify-content:space-between;">
-                            <div style="font-weight:bold; font-size:14px; line-height:1.2;">${d.title}</div>
-                            <div style="display:flex; justify-content:space-between; align-items:flex-end;">
-                                <span style="color:#ef4444; font-weight:bold;">¥${d.price}</span>
-                                <button onclick="window.doPublish(${d.id})" style="background:#0f172a; color:#fff; border:none; padding:6px 12px; border-radius:4px; font-size:12px;">上架</button>
+                    <div class="card flex gap-4 items-center">
+                        <img src="${(d.image_url||'').replace('http://','https://')}" class="w-20 h-20 object-cover rounded-xl bg-slate-100">
+                        <div class="flex-1">
+                            <div class="font-bold text-slate-800 text-sm leading-snug mb-2 line-clamp-2">${d.title}</div>
+                            <div class="flex justify-between items-end">
+                                <span class="font-bold text-slate-900">¥${d.price}</span>
+                                <button onclick="window.doPublish(${d.id})" class="bg-blue-50 text-blue-600 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-100 transition">一键上架</button>
                             </div>
                         </div>
-                    </div>`).join('') || '<div style="text-align:center; padding:40px; color:#94a3b8;">暂无数据</div>'}
+                    </div>`).join('') || '<div style="text-align:center; padding:40px; color:#94a3b8;">暂无草稿</div>'}
                 </div>
             </div>`;
         }
