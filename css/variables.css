@@ -1,14 +1,20 @@
 :root {
   --brand-primary: #4f46e5;
   --brand-gradient: linear-gradient(135deg, #4f46e5, #0ea5e9);
+  --bg-glass: rgba(255, 255, 255, 0.6);
+  --border-glass: rgba(255, 255, 255, 0.9);
   --text-main: #111827;
   --text-muted: #4b5563;
-  --shadow-glass: 0 20px 40px -10px rgba(0, 0, 0, 0.1);
+  --shadow-glass: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
 }
 
 body {
-  /* 替换为一张极具高级感、浅色背景的人物半身像 */
-  background: url('https://images.unsplash.com/photo-1531123897727-8f129e1688ce?q=80&w=2000&auto=format&fit=crop') no-repeat center center fixed !important;
+  /* 纯 CSS 手搓的高级灰紫渐变背景，不依赖任何图片，永远不卡加载！ */
+  background: 
+    radial-gradient(circle at 15% 50%, rgba(200, 210, 255, 0.6), transparent 40%),
+    radial-gradient(circle at 85% 30%, rgba(230, 200, 255, 0.5), transparent 40%),
+    radial-gradient(circle at 50% 90%, rgba(180, 220, 255, 0.4), transparent 50%),
+    linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%) !important;
   background-size: cover !important;
   color: var(--text-main);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -17,21 +23,16 @@ body {
   overflow: hidden;
 }
 
-/* 给人物图片盖一层浅紫灰色的半透明遮罩，让文字清晰，同时透出人物轮廓 */
+/* 彻底做干净，不需要遮罩了，直接用背景色 */
 body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background: linear-gradient(135deg, rgba(240, 243, 255, 0.75) 0%, rgba(226, 232, 240, 0.6) 100%);
-  z-index: -1;
-  pointer-events: none;
+  display: none !important;
 }
 
-/* 全局毛玻璃卡片强化 */
-.card, .table-container, .login-box-new {
-  background: rgba(255, 255, 255, 0.6) !important;
+/* 极高质感的磨砂玻璃卡片 */
+.card, .table-container, .login-box-new, .sidebar, .topbar {
+  background: rgba(255, 255, 255, 0.55) !important;
   backdrop-filter: blur(24px) !important;
   -webkit-backdrop-filter: blur(24px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.9) !important;
-  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 1) !important;
+  box-shadow: var(--shadow-glass) !important;
 }
