@@ -7,45 +7,138 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        /* 隐藏滚动条但保留滚动功能 */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
 </head>
-<body class="flex h-screen overflow-hidden bg-slate-50 font-sans relative">
+<body class="flex h-screen overflow-hidden bg-slate-100 font-sans relative text-sm">
 
     <!-- 移动端遮罩层 -->
-    <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-20 hidden md:hidden" onclick="toggleSidebar()"></div>
+    <div id="sidebar-overlay" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 hidden md:hidden transition-opacity" onclick="toggleSidebar()"></div>
 
     <!-- 侧边栏 -->
-    <aside id="sidebar" class="w-64 bg-slate-900 text-slate-300 flex flex-col z-30 absolute md:relative h-full transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out">
-        <div class="h-16 flex items-center justify-between px-4 border-b border-slate-800">
-            <span class="text-lg font-black text-white">LYNLI CONSOLE</span>
-            <button onclick="toggleSidebar()" class="md:hidden text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+    <aside id="sidebar" class="w-64 bg-[#0f172a] text-slate-300 flex flex-col z-50 absolute md:relative h-full transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out">
+        
+        <!-- Logo & 环境标识 -->
+        <div class="h-16 flex items-center justify-between px-5 border-b border-slate-800/50 shrink-0">
+            <div class="flex items-center gap-2">
+                <span class="text-lg font-black text-white tracking-wide">LYNLI</span>
+                <span class="px-1.5 py-0.5 bg-blue-500/20 text-blue-400 border border-blue-500/30 text-[10px] font-bold rounded">PRO</span>
+            </div>
+            <button onclick="toggleSidebar()" class="md:hidden text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
         </div>
-        <nav class="flex-1 px-3 py-4 space-y-2 overflow-y-auto">
-            <a href="#dashboard" class="nav-link flex items-center px-4 py-3 rounded-xl hover:bg-slate-800 hover:text-white"><i class="fa-solid fa-chart-pie w-8"></i> 看板</a>
-            <a href="#products" class="nav-link flex items-center px-4 py-3 rounded-xl hover:bg-slate-800 hover:text-white"><i class="fa-solid fa-box w-8"></i> 商品</a>
-            <a href="#orders" class="nav-link flex items-center px-4 py-3 rounded-xl hover:bg-slate-800 hover:text-white"><i class="fa-solid fa-file-invoice w-8"></i> 订单</a>
-            <a href="#spider" class="nav-link flex items-center px-4 py-3 rounded-xl hover:bg-slate-800 hover:text-white"><i class="fa-solid fa-robot w-8"></i> 选品</a>
+
+        <!-- 菜单列表 -->
+        <nav class="flex-1 px-3 py-4 overflow-y-auto no-scrollbar space-y-6">
+            
+            <!-- 仪表盘 -->
+            <div>
+                <p class="px-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">总览</p>
+                <a href="#dashboard" class="nav-link flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
+                    <i class="fa-solid fa-chart-pie w-6 text-center text-slate-400"></i> 数据看板
+                </a>
+            </div>
+
+            <!-- 商品模块 -->
+            <div>
+                <p class="px-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">商品管理</p>
+                <a href="#products" class="nav-link flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
+                    <i class="fa-solid fa-box-open w-6 text-center text-slate-400"></i> 商品库
+                    <span class="ml-auto bg-slate-800 text-xs px-2 py-0.5 rounded-full text-slate-400">856</span>
+                </a>
+                <a href="#drafts" class="nav-link flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
+                    <i class="fa-solid fa-file-signature w-6 text-center text-slate-400"></i> 抓取草稿箱
+                </a>
+                <a href="#assets" class="nav-link flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
+                    <i class="fa-solid fa-images w-6 text-center text-slate-400"></i> 素材图库
+                </a>
+            </div>
+
+            <!-- 交易模块 -->
+            <div>
+                <p class="px-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">交易中心</p>
+                <a href="#orders" class="nav-link flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
+                    <i class="fa-solid fa-file-invoice-dollar w-6 text-center text-slate-400"></i> 全部订单
+                </a>
+                <a href="#purchase" class="nav-link flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
+                    <i class="fa-solid fa-cart-shopping w-6 text-center text-slate-400"></i> 采购列表
+                    <span class="ml-auto bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">12</span>
+                </a>
+                <a href="#aftersales" class="nav-link flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
+                    <i class="fa-solid fa-headset w-6 text-center text-slate-400"></i> 售后工单
+                </a>
+            </div>
+
+            <!-- 智能工具 -->
+            <div>
+                <p class="px-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">AI 引擎</p>
+                <a href="#spider" class="nav-link flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
+                    <i class="fa-solid fa-robot w-6 text-center text-slate-400"></i> AI 智能选品
+                </a>
+                <a href="#logs" class="nav-link flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
+                    <i class="fa-solid fa-microchip w-6 text-center text-slate-400"></i> 任务运行日志
+                </a>
+            </div>
+
+            <!-- 系统设置 -->
+            <div>
+                <p class="px-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">系统</p>
+                <a href="#settings" class="nav-link flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
+                    <i class="fa-solid fa-gear w-6 text-center text-slate-400"></i> 店铺设置
+                </a>
+                <a href="#api" class="nav-link flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
+                    <i class="fa-solid fa-code w-6 text-center text-slate-400"></i> API 接口配置
+                </a>
+            </div>
         </nav>
-        <!-- 退出登录按钮 -->
-        <div class="p-4 border-t border-slate-800">
-            <button id="logoutBtn" class="w-full flex items-center justify-center px-4 py-2 bg-slate-800 hover:bg-red-600 text-slate-300 hover:text-white rounded-xl transition-colors font-medium">
-                <i class="fa-solid fa-power-off mr-2"></i> 退出登录
-            </button>
+
+        <!-- 底部用户信息 -->
+        <div class="p-4 border-t border-slate-800/50 bg-[#0b1120]">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <img src="./logo.png" class="w-8 h-8 rounded-full bg-slate-800 p-1 object-contain">
+                    <div>
+                        <p class="text-xs font-bold text-white">超级管理员</p>
+                        <p class="text-[10px] text-slate-500">admin@lynli.me</p>
+                    </div>
+                </div>
+                <button id="logoutBtn" class="text-slate-500 hover:text-red-400 transition-colors p-2" title="退出登录">
+                    <i class="fa-solid fa-power-off"></i>
+                </button>
+            </div>
         </div>
     </aside>
 
     <!-- 主内容区 -->
-    <main class="flex-1 flex flex-col w-full h-full">
-        <header class="h-16 bg-white border-b border-slate-200 flex items-center px-4 shrink-0">
-            <button onclick="toggleSidebar()" class="md:hidden mr-4 text-slate-600 hover:text-slate-900 focus:outline-none">
-                <i class="fa-solid fa-bars text-xl"></i>
-            </button>
-            <h2 id="page-title" class="text-lg font-bold">数据看板</h2>
+    <main class="flex-1 flex flex-col w-full h-full min-w-0">
+        <!-- 顶栏 -->
+        <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 shrink-0 shadow-sm z-10">
+            <div class="flex items-center">
+                <button onclick="toggleSidebar()" class="md:hidden mr-3 text-slate-600 hover:text-slate-900 focus:outline-none">
+                    <i class="fa-solid fa-bars text-lg"></i>
+                </button>
+                <div class="flex items-center text-sm">
+                    <span class="text-slate-400 hidden sm:inline">控制台</span>
+                    <i class="fa-solid fa-chevron-right text-[10px] mx-2 text-slate-300 hidden sm:inline"></i>
+                    <h2 id="page-title" class="text-base font-bold text-slate-800">数据看板</h2>
+                </div>
+            </div>
+            
+            <!-- 顶栏右侧按钮 -->
+            <div class="flex items-center gap-3">
+                <button class="w-8 h-8 flex items-center justify-center rounded-full bg-slate-50 text-slate-500 hover:bg-slate-100 border border-slate-200"><i class="fa-solid fa-bell"></i></button>
+                <button class="w-8 h-8 flex items-center justify-center rounded-full bg-slate-50 text-slate-500 hover:bg-slate-100 border border-slate-200"><i class="fa-solid fa-circle-question"></i></button>
+            </div>
         </header>
         
-        <div id="app-view" class="flex-1 p-4 overflow-auto w-full"></div>
+        <!-- 内容渲染区 -->
+        <div id="app-view" class="flex-1 p-4 overflow-y-auto w-full"></div>
     </main>
 
     <script>
+        // 侧边栏滑动
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('sidebar-overlay');
@@ -57,6 +150,12 @@
                 overlay.classList.add('hidden');
             }
         }
+
+        // 退出登录逻辑
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            localStorage.removeItem('lynli_token');
+            window.location.href = '/';
+        });
     </script>
     <script type="module" src="./js/router.js"></script>
 </body>
