@@ -1,3 +1,18 @@
+// 🔥 无死角捕获所有 JS 报错，如果有错直接显示在屏幕上！
+window.onerror = function(msg, url, line, col, error) {
+  document.getElementById('app').innerHTML = `
+    <div style="color:#f87171; padding:40px; font-family:monospace; background:#070b14; height:100vh;">
+      <h2 style="font-size:24px; margin-bottom:20px;">⚠️ 页面加载出错 (请截图发给AI)</h2>
+      <div style="background:rgba(248,113,113,0.1); padding:20px; border-radius:8px; border:1px solid #f87171;">
+        <p style="margin-bottom:10px; word-break:break-all;"><b>错误信息:</b> ${msg}</p>
+        <p style="margin-bottom:10px; word-break:break-all;"><b>出错文件:</b> ${url}</p>
+        <p><b>行号:</b> ${line}:${col}</p>
+      </div>
+    </div>
+  `;
+  return false;
+};
+
 import { routes } from "./router.js";
 import { renderLayout } from "./views/layout.js";
 import { showModal, toast } from "./ui.js";
@@ -38,6 +53,7 @@ Object.assign(routes.system, { render: System.render });
 
 function renderTabs() {
   const tabsBar = document.getElementById('tabs-bar');
+  if(!tabsBar) return;
   tabsBar.innerHTML = openTabs.map(page => `
     <div class="tab-item ${page === currentPage ? 'active' : ''}" data-page="${page}">
       ${routes[page].title}
@@ -74,7 +90,7 @@ function switchPage(page) {
   
   setTimeout(() => {
     if (routes[page].render) routes[page].render(content);
-  }, 150);
+  }, 50);
 }
 
 function renderLogin() {
@@ -95,7 +111,7 @@ function renderLogin() {
 
 function renderApp() {
   app.innerHTML = renderLayout();
-  initAICopilot(); // 初始化 AI 助手
+  initAICopilot(); 
   
   openTabs = ["dashboard"];
   currentPage = "dashboard";
@@ -139,7 +155,8 @@ function renderApp() {
       }
     });
     setTimeout(() => {
-      document.querySelector('#change-avatar-btn').onclick = () => {
+      const changeBtn = document.querySelector('#change-avatar-btn');
+      if(changeBtn) changeBtn.onclick = () => {
         const emojis = ['🐱', '🐶', '🦊', '🐻', '🐼', '🚀', '😎', '⚡'];
         document.querySelector('#modal-avatar-preview').textContent = emojis[Math.floor(Math.random() * emojis.length)];
       };
