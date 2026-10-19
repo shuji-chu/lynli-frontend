@@ -23,46 +23,37 @@
                 <label class="block text-xs font-medium text-slate-500 mb-1">密码</label>
                 <input type="password" id="password" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" required>
             </div>
-            <div class="flex items-center justify-between pt-2">
-                <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" id="remember" class="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 border-slate-300">
-                    <span class="text-sm text-slate-600">记住账号</span>
-                </label>
-            </div>
-            <button type="submit" class="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg shadow-blue-500/30 transition-all active:scale-95 mt-4">登录</button>
+            <button type="submit" class="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg shadow-blue-500/30 transition-all mt-4">登录</button>
         </form>
     </div>
     <script>
-        const saved = localStorage.getItem('lynli_saved_user');
-        if (saved) { document.getElementById('username').value = saved; document.getElementById('remember').checked = true; }
-        if (localStorage.getItem('token')) window.location.href = '/dashboard.html';
-
+        // 直接请求，直连服务器
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const u = document.getElementById('username').value;
-            const p = document.getElementById('password').value;
-            const remember = document.getElementById('remember').checked;
             const btn = e.target.querySelector('button');
-            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> 验证中...';
-
+            btn.innerHTML = '验证中...';
             try {
-                // 使用相对路径，走 Vercel 代理，同源请求无跨域！
-                const res = await fetch('/api/login', {
-                    method: 'POST', 
-                    headers: {'Content-Type':'application/json'}, 
-                    body: JSON.stringify({username: u, password: p})
+                const res = await fetch('https://spider.lynli.me/api/login', {
+                    method: 'POST',
+                    headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({
+                        username: document.getElementById('username').value,
+                        password: document.getElementById('password').value
+                    })
                 }).then(r => r.json());
-
-                if (res.code === 200) {
+                
+                if(res.code === 200) {
                     localStorage.setItem('token', res.token);
                     localStorage.setItem('user_info', JSON.stringify(res.user));
-                    if (remember) localStorage.setItem('lynli_saved_user', u);
-                    else localStorage.removeItem('lynli_saved_user');
                     window.location.href = '/dashboard.html';
                 } else {
-                    alert(res.msg); btn.innerHTML = '登录';
+                    alert(res.msg);
+                    btn.innerHTML = '登录';
                 }
-            } catch (err) { alert('网络错误，请检查后端服务'); btn.innerHTML = '登录'; }
+            } catch (e) {
+                alert('网络错误');
+                btn.innerHTML = '登录';
+            }
         });
     </script>
 </body>
