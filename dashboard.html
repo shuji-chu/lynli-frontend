@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>LYNLI 控制台</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body class="flex h-screen overflow-hidden bg-slate-50 font-sans">
+    <aside class="w-64 bg-slate-900 text-slate-300 flex flex-col z-20">
+        <div class="h-20 flex items-center px-6 border-b border-slate-800">
+            <span class="text-xl font-black text-white">LYNLI CONSOLE</span>
+        </div>
+        <nav class="flex-1 px-4 py-6 space-y-2">
+            <a href="#dashboard" class="nav-link flex items-center px-4 py-3 rounded-xl hover:bg-slate-800 hover:text-white"><i class="fa-solid fa-chart-pie w-8"></i> 看板</a>
+            <a href="#products" class="nav-link flex items-center px-4 py-3 rounded-xl hover:bg-slate-800 hover:text-white"><i class="fa-solid fa-box w-8"></i> 商品</a>
+            <a href="#orders" class="nav-link flex items-center px-4 py-3 rounded-xl hover:bg-slate-800 hover:text-white"><i class="fa-solid fa-file-invoice w-8"></i> 订单</a>
+            <a href="#spider" class="nav-link flex items-center px-4 py-3 rounded-xl hover:bg-slate-800 hover:text-white"><i class="fa-solid fa-robot w-8"></i> 选品</a>
+        </nav>
+    </aside>
+    <main class="flex-1 flex flex-col">
+        <header class="h-20 bg-white border-b border-slate-200 flex items-center px-8"><h2 id="page-title" class="text-2xl font-bold">数据看板</h2></header>
+        <div id="app-view" class="flex-1 p-8 overflow-auto"></div>
+    </main>
+    <script type="module" src="./js/router.js"></script>
+</body>
+</html>
