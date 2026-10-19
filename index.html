@@ -3,36 +3,62 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LYNLI V6</title>
+  <title>LYNLI 管理控制台</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
 </head>
-<body style="background:#070b14; color:white; padding:20px; font-family:sans-serif;">
-  <h1 style="color:#10b981;">V6版本加载成功！</h1>
-  <div id="login-box">
-    <p>账号: <input id="acc" value="admin"></p>
-    <p>密码: <input id="pwd" type="password" value="123456"></p>
-    <button onclick="doLogin()" style="padding:10px 20px; background:#3b82f6; color:white; border:none;">点击登录</button>
-  </div>
-  
-  <div id="app-box" style="display:none;">
-    <h2>欢迎进入大厂后台，系统管理员</h2>
-    <p>如果你看到了这句话，说明登录接口彻底打通了。</p>
-  </div>
+<body>
+  <div id="app">
+    <!-- 登录页 -->
+    <section id="login-view" class="auth">
+      <div class="auth__panel">
+        <header class="brand">
+          <div class="brand__mark"><img src="logo.png" alt="Logo"></div>
+          <div class="brand__text"><h1>LYNLI</h1><p>管理控制台</p></div>
+        </header>
+        <div class="auth__card">
+          <div class="auth__head"><h2>登录</h2><p>请输入您的账号信息</p></div>
+          <form id="login-form">
+            <label class="field"><span class="field__label">账号</span><input class="field__input" type="text" name="account" value="admin" required></label>
+            <label class="field"><span class="field__label">密码</span><input class="field__input" type="password" name="password" value="123456" required></label>
+            <button class="btn btn--primary" type="submit">进入控制台</button>
+          </form>
+        </div>
+      </div>
+    </section>
 
-  <script>
-    async function doLogin() {
-      const res = await fetch('https://spider.lynli.me/api/auth/login', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({account: document.getElementById('acc').value, password: document.getElementById('pwd').value})
-      });
-      const data = await res.json();
-      if (data.code === 200) {
-        document.getElementById('login-box').style.display = 'none';
-        document.getElementById('app-box').style.display = 'block';
-      } else {
-        alert('登录失败');
-      }
-    }
-  </script>
+    <!-- 主界面 -->
+    <section id="app-view" class="app" hidden>
+      <aside class="sidebar">
+        <div class="sidebar__brand">
+          <div class="brand__mark brand__mark--sm"><img src="logo.png"></div>
+          <div class="sidebar__brand-text"><strong>LYNLI</strong><span>控制台</span></div>
+        </div>
+        <nav class="sidebar__nav">
+          <div class="nav-title">概览</div>
+          <button class="nav-item active" data-route="dashboard">数据看板</button>
+          <div class="nav-title">交易中心</div>
+          <button class="nav-item" data-route="orders">全部订单</button>
+          <button class="nav-item" data-route="purchase">采购与代发</button>
+          <div class="nav-title">商品中心</div>
+          <button class="nav-item" data-route="products">商品库</button>
+          <button class="nav-item" data-route="spider">AI选品矩阵</button>
+        </nav>
+        <div class="sidebar__foot">
+          <div class="user-chip">
+            <div class="user-chip__avatar">管</div>
+            <div class="user-chip__meta"><strong>系统管理员</strong><span>admin@lynli.me</span></div>
+          </div>
+        </div>
+      </aside>
+      <div class="app__main">
+        <header class="topbar">
+          <h1 id="page-title">数据看板</h1>
+        </header>
+        <main class="content" id="content"></main>
+      </div>
+    </section>
+  </div>
+  <script type="module" src="js/main.js"></script>
 </body>
 </html>
