@@ -1,7 +1,6 @@
 import { $ } from "../core/utils.js";
 import { renderLayout } from "../components/ui/layout.js";
 import { ROUTES } from "../router/routes.js";
-import { nav } from "../router/index.js";
 import { toast } from "../components/ui/toast.js";
 
 export function initAuth() {
@@ -11,7 +10,7 @@ export function initAuth() {
     const password = e.target.password.value;
 
     try {
-      const res = await fetch("https://spider.lynli.me/api/login", {
+      const res = await fetch("https://spider.lynli.me/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ account, password })

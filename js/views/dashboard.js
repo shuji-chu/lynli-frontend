@@ -1,10 +1,22 @@
-import { store } from "../store/data.js";
 import { fmtMoney } from "../core/utils.js";
+
 export async function render(m) {
-  const d = store.get(); const profit = d.finance.revenue - d.finance.cost;
-  m.innerHTML = `<div class="kpi-grid">
-    <div class="card kpi"><div class="kpi-label">总营收</div><div class="kpi-val">${fmtMoney(d.finance.revenue)}</div></div>
-    <div class="card kpi"><div class="kpi-label">总成本</div><div class="kpi-val" style="color:#f87171">${fmtMoney(d.finance.cost)}</div></div>
-    <div class="card kpi"><div class="kpi-label">净利润</div><div class="kpi-val" style="color:#34d399">${fmtMoney(profit)}</div></div>
-  </div><h3>点击左侧订单进行真实业务操作，数据实时联动。</h3>`;
+  m.innerHTML = `<div class="card"><h2>加载中...</h2></div>`;
+  try {
+    const res = await fetch("https://spider.lynli.me/api/dashboard");
+    const json = await res.json();
+    const d = json.data;
+
+    m.innerHTML = `<div class="kpi-grid">
+      <div class="card kpi"><div class="kpi-label">今日营收</div><div class="kpi-val" style="color:#3b82f6;">${fmtMoney(d.revenue)}</div></div>
+      <div class="card kpi"><div class="kpi-label">今日订单</div><div class="kpi-val">${d.orders_today}</div></div>
+      <div class="card kpi"><div class="kpi-label">待发货</div><div class="kpi-val" style="color:#f87171;">${d.pending_ship}</div></div>
+      <div class="card kpi"><div class="kpi-label">在售商品</div><div class="kpi-val">${d.total_prod}</div></div>
+    </div>
+    <div class="card" style="margin-top:20px;">
+      <h2>系统已接入真实数据库，左侧操作数据实时联动。</h2>
+    </div>`;
+  } catch (e) {
+    m.innerHTML = `<h2>加载失败</h2>`;
+  }
 }
