@@ -11,7 +11,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: pages
+  group: "pages"
   cancel-in-progress: true
 
 jobs:
@@ -26,6 +26,10 @@ jobs:
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
+
+      # 关键一步：确保构建产物中永远有 CNAME，防止掉线
+      - name: Ensure CNAME
+        run: echo "select.lynli.me" > ./CNAME
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
