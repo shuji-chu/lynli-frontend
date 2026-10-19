@@ -5,7 +5,6 @@ const TOKEN_KEY = "lynli.token";
 const USER_KEY = "lynli.user";
 
 const state = {
-  role: "super_admin",
   loading: false,
   user: null,
 };
@@ -47,20 +46,6 @@ const ROLE_LABEL = {
 register("dashboard", () => import("./views/dashboard.js"));
 
 /* ---------- 登录交互 ---------- */
-function initRoleSwitch() {
-  const items = $$(".role-switch__item");
-  items.forEach((btn) => {
-    btn.addEventListener("click", () => {
-      if (state.loading) return;
-      items.forEach((b) => {
-        b.classList.toggle("is-active", b === btn);
-        b.setAttribute("aria-selected", String(b === btn));
-      });
-      state.role = btn.dataset.role;
-    });
-  });
-}
-
 function showError(msg) {
   const el = $("#login-error");
   el.textContent = msg;
@@ -125,7 +110,7 @@ async function handleLogin(e) {
     const res = await fetch(`${API_BASE}/api/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password, role: state.role }),
+      body: JSON.stringify({ email, password }),
     });
 
     const data = await res.json().catch(() => ({}));
@@ -139,7 +124,9 @@ async function handleLogin(e) {
     }
 
     localStorage.setItem(TOKEN_KEY, data.token);
-    const user = data.user || { email, role: state.role };
+    
+    // 如果后端没有返回 user，给个默认的 dummy 数据防止报错
+    const user = data.user || { email, role: "super_admin", nickname: "Admin" };
     localStorage.setItem(USER_KEY, JSON.stringify(user));
 
     persistRememberedEmail(email, remember);
@@ -170,7 +157,7 @@ function enterApp(user) {
 }
 
 function renderNav() {
-  const role = state.user?.role || state.role;
+  const role = state.user?.role || "super_admin"; // 依赖后端返回的角色
   const items = NAV.filter((n) => n.roles.includes(role));
 
   $("#nav").innerHTML = items
@@ -193,7 +180,7 @@ function renderNav() {
 
 function renderUser() {
   const user = state.user || {};
-  const role = user.role || state.role;
+  const role = user.role || "super_admin";
   const email = user.email || "未登录";
   const name = user.nickname || email.split("@")[0];
   const initial = (name || "U").slice(0, 1).toUpperCase();
@@ -268,7 +255,6 @@ function logout() {
 
 /* ---------- 启动 ---------- */
 function boot() {
-  initRoleSwitch();
   restoreRememberedEmail();
 
   const form = $("#login-form");
