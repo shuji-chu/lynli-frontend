@@ -5,299 +5,106 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AI 选品中心 - Lynli 管理后台</title>
 <style>
-  :root {
-    --bg: #f5f7fa;
-    --white: #ffffff;
-    --text: #1e293b;
-    --text-sub: #64748b;
-    --blue: #2563eb;
-    --blue-light: #eff6ff;
-    --border: #e2e8f0;
-    --danger: #ef4444;
-    --success: #10b981;
-  }
+  :root { --bg: #f5f7fa; --white: #ffffff; --text: #1e293b; --text-sub: #64748b; --blue: #2563eb; --blue-light: #eff6ff; --border: #e2e8f0; --danger: #ef4444; }
   *{box-sizing:border-box;margin:0;padding:0}
-  body {
-    background-color: var(--bg);
-    color: var(--text);
-    font: 14px/1.6 -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
-    -webkit-font-smoothing: antialiased;
-    height: 100vh; overflow: hidden;
-  }
-
-  /* ================= 登录页样式 (完美复刻图2) ================= */
-  #login-page {
-    display: flex; align-items: center; justify-content: center;
-    height: 100vh; background-color: var(--white);
-  }
-  .login-card {
-    width: 100%; max-width: 420px; padding: 40px;
-    background: var(--white);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.02);
-  }
-  .login-card h1 { font-size: 24px; font-weight: 600; margin-bottom: 4px; }
-  .login-card p.sub { color: var(--text-sub); font-size: 14px; margin-bottom: 30px; }
-  .form-group { margin-bottom: 20px; }
-  .form-group label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 8px; }
-  .form-group input {
-    width: 100%; padding: 12px 16px;
-    border: 1px solid var(--border); border-radius: 8px;
-    font-size: 14px; outline: none; transition: 0.2s;
-  }
-  .form-group input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-light); }
-  .btn-login {
-    width: 100%; padding: 14px; background: #000; color: #fff;
-    border: none; border-radius: 8px; font-size: 16px; font-weight: 500;
-    cursor: pointer; margin-top: 10px; transition: 0.2s;
-  }
-  .btn-login:hover { background: #333; }
-  .copyright { text-align: center; color: #94a3b8; font-size: 12px; margin-top: 40px; }
-
-  /* ================= 主面板样式 (完美复刻图1) ================= */
-  #dashboard {
-    display: none; height: 100vh; display: flex;
-  }
-  /* 侧边栏 */
-  .sidebar {
-    width: 260px; background: var(--white);
-    border-right: 1px solid var(--border);
-    display: flex; flex-direction: column;
-  }
-  .sidebar-header {
-    padding: 24px; display: flex; align-items: center; gap: 12px;
-    border-bottom: 1px solid var(--border);
-  }
-  .sidebar-header img { width: 32px; height: 32px; border-radius: 8px; background: #000; }
-  .sidebar-header span { font-weight: 600; font-size: 16px; }
-  
-  .menu-group { padding: 20px 12px 10px; color: var(--text-sub); font-size: 12px; font-weight: 600; letter-spacing: 1px; }
-  .menu-item {
-    display: flex; align-items: center; gap: 12px;
-    padding: 12px 16px; margin-bottom: 4px;
-    border-radius: 8px; cursor: pointer; color: var(--text);
-    font-weight: 500; transition: 0.2s;
-  }
-  .menu-item:hover { background: var(--bg); }
-  .menu-item.active { background: var(--blue-light); color: var(--blue); }
-  .menu-item svg { width: 18px; height: 18px; fill: currentColor; }
-
-  /* 主内容区 */
-  .main-content {
-    flex: 1; display: flex; flex-direction: column; background: var(--bg); overflow-y: auto;
-  }
-  .top-bar {
-    height: 64px; background: var(--white); border-bottom: 1px solid var(--border);
-    display: flex; align-items: center; justify-content: flex-end; padding: 0 24px; gap: 16px;
-  }
-  .user-profile { display: flex; align-items: center; gap: 8px; font-weight: 500; cursor: pointer; }
-  
-  .content-area { padding: 30px; max-width: 1200px; margin: 0 auto; width: 100%; }
-  .page-title { font-size: 20px; font-weight: 600; margin-bottom: 24px; }
-
-  /* 选品工具条 */
-  .toolbar {
-    display: flex; gap: 12px; margin-bottom: 24px;
-    background: var(--white); padding: 20px; border-radius: 12px;
-    border: 1px solid var(--border);
-  }
-  .toolbar input {
-    flex: 1; padding: 10px 16px; border: 1px solid var(--border);
-    border-radius: 8px; outline: none; font-size: 14px;
-  }
-  .toolbar input:focus { border-color: var(--blue); }
-  .btn-primary {
-    padding: 10px 24px; background: var(--blue); color: #fff;
-    border: none; border-radius: 8px; cursor: pointer; font-weight: 500; transition: 0.2s;
-  }
-  .btn-primary:hover { background: #1d4ed8; }
-
-  /* 卡片网格 */
+  body { background: var(--bg); color: var(--text); font: 14px/1.6 -apple-system, sans-serif; height: 100vh; display: flex; }
+  .sidebar { width: 240px; background: var(--white); border-right: 1px solid var(--border); padding: 20px 0; }
+  .sidebar-logo { padding: 0 20px 20px; font-weight: bold; font-size: 18px; border-bottom: 1px solid var(--border); margin-bottom: 10px; }
+  .menu-item { padding: 12px 20px; color: var(--text-sub); cursor: pointer; }
+  .menu-item.active { background: var(--blue-light); color: var(--blue); border-right: 3px solid var(--blue); font-weight: 600; }
+  .main { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
+  .topbar { height: 60px; background: var(--white); border-bottom: 1px solid var(--border); display: flex; justify-content: flex-end; align-items: center; padding: 0 24px; }
+  .content { padding: 30px; max-width: 1200px; width: 100%; margin: 0 auto; }
+  .toolbar { display: flex; gap: 12px; margin-bottom: 24px; background: var(--white); padding: 20px; border-radius: 12px; border: 1px solid var(--border); }
+  .toolbar input { flex: 1; padding: 10px 16px; border: 1px solid var(--border); border-radius: 8px; outline: none; }
+  .btn { padding: 10px 24px; background: var(--blue); color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 500; }
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
-  .card {
-    background: var(--white); border: 1px solid var(--border);
-    border-radius: 12px; overflow: hidden; transition: 0.3s;
-  }
-  .card:hover { box-shadow: 0 10px 20px rgba(0,0,0,0.03); transform: translateY(-2px); }
-  .card img { width: 100%; height: 180px; object-fit: cover; border-bottom: 1px solid var(--border); }
+  .card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .card img { width: 100%; height: 180px; object-fit: cover; }
   .card-body { padding: 16px; }
-  .card-title { font-size: 14px; font-weight: 600; margin-bottom: 12px; line-height: 1.4; height: 40px; overflow: hidden; }
-  .price-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-  .price-input { width: 70px; padding: 4px 8px; border: 1px solid var(--border); border-radius: 4px; outline: none; color: var(--blue); font-weight: bold; }
-  .price-input:focus { border-color: var(--blue); }
+  .title { font-size: 14px; font-weight: 600; margin-bottom: 12px; height: 40px; overflow: hidden; }
+  .price-row { display: flex; justify-content: space-between; margin-bottom: 16px; }
+  .price-input { width: 60px; border: 1px solid var(--border); border-radius: 4px; padding: 4px; color: var(--blue); font-weight: bold; }
   .actions { display: flex; gap: 10px; }
-  .actions button { flex: 1; padding: 8px; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 13px; }
-  .btn-success { background: var(--blue-light); color: var(--blue); }
-  .btn-success:hover { background: #dbeafe; }
-  .btn-danger { background: #fef2f2; color: var(--danger); }
-  .btn-danger:hover { background: #fee2e2; }
-  #loading { display: none; color: var(--blue); font-weight: 500; margin-bottom: 20px; }
+  .actions button { flex: 1; padding: 8px; border: none; border-radius: 6px; cursor: pointer; }
+  .btn-up { background: var(--blue-light); color: var(--blue); }
+  .btn-del { background: #fef2f2; color: var(--danger); }
+  #loading { display: none; color: var(--blue); margin-bottom: 20px; }
 </style>
 </head>
 <body>
-
-<!-- ================= 登录页 ================= -->
-<div id="login-page">
-  <div class="login-card">
-    <div style="margin-bottom: 20px;">
-      <img src="./logo.png" style="width: 48px; height: 48px; border-radius: 12px; background: #000; padding: 4px;">
-    </div>
-    <h1>Lynli 管理后台</h1>
-    <p class="sub">AI 选品中心控制台</p>
-    
-    <div class="form-group">
-      <label>管理员密码</label>
-      <input type="password" id="pwd-input" placeholder="请输入密码" onkeypress="if(event.key==='Enter') checkPassword()">
-    </div>
-    
-    <button class="btn-login" onclick="checkPassword()">登录</button>
-    <div class="copyright">© 2026 Lynli. All rights reserved.</div>
-  </div>
-</div>
-
-<!-- ================= 主面板 ================= -->
-<div id="dashboard" style="display: none;">
-  
-  <!-- 侧边栏 -->
   <div class="sidebar">
-    <div class="sidebar-header">
-      <img src="./logo.png">
-      <span>Lynli Panel</span>
-    </div>
-    
-    <div class="menu-group">功能</div>
-    
-    <div class="menu-item active">
-      <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zm0 9l2.5-1.25L12 8.5l-2.5 1.25L12 11zm0 2.5l-5-2.5-5 2.5L12 22l10-8.5-5-2.5-5 2.5z"/></svg>
-      AI 选品采集
-    </div>
-    
-    <div class="menu-item">
-      <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
-      商品管理
-    </div>
+    <div class="sidebar-logo">Lynli Panel</div>
+    <div class="menu-item">数据看板</div>
+    <div class="menu-item active">AI 选品中心</div>
+    <div class="menu-item">商品管理</div>
   </div>
-
-  <!-- 主内容 -->
-  <div class="main-content">
-    <div class="top-bar">
-      <div class="user-profile">
-        <img src="./logo.png" style="width: 24px; height: 24px; border-radius: 50%;">
-        超级管理员
-      </div>
-    </div>
-
-    <div class="content-area">
-      <div class="page-title">AI 选品采集</div>
-      
+  <div class="main">
+    <div class="topbar"><span style="font-weight: 500;">超级管理员</span></div>
+    <div class="content">
       <div class="toolbar">
-        <input type="text" id="keyword" placeholder="输入想要抓取的商品关键词，例如：私密护理仪" onkeypress="if(event.key==='Enter') startSpider()">
-        <button class="btn-primary" onclick="startSpider()">开始抓取</button>
+        <input type="text" id="keyword" placeholder="输入商品关键词，例如：私密护理仪" onkeypress="if(event.key==='Enter') startSpider()">
+        <button class="btn" onclick="startSpider()">开始抓取</button>
       </div>
-
-      <div id="loading">⏳ 正在调度爬虫抓取并上传至 OSS，请稍候...</div>
+      <div id="loading">⏳ 正在调度爬虫抓取并上传至 OSS...</div>
       <div class="grid" id="list"></div>
     </div>
   </div>
-</div>
-
 <script>
 const API = 'https://spider.lynli.me';
-const ADMIN_PASSWORD = 'lynli888'; // 你的管理密码
-
-// 检查密码
-function checkPassword() {
-  const pwd = document.getElementById('pwd-input').value;
-  if (pwd === ADMIN_PASSWORD) {
-    localStorage.setItem('spider_auth', 'true');
-    document.getElementById('login-page').style.display = 'none';
-    document.getElementById('dashboard').style.display = 'flex';
-    loadDrafts();
-  } else {
-    alert('密码错误！');
-  }
-}
-
-// 页面加载检查登录状态
-if (localStorage.getItem('spider_auth') === 'true') {
-  document.getElementById('login-page').style.display = 'none';
-  document.getElementById('dashboard').style.display = 'flex';
-  loadDrafts();
-}
-
 async function startSpider() {
   const kw = document.getElementById('keyword').value;
   if (!kw) return alert('请输入关键词');
-  const loading = document.getElementById('loading');
-  loading.style.display = 'block';
+  document.getElementById('loading').style.display = 'block';
   document.getElementById('list').innerHTML = '';
   try {
-    const res = await fetch(`${API}/api/v1/admin/spider/start`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ keyword: kw })
-    });
-    const data = await res.json();
-    if (data.code === 1) { setTimeout(loadDrafts, 3000); } 
-    else { alert(data.msg); loading.style.display = 'none'; }
-  } catch (err) { alert('请求失败: ' + err.message); loading.style.display = 'none'; }
+    await fetch(`${API}/api/v1/admin/spider/start`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ keyword: kw }) });
+    setTimeout(loadDrafts, 3000);
+  } catch (err) { alert('请求失败'); document.getElementById('loading').style.display = 'none'; }
 }
-
 async function loadDrafts() {
-  const loading = document.getElementById('loading');
   try {
     const res = await fetch(`${API}/api/v1/admin/spider/list`);
     const data = await res.json();
-    loading.style.display = 'none';
+    document.getElementById('loading').style.display = 'none';
     if (data.code !== 1) throw new Error(data.msg);
-    if (data.data.length === 0) {
-      document.getElementById('list').innerHTML = '<div style="color:#64748b; width:100%;">暂无草稿数据，请输入关键词开始抓取。</div>';
-      return;
-    }
+    if (data.data.length === 0) { document.getElementById('list').innerHTML = '<div style="color:#64748b">暂无数据。</div>'; return; }
     document.getElementById('list').innerHTML = data.data.map(item => `
       <div class="card" id="card-${item.id}">
-        <img src="${item.image_url}" alt="商品图">
+        <img src="${item.image_url}">
         <div class="card-body">
-          <div class="card-title">${item.title}</div>
+          <div class="title">${item.title}</div>
           <div class="price-row">
             <span style="color:#64748b; font-size:12px;">进价: ¥${item.price}</span>
-            <span style="font-size:12px; color:#64748b;">售价: ¥<input type="number" class="price-input" id="price-${item.id}" value="${Math.floor(item.price * 3)}"></span>
+            <span style="font-size:12px;">售价: ¥<input type="number" class="price-input" id="price-${item.id}" value="${Math.floor(item.price * 3)}"></span>
           </div>
           <div class="actions">
-            <button class="btn-success" onclick="publish(${item.id})">确认上架</button>
-            <button class="btn-danger" onclick="discard(${item.id})">丢弃</button>
+            <button class="btn-up" onclick="publish(${item.id})">上架</button>
+            <button class="btn-del" onclick="discard(${item.id})">丢弃</button>
           </div>
         </div>
       </div>
     `).join('');
-  } catch (err) { loading.style.display = 'none'; alert('拉取列表失败: ' + err.message); }
+  } catch (err) { document.getElementById('loading').style.display = 'none'; alert('拉取失败'); }
 }
-
 async function publish(id) {
   const price = document.getElementById(`price-${id}`).value;
   const btn = event.target; btn.innerText = '处理中'; btn.disabled = true;
   try {
-    const res = await fetch(`${API}/api/v1/admin/spider/publish`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, price })
-    });
-    const data = await res.json();
-    alert(data.msg);
-    if (data.code === 1) { document.getElementById(`card-${id}`).remove(); } 
-    else { btn.innerText = '确认上架'; btn.disabled = false; }
-  } catch (err) { alert('上架失败'); btn.innerText = '确认上架'; btn.disabled = false; }
+    const res = await fetch(`${API}/api/v1/admin/spider/publish`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, price }) });
+    const data = await res.json(); alert(data.msg);
+    if (data.code === 1) document.getElementById(`card-${id}`).remove(); else { btn.innerText = '上架'; btn.disabled = false; }
+  } catch (err) { alert('失败'); btn.innerText = '上架'; btn.disabled = false; }
 }
-
 async function discard(id) {
-  if (!confirm('确定丢弃吗？会同时删除 OSS 上的图片！')) return;
+  if (!confirm('确定丢弃吗？会同时删除 OSS 图片！')) return;
   const btn = event.target; btn.innerText = '删除中'; btn.disabled = true;
   try {
-    const res = await fetch(`${API}/api/v1/admin/spider/discard`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id })
-    });
-    const data = await res.json();
-    if (data.code === 1) { document.getElementById(`card-${id}`).remove(); } 
-    else { alert(data.msg); btn.innerText = '丢弃'; btn.disabled = false; }
-  } catch (err) { alert('删除失败'); btn.innerText = '丢弃'; btn.disabled = false; }
+    const res = await fetch(`${API}/api/v1/admin/spider/discard`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
+    if ((await res.json()).code === 1) document.getElementById(`card-${id}`).remove(); else { btn.innerText = '丢弃'; btn.disabled = false; }
+  } catch (err) { alert('失败'); btn.innerText = '丢弃'; btn.disabled = false; }
 }
+loadDrafts();
 </script>
 </body>
 </html>
