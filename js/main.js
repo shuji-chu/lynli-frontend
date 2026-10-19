@@ -1,53 +1,21 @@
-import { storage } from "./utils/storage.js";
-import { findRouteMeta } from "./router/routes.js";
-import { registerRoute, navigate } from "./router/index.js";
-import { renderLayout } from "./components/layout.js";
-import { initAuth } from "./views/auth.js";
-import { $ } from "./utils/dom.js";
+import { storage } from "./utils/storage.js"; import { findRouteMeta } from "./router/routes.js"; import { registerRoute, navigate } from "./router/index.js"; import { renderLayout } from "./components/layout.js"; import { initAuth } from "./views/auth.js"; import { $ } from "./utils/dom.js";
 
-// 核心页面注册
-registerRoute("dashboard", () => import("./views/dashboard.js"));
-registerRoute("orders-all", () => import("./views/orders.js"));
-registerRoute("products-list", () => import("./views/products.js"));
-registerRoute("finance", () => import("./views/finance.js"));
-registerRoute("users", () => import("./views/users.js"));
-registerRoute("settings", () => import("./views/settings.js"));
-
-// 选品矩阵注册
-registerRoute("spider", () => import("./views/spider.js"));
-registerRoute("spider-tasks", () => import("./views/spider-tasks.js"));
-registerRoute("spider-rules", () => import("./views/spider-rules.js"));
-
-// 占位页面
-const PlaceholderView = { render: async (mount) => { mount.innerHTML = '<div class="view-empty"><h2>模块建设中</h2><p>敬请期待...</p></div>'; } };
-registerRoute("data-center", () => Promise.resolve(PlaceholderView));
-registerRoute("orders-delivery", () => Promise.resolve(PlaceholderView));
-registerRoute("orders-refund", () => Promise.resolve(PlaceholderView));
-registerRoute("products-category", () => Promise.resolve(PlaceholderView));
-registerRoute("products-inventory", () => Promise.resolve(PlaceholderView));
-registerRoute("marketing-coupon", () => Promise.resolve(PlaceholderView));
-registerRoute("marketing-promo", () => Promise.resolve(PlaceholderView));
+registerRoute("dashboard", () => import("./views/dashboard.js")); registerRoute("orders-all", () => import("./views/orders.js"));
+registerRoute("users", () => import("./views/users.js")); registerRoute("spider", () => import("./views/spider.js"));
+registerRoute("finance", () => import("./views/finance.js")); registerRoute("settings", () => import("./views/settings.js"));
+const Ph = { render: async (m) => { m.innerHTML = '<div class="view-empty"><h2>建设中</h2></div>'; } };
+["data-center","orders-delivery","orders-refund","products-list","products-category","marketing-coupon"].forEach(k => registerRoute(k, () => Promise.resolve(Ph)));
 
 function boot() {
   if (!storage.getToken()) { initAuth(); return; }
-  $("#login-view").hidden = true;
-  $("#app-view").hidden = false;
-  renderLayout();
-
-  document.addEventListener("click", (e) => {
-    const navItem = e.target.closest(".nav-item[data-route]");
-    if (navItem) { location.hash = `#/${navItem.dataset.route}`; document.body.classList.remove("sidebar-open"); }
-  });
-
+  $("#login-view").hidden = true; $("#app-view").hidden = false; renderLayout();
+  document.addEventListener("click", (e) => { const n = e.target.closest(".nav-item[data-route]"); if (n) { location.hash = `#/${n.dataset.route}`; document.body.classList.remove("sidebar-open"); } });
   window.addEventListener("hashchange", () => {
-    const key = location.hash.replace(/^#\/?/, "") || "dashboard";
-    const meta = findRouteMeta(key);
-    if (meta) { $("#page-title").textContent = meta.label; $("#page-sub").textContent = meta.sub || ""; }
-    document.querySelectorAll(".nav-item").forEach(el => el.classList.toggle("is-active", el.dataset.route === key));
-    navigate(key);
+    const k = location.hash.replace(/^#\/?/, "") || "dashboard"; const m = findRouteMeta(k);
+    if (m) { $("#page-title").textContent = m.label; $("#page-sub").textContent = m.sub || ""; }
+    document.querySelectorAll(".nav-item").forEach(el => el.classList.toggle("is-active", el.dataset.route === k));
+    navigate(k);
   });
-
-  if (!location.hash) location.hash = "#/dashboard";
-  else navigate(location.hash.replace(/^#\/?/, ""));
+  if (!location.hash) location.hash = "#/dashboard"; else navigate(location.hash.replace(/^#\/?/, ""));
 }
 if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot); else boot();
