@@ -1,8 +1,7 @@
-import { toast } from "../ui.js";
+import { toast, showModal } from "../ui.js";
 
 export async function render(container) {
   container.innerHTML = `
-    <!-- 复杂工具栏 -->
     <div class="toolbar">
       <div class="toolbar-left">
         <input type="text" class="filter-input" placeholder="搜索订单号/买家昵称">
@@ -11,21 +10,9 @@ export async function render(container) {
           <option>待付款</option>
           <option>待发货</option>
           <option>已发货</option>
-          <option>已完成</option>
         </select>
         <button class="btn" style="width:auto; padding:8px 16px; margin:0;">查询</button>
-        <button class="btn" style="width:auto; padding:8px 16px; margin:0; background:var(--sur); border:1px solid var(--line);">重置</button>
       </div>
-      <div class="toolbar-right">
-        <button class="btn" style="width:auto; padding:8px 16px; margin:0; background:rgba(16,185,129,0.15); color:#10b981; border:1px solid #10b981;">批量发货</button>
-        <button class="btn" style="width:auto; padding:8px 16px; margin:0; background:rgba(248,113,113,0.15); color:#f87171; border:1px solid #f87171;">导出订单</button>
-      </div>
-    </div>
-
-    <!-- 选中后的批量提示条 (默认隐藏) -->
-    <div class="batch-bar" id="batch-bar" style="display:none;">
-      <span>已选中 <b>0</b> 条订单</span>
-      <button class="btn" style="width:auto; padding:4px 12px; margin:0; font-size:12px;" onclick="alert('执行批量操作')">批量处理</button>
     </div>
 
     <div class="table-container" style="overflow-x:auto;">
@@ -41,11 +28,11 @@ export async function render(container) {
           </tr>
         </thead>
         <tbody id="order-list">
-          ${[1, 2, 3, 4, 5].map(i => `
-            <tr>
+          ${[1, 2, 3].map(i => `
+            <tr id="row-${i}">
               <td><input type="checkbox" class="row-check"></td>
               <td>
-                <div style="font-weight:bold; color:var(--pri); cursor:pointer;">ORD-2023-00${i}</div>
+                <div style="font-weight:bold; color:var(--pri);">ORD-2023-00${i}</div>
                 <div style="font-size:12px; color:var(--dim); margin-top:4px;">2023-10-24 10:0${i}</div>
               </td>
               <td>用户_${1000 + i}</td>
@@ -55,7 +42,7 @@ export async function render(container) {
               </td>
               <td>
                 <a href="javascript:;" style="color:var(--pri); margin-right:8px;">详情</a>
-                ${i % 2 === 0 ? '<a href="javascript:;" style="color:#10b981;">发货</a>' : ''}
+                ${i % 2 === 0 ? `<a href="javascript:;" class="ship-btn" data-id="${i}" style="color:#10b981;">发货</a>` : ''}
               </td>
             </tr>
           `).join('')}
@@ -64,29 +51,36 @@ export async function render(container) {
     </div>
   `;
 
-  // 全选逻辑
-  const checkAll = container.querySelector('#check-all');
-  const rowChecks = container.querySelectorAll('.row-check');
-  const batchBar = container.querySelector('#batch-bar');
-
-  const updateBatchBar = () => {
-    const checkedCount = Array.from(rowChecks).filter(c => c.checked).length;
-    if (checkedCount > 0) {
-      batchBar.style.display = 'flex';
-      batchBar.querySelector('b').textContent = checkedCount;
-    } else {
-      batchBar.style.display = 'none';
-    }
-  };
-
-  checkAll.onchange = (e) => {
-    rowChecks.forEach(c => c.checked = e.target.checked);
-    updateBatchBar();
-  };
-
-  rowChecks.forEach(c => c.onchange = () => {
-    if (!c.checked) checkAll.checked = false;
-    if (Array.from(rowChecks).every(c => c.checked)) checkAll.checked = true;
-    updateBatchBar();
+  // 发货弹窗逻辑
+  container.querySelectorAll('.ship-btn').forEach(btn => {
+    btn.onclick = () => {
+      const orderId = btn.dataset.id;
+      showModal({
+        title: "订单发货",
+        contentHTML: `
+          <div class="field"><label>物流公司</label>
+            <select class="form-select" id="m-express">
+              <option value="SF">顺丰速运</option>
+              <option value="YTO">圆通速递</option>
+              <option value="ZTO">中通快递</option>
+            </select>
+          </div>
+          <div class="field"><label>物流单号</label><input type="text" id="m-tracking" placeholder="请输入快递单号" style="width:100%;"></div>
+        `,
+        onConfirm: (mask, close) => {
+          const tracking = mask.querySelector('#m-tracking').value;
+          if (!tracking) return toast("请输入快递单号", "error");
+          
+          toast("发货成功！");
+          close();
+          // 修改界面状态为已发货
+          const row = document.getElementById(`row-${orderId}`);
+          if (row) {
+            row.querySelector('.badge').outerHTML = '<span class="badge badge-info">已发货</span>';
+            btn.remove(); // 移除发货按钮
+          }
+        }
+      });
+    };
   });
 }

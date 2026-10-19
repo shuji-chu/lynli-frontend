@@ -15,8 +15,18 @@ import * as Finance from "./views/finance.js";
 import * as System from "./views/system.js";
 
 const app = document.getElementById("app");
-let openTabs = ["dashboard"]; // 记录打开的页签
+let openTabs = ["dashboard"];
 let currentPage = "dashboard";
+
+// 全局水印
+if (!document.querySelector('.watermark')) {
+  const wm = document.createElement('div');
+  wm.className = 'watermark';
+  document.body.appendChild(wm);
+}
+
+// 恢复主题
+if (localStorage.getItem('theme') === 'light') document.body.classList.add('light-mode');
 
 document.addEventListener('click', () => { document.getElementById('dropdown-menu')?.classList.remove('show'); });
 
@@ -32,7 +42,6 @@ Object.assign(routes.crm, { render: CRM.render });
 Object.assign(routes.finance, { render: Finance.render });
 Object.assign(routes.system, { render: System.render });
 
-// 渲染页签
 function renderTabs() {
   const tabsBar = document.getElementById('tabs-bar');
   tabsBar.innerHTML = openTabs.map(page => `
@@ -42,7 +51,6 @@ function renderTabs() {
     </div>
   `).join('');
 
-  // 绑定页签点击
   tabsBar.querySelectorAll('.tab-item').forEach(tab => {
     tab.onclick = (e) => {
       if (e.target.classList.contains('tab-close')) return;
@@ -50,38 +58,27 @@ function renderTabs() {
     };
   });
 
-  // 绑定页签关闭
   tabsBar.querySelectorAll('.tab-close').forEach(btn => {
     btn.onclick = (e) => {
       e.stopPropagation();
       const page = btn.dataset.close;
       openTabs = openTabs.filter(p => p !== page);
-      if (currentPage === page) {
-        switchPage(openTabs[openTabs.length - 1]); // 切到最后一个
-      } else {
-        renderTabs();
-      }
+      if (currentPage === page) switchPage(openTabs[openTabs.length - 1]);
+      else renderTabs();
     };
   });
 }
 
-// 页面切换核心逻辑
 function switchPage(page) {
   currentPage = page;
   if (!openTabs.includes(page)) openTabs.push(page);
-  
   document.getElementById('page-title').textContent = routes[page].title;
-  document.querySelectorAll('.nav-item').forEach(i => {
-    i.classList.toggle('active', i.dataset.page === page);
-  });
-  
+  document.querySelectorAll('.nav-item').forEach(i => i.classList.toggle('active', i.dataset.page === page));
   renderTabs();
-  
   if (window.innerWidth <= 768) {
     document.getElementById('sidebar').classList.remove('open');
     document.getElementById('overlay').classList.remove('show');
   }
-
   if (routes[page].render) routes[page].render(document.getElementById('content'));
 }
 
@@ -99,10 +96,7 @@ function renderLogin() {
       </div>
     </div>
   `;
-  document.getElementById('login-form').onsubmit = (e) => {
-    e.preventDefault();
-    renderApp();
-  };
+  document.getElementById('login-form').onsubmit = (e) => { e.preventDefault(); renderApp(); };
 }
 
 function renderApp() {
@@ -120,10 +114,15 @@ function renderApp() {
     else document.exitFullscreen();
   };
 
+  // 主题切换按钮
+  document.getElementById('theme-btn').onclick = () => {
+    document.body.classList.toggle('light-mode');
+    localStorage.setItem('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
+  };
+
   document.getElementById('user-profile').onclick = (e) => { e.stopPropagation(); document.getElementById('dropdown-menu').classList.toggle('show'); };
   document.getElementById('logout-btn').onclick = renderLogin;
 
-  // 个人中心弹窗
   document.getElementById('profile-btn').onclick = () => {
     const userInfo = JSON.parse(localStorage.getItem("lynli_user") || '{"name":"系统管理员","avatar":"管"}');
     showModal({

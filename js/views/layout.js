@@ -21,6 +21,7 @@ export function renderLayout() {
             <span class="page-title" id="page-title">数据大盘</span>
           </div>
           <div class="topbar-right" style="display: flex; align-items: center; gap: 15px;">
+            <button id="theme-btn" style="background:none; border:none; color:var(--dim); font-size: 18px; cursor:pointer;" title="切换主题">🌗</button>
             <button id="fullscreen-btn" style="background:none; border:none; color:var(--dim); font-size: 18px; cursor:pointer;" title="全屏">⛶</button>
             <div style="position:relative; cursor:pointer;" title="消息">
               <span style="color:var(--dim); font-size: 18px;">🔔</span>
@@ -38,7 +39,6 @@ export function renderLayout() {
             </div>
           </div>
         </div>
-        <!-- 多页签栏 -->
         <div class="tabs-bar" id="tabs-bar">
           <div class="tab-item active" data-page="dashboard">数据大盘</div>
         </div>

@@ -119,3 +119,26 @@ body { background: var(--bg); color: var(--text); height: 100vh; overflow: hidde
   .filter-input, .select-input { width: 100%; }
   .hide-mobile { display: none !important; }
 }
+
+/* --- 明亮模式变量 --- */
+body.light-mode {
+  --bg: #f3f4f6; --sur: #ffffff; --line: rgba(0,0,0,0.08); --text: #1f2937; --dim: #6b7280; --pri: #2563eb;
+}
+body.light-mode .login-box { background: rgba(255,255,255,0.9); box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+body.light-mode .field input { background: #f9fafb; color: #1f2937; }
+body.light-mode .filter-input, body.light-mode .select-input { background: #f9fafb; color: #1f2937; }
+body.light-mode .table-container { background: #fff; }
+body.light-mode .css-chart .chart-bar { background: linear-gradient(to top, rgba(37,99,235,0.2), #2563eb); }
+
+/* --- 系统水印 --- */
+.watermark {
+  position: fixed; inset: 0; pointer-events: none; z-index: 9999;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' version='1.1' width='200' height='200'><text x='50' y='100' fill='rgba(128,128,128,0.05)' font-size='16' transform='rotate(-30 50 100)'>LYNLI PRO</text></svg>");
+  opacity: 0.8;
+}
+
+/* --- 表单联动与高级输入框 --- */
+.form-row { display: flex; gap: 10px; margin-bottom: 16px; }
+.form-row .field { flex: 1; margin-bottom: 0; }
+select.form-select { width: 100%; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid var(--line); border-radius: 8px; color: #fff; outline: none; }
+body.light-mode select.form-select { background: #f9fafb; color: #1f2937; }
