@@ -1,6 +1,5 @@
 import { register, navigate } from "./router.js";
 
-const API_BASE = "https://spider.lynli.me";
 const TOKEN_KEY = "lynli.token";
 const USER_KEY = "lynli.user";
 
@@ -12,7 +11,6 @@ const state = {
 const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
 
-/* ---------- 菜单与角色 ---------- */
 const ICONS = {
   dashboard: '<path d="M4 13h6V4H4v9Zm0 7h6v-5H4v5Zm10 0h6v-9h-6v9Zm0-16v5h6V4h-6Z"/>',
   orders: '<path d="M6 4h12l1 16H5L6 4Z"/><path d="M9 8h6"/>',
@@ -59,23 +57,24 @@ function clearError() {
   el.hidden = true;
 }
 
-const REMEMBER_KEY = "lynli.remember.email";
+const REMEMBER_KEY = "lynli.remember.account";
 
-function restoreRememberedEmail() {
+function restoreRememberedAccount() {
   const saved = localStorage.getItem(REMEMBER_KEY);
   if (!saved) return;
-  const input = $('#login-form [name="email"]');
+  const input = $('#login-form [name="account"]');
   const check = $('#login-form [name="remember"]');
   if (!input || !check) return;
   input.value = saved;
   check.checked = true;
 }
 
-function persistRememberedEmail(email, remember) {
-  if (remember) localStorage.setItem(REMEMBER_KEY, email);
+function persistRememberedAccount(account, remember) {
+  if (remember) localStorage.setItem(REMEMBER_KEY, account);
   else localStorage.removeItem(REMEMBER_KEY);
 }
 
+// 核心登录逻辑（目前模拟登录）
 async function handleLogin(e) {
   e.preventDefault();
   if (state.loading) return;
@@ -83,16 +82,16 @@ async function handleLogin(e) {
   clearError();
 
   const form = e.currentTarget;
-  const email = form.email.value.trim();
+  const account = form.account.value.trim();
   const password = form.password.value;
   const remember = form.remember.checked;
 
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    form.email.classList.add("is-invalid");
-    showError("请输入有效的邮箱地址");
+  if (!account) {
+    form.account.classList.add("is-invalid");
+    showError("请输入账号");
     return;
   }
-  form.email.classList.remove("is-invalid");
+  form.account.classList.remove("is-invalid");
 
   if (!password || password.length < 6) {
     form.password.classList.add("is-invalid");
@@ -107,30 +106,46 @@ async function handleLogin(e) {
   submitBtn.disabled = true;
 
   try {
-    const res = await fetch(`${API_BASE}/api/auth/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
+    // 模拟网络延迟，显得真实一点
+    await new Promise((resolve) => setTimeout(resolve, 600));
 
-    const data = await res.json().catch(() => ({}));
+    // ==========================================
+    // 【超级管理员测试账号】
+    // 账号：admin
+    // 密码：123456
+    // ==========================================
+    if (account === "admin" && password === "123456") {
+      
+      const user = { 
+        email: "admin@lynli.me", 
+        role: "super_admin", 
+        nickname: "最高指挥官" 
+      };
+      
+      localStorage.setItem(TOKEN_KEY, "mock_token_123456");
+      localStorage.setItem(USER_KEY, JSON.stringify(user));
 
-    if (!res.ok) {
-      throw new Error(data.message || "登录失败，请检查账号或密码");
+      persistRememberedAccount(account, remember);
+      enterApp(user);
+      
+    } else if (account === "yunying" && password === "123456") {
+      
+      // 运营测试账号：yunying / 123456
+      const user = { 
+        email: "yunying@lynli.me", 
+        role: "operator", 
+        nickname: "运营专员" 
+      };
+      
+      localStorage.setItem(TOKEN_KEY, "mock_token_operator");
+      localStorage.setItem(USER_KEY, JSON.stringify(user));
+
+      persistRememberedAccount(account, remember);
+      enterApp(user);
+
+    } else {
+      throw new Error("账号或密码错误，请重试");
     }
-
-    if (!data.token) {
-      throw new Error("服务端未返回登录凭证");
-    }
-
-    localStorage.setItem(TOKEN_KEY, data.token);
-    
-    // 如果后端没有返回 user，给个默认的 dummy 数据防止报错
-    const user = data.user || { email, role: "super_admin", nickname: "Admin" };
-    localStorage.setItem(USER_KEY, JSON.stringify(user));
-
-    persistRememberedEmail(email, remember);
-    enterApp(user);
   } catch (err) {
     showError(err.message || "网络异常，请稍后重试");
   } finally {
@@ -157,7 +172,7 @@ function enterApp(user) {
 }
 
 function renderNav() {
-  const role = state.user?.role || "super_admin"; // 依赖后端返回的角色
+  const role = state.user?.role || "super_admin";
   const items = NAV.filter((n) => n.roles.includes(role));
 
   $("#nav").innerHTML = items
@@ -255,7 +270,7 @@ function logout() {
 
 /* ---------- 启动 ---------- */
 function boot() {
-  restoreRememberedEmail();
+  restoreRememberedAccount();
 
   const form = $("#login-form");
   form.addEventListener("submit", handleLogin);
