@@ -224,3 +224,41 @@ a { color: inherit; text-decoration: none; }
     grid-template-columns: repeat(3, 1fr);
   }
 }
+
+/* ============ 大厂 Tabs ============ */
+.tabs-header { display: flex; gap: 24px; border-bottom: 1px solid var(--line); margin-bottom: 16px; overflow-x: auto; }
+.tab-item { padding: 12px 0; font-size: 14px; color: var(--text-dim); cursor: pointer; position: relative; font-weight: 500; white-space: nowrap; }
+.tab-item:hover { color: var(--text); }
+.tab-item.is-active { color: var(--primary); }
+.tab-item.is-active::after { content: ""; position: absolute; bottom: -1px; left: 0; width: 100%; height: 2px; background: var(--primary); border-radius: 2px; }
+.badge-num { background: #ef4444; color: #fff; padding: 2px 6px; border-radius: 10px; font-size: 10px; margin-left: 4px; }
+.tab-pane { display: none; animation: fadeIn 0.3s; }
+.tab-pane.is-active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ============ 表格细节 ============ */
+.data-table td .status-tag { display: inline-flex; align-items: center; justify-content: center; }
+.data-table td .status-tag.is-warn { background: rgba(251, 191, 36, 0.1); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.2); }
+.data-table td .status-tag.is-danger { background: rgba(248, 113, 113, 0.1); color: #f87171; border: 1px solid rgba(248, 113, 113, 0.2); }
+
+/* ============ 分页器 ============ */
+.pagination { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--line); }
+.page-info { font-size: 13px; color: var(--text-faint); }
+.page-btns { display: flex; gap: 6px; }
+
+/* ============ 商品卡片流 ============ */
+.filter-bar { display: flex; gap: 12px; margin-bottom: 20px; }
+.product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+.product-card { background: rgba(255,255,255,0.02); border: 1px solid var(--line); border-radius: var(--radius-md); overflow: hidden; transition: all 0.2s; display: flex; flex-direction: column; }
+.product-card:hover { transform: translateY(-2px); border-color: rgba(99, 102, 241, 0.4); box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5); }
+.product-img { position: relative; width: 100%; aspect-ratio: 1; }
+.product-img img { width: 100%; height: 100%; object-fit: cover; }
+.product-status { position: absolute; top: 8px; left: 8px; background: rgba(52, 211, 153, 0.9); color: #000; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 4px; backdrop-filter: blur(4px); }
+.product-info { padding: 14px; display: flex; flex-direction: column; flex: 1; }
+.product-title { font-size: 13px; line-height: 1.4; color: var(--text); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; flex: 1; margin-bottom: 12px; }
+.product-price-row { display: flex; align-items: baseline; gap: 8px; margin-bottom: 8px; }
+.product-price { color: #f87171; font-size: 18px; font-weight: bold; }
+.product-cost { font-size: 11px; color: var(--text-faint); text-decoration: line-through; }
+.product-meta { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-dim); margin-bottom: 12px; }
+.product-actions { display: flex; gap: 8px; }
+.product-actions .btn { flex: 1; }
