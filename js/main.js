@@ -27,22 +27,22 @@ const NAV = [
   { key: "dashboard", label: "数据看板", sub: "经营概览", roles: ["super_admin", "operator", "support"] },
   { key: "orders", label: "订单管理", sub: "收件与物流", roles: ["super_admin", "operator", "support"] },
   { key: "products", label: "商品库", sub: "已上架商品", roles: ["super_admin", "operator"] },
-  { key: "users", label: "会员列表", sub: "邮箱与头像", roles: ["super_admin", "support"] },
+  { key: "users", label: "账号与权限", sub: "员工与角色", roles: ["super_admin"] }, // 只有超管能看
   { key: "spider", label: "AI 选品", sub: "抓取与上架", roles: ["super_admin", "operator"] },
   { key: "email", label: "邮件通知", sub: "群发与模板", roles: ["super_admin", "operator"] },
   { key: "finance", label: "财务对账", sub: "成本与利润", roles: ["super_admin"] },
   { key: "marketing", label: "营销活动", sub: "优惠与投放", roles: ["super_admin", "operator"] },
-  { key: "settings", label: "系统设置", sub: "账号与权限", roles: ["super_admin"] },
+  { key: "settings", label: "系统设置", sub: "个人资料与安全", roles: ["super_admin", "operator", "support"] }, // 所有人可见
 ];
 
-const ROLE_LABEL = {
-  super_admin: "超级管理员",
-  operator: "运营",
-  support: "客服",
-};
+const ROLE_LABEL = { super_admin: "超级管理员", operator: "运营", support: "客服" };
 
+// 注册真实视图
 register("dashboard", () => import("./views/dashboard.js"));
+register("users", () => import("./views/users.js"));
+register("settings", () => import("./views/settings.js"));
 
+/* ---------- 登录交互 ---------- */
 function showError(msg) {
   const el = $("#login-error");
   el.textContent = msg;
@@ -62,7 +62,6 @@ async function handleLogin(e) {
   clearError();
 
   const form = e.currentTarget;
-  // 兼容你 HTML 里目前叫 email 还是叫 account
   const emailInput = form.querySelector('input[type="text"], input[type="email"]');
   const account = emailInput.value.trim();
   const password = form.password.value;
@@ -87,22 +86,20 @@ async function handleLogin(e) {
   submitBtn.disabled = true;
 
   try {
-    // 模拟 0.5 秒的加载动画
     await new Promise((resolve) => setTimeout(resolve, 500));
 
-    // 核心逻辑：只要输入 admin / 123456 就放行
     if (account === "admin" && password === "123456") {
       const user = { email: "admin@lynli.me", role: "super_admin", nickname: "最高指挥官" };
-      localStorage.setItem(TOKEN_KEY, "mock_token_123456");
+      localStorage.setItem(TOKEN_KEY, "mock_token_admin");
       localStorage.setItem(USER_KEY, JSON.stringify(user));
       enterApp(user);
     } else if (account === "yunying" && password === "123456") {
       const user = { email: "yunying@lynli.me", role: "operator", nickname: "运营专员" };
-      localStorage.setItem(TOKEN_KEY, "mock_token_operator");
+      localStorage.setItem(TOKEN_KEY, "mock_token_op");
       localStorage.setItem(USER_KEY, JSON.stringify(user));
       enterApp(user);
     } else {
-      throw new Error("账号或密码错误，请重试");
+      throw new Error("账号或密码错误");
     }
   } catch (err) {
     showError(err.message);
@@ -113,6 +110,7 @@ async function handleLogin(e) {
   }
 }
 
+/* ---------- 主布局 ---------- */
 function enterApp(user) {
   state.user = user;
   $("#login-view").hidden = true;
@@ -169,7 +167,7 @@ function renderUser() {
   $("#sidebar-foot").innerHTML = chip;
 
   $("#topbar-user").innerHTML = `
-    <span class="role-badge">${ROLE_LABEL[role] || role}</span>
+    <span class="role-badge hide-mobile">${ROLE_LABEL[role] || role}</span>
     <button class="icon-btn" id="logout-btn" type="button" aria-label="退出登录">
       <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
         <path d="M9 4H5v16h4M16 8l4 4-4 4M20 12H9"/>
