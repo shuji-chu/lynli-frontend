@@ -1,40 +1,74 @@
-import { switchPage } from './router.js';
-import { api } from './api/index.js';
+import { api } from './api.js';
+import { renderDashboard } from './views/dashboard.js';
+import { renderOrders } from './views/orders.js';
+import { renderProducts, renderUsers } from './views/products.js';
+import { renderEmail } from './views/email.js';
 
+const contentArea = document.getElementById('page-content');
+const breadcrumb = document.getElementById('breadcrumb');
+
+window.handleLogin = () => {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').classList.remove('hidden');
+    switchPage('dashboard');
+};
+
+async function switchPage(pageId) {
+    // 更新菜单样式
+    document.querySelectorAll('.nav-item').forEach(el => {
+        if (el.dataset.target === pageId) {
+            el.classList.add('bg-blue-600', 'text-white');
+            el.classList.remove('hover:bg-slate-800');
+            breadcrumb.innerText = `首页 / ${el.innerText.trim()}`;
+        } else {
+            el.classList.remove('bg-blue-600', 'text-white');
+            el.classList.add('hover:bg-slate-800');
+        }
+    });
+
+    contentArea.innerHTML = '<div class="flex justify-center items-center h-full"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>';
+
+    try {
+        if (pageId === 'dashboard') contentArea.innerHTML = await renderDashboard();
+        if (pageId === 'orders') contentArea.innerHTML = await renderOrders();
+        if (pageId === 'products') contentArea.innerHTML = await renderProducts();
+        if (pageId === 'users') contentArea.innerHTML = await renderUsers();
+        if (pageId === 'email') contentArea.innerHTML = renderEmail();
+    } catch (err) {
+        contentArea.innerHTML = '<div class="text-red-500">数据加载失败，请检查后端</div>';
+    }
+}
+
+// 绑定全局事件
 window.switchPage = switchPage;
 
-// 处理发货
 window.doShip = async (trade_no) => {
-    const no = prompt("请输入快递单号:");
-    if(no) { 
-        await api.shipOrder(trade_no, no); 
-        switchPage('orders', document.querySelector('.tab-btn[data-id="orders"]')); 
+    const tracking_no = prompt("请输入快递单号:");
+    if (tracking_no) {
+        await api.shipOrder(trade_no, tracking_no);
+        switchPage('orders');
     }
 };
 
-// 模拟物流地图（对接第三方接口后渲染真实地图）
 window.showMap = (tracking_no) => {
-    const mapBox = document.getElementById(`map-${tracking_no}`);
-    if(mapBox) {
-        mapBox.innerHTML = `📍 物流轨迹: 深圳市 -> 广州市 -> 派件中...<br>（此处集成高德/百度地图API后显示地图轨迹）`;
-        mapBox.style.color = 'var(--blue)';
+    alert(`正在请求快递100接口获取单号 ${tracking_no} 的轨迹...\n(请在此处集成高德地图 Web SDK 渲染路线)`);
+};
+
+window.sendBroadcast = async () => {
+    const subject = document.getElementById('email-subject').value;
+    const content = document.getElementById('email-content').value;
+    if (!subject || !content) return alert("请填写完整");
+    
+    if(confirm("确定发送给所有注册用户吗？")) {
+        await api.broadcastEmail(subject, content);
+        alert("群发任务已提交至后台，请查看服务器终端日志！");
     }
 };
 
-// 触发抓取
-window.startCrawl = async () => {
-    const kw = document.getElementById('kw').value;
-    if(!kw) return alert("输入关键词");
-    document.getElementById('draft-box').innerHTML = '抓取中...';
-    await api.startCrawl(kw);
-    setTimeout(() => switchPage('spider', document.querySelector('.tab-btn[data-id="spider"]')), 3000);
-};
-
-// 上架草稿
-window.doPublish = async (id) => {
-    const p = prompt("设置零售价:");
-    if(p) { await api.publishProduct(id, p); switchPage('spider', document.querySelector('.tab-btn[data-id="spider"]')); }
-};
-
-// 初始化
-window.onload = () => switchPage('dashboard', document.querySelector('.tab-btn[data-id="dashboard"]'));
+// 初始化侧边栏点击事件
+document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', (e) => {
+        e.preventDefault();
+        switchPage(e.currentTarget.dataset.target);
+    });
+});
