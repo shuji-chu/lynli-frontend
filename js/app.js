@@ -8,6 +8,7 @@ import { renderLogin } from "./views/login.js";
 import { openProfileModal } from "./views/profile.js";
 
 import * as Dashboard from "./views/dashboard.js";
+import * as Chat from "./views/chat.js"; // 新引入
 import * as Orders from "./views/orders.js";
 import * as Aftersales from "./views/aftersales.js";
 import * as Products from "./views/products.js";
@@ -30,6 +31,7 @@ let currentPage = "dashboard";
 document.addEventListener('click', () => { document.getElementById('dropdown-menu')?.classList.remove('show'); });
 
 Object.assign(routes.dashboard, { render: Dashboard.render });
+Object.assign(routes.chat, { render: Chat.render }); // 注册路由
 Object.assign(routes.orders, { render: Orders.render });
 Object.assign(routes.aftersales, { render: Aftersales.render });
 Object.assign(routes.products, { render: Products.render });
@@ -106,7 +108,7 @@ function renderApp() {
   document.getElementById('notice-btn').onclick = () => {
     showModal({
       title: "系统通知",
-      contentHTML: `<div class="notice-list"><div class="notice-item"><b>系统升级完成</b><p>V3.0 架构深度拆分，背景与主题全面重构。</p></div></div>`,
+      contentHTML: `<div class="notice-list"><div class="notice-item"><b>客服系统上线</b><p>您有 2 个买家正在等待回复，请及时处理。</p></div></div>`,
       onConfirm: (mask, close) => close()
     });
   };
@@ -115,15 +117,11 @@ function renderApp() {
   document.getElementById('logout-btn').onclick = () => renderLogin(renderApp);
 
   document.getElementById('profile-btn').onclick = () => {
-    openProfileModal(() => {
-      renderApp(); 
-      switchPage("dashboard"); 
-    });
+    openProfileModal(() => { renderApp(); switchPage("dashboard"); });
   };
 
   document.querySelectorAll('.nav-item').forEach(el => { el.onclick = () => switchPage(el.dataset.page); });
   switchPage("dashboard");
 }
 
-// 启动
 renderLogin(renderApp);

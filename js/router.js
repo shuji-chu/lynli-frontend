@@ -1,5 +1,6 @@
 export const routes = {
   dashboard: { title: "数据大盘", render: null },
+  chat: { title: "客服工作台", render: null },
   orders: { title: "交易中心", render: null },
   aftersales: { title: "售后工单", render: null },
   products: { title: "商品中心", render: null },
@@ -18,9 +19,10 @@ export const routes = {
 
 export const navGroups = [
   { group: "概览", items: ["dashboard"] },
+  { group: "客户与沟通", items: ["chat", "crm"] },
   { group: "交易与售后", items: ["orders", "aftersales"] },
   { group: "商品与供应链", items: ["products", "spider", "proxy", "purchases", "suppliers"] },
-  { group: "运营与客户", items: ["marketing", "crm"] },
+  { group: "运营中心", items: ["marketing"] },
   { group: "财务与仓储", items: ["finance", "logistics"] },
   { group: "组织与系统", items: ["organization", "roles", "system"] }
 ];
