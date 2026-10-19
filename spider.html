@@ -3,155 +3,226 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>微澜 LYNLI - AI 选品中心</title>
+<title>AI 选品中心 - Lynli 管理后台</title>
 <style>
   :root {
-    --bg-gradient: linear-gradient(135deg, #e0eafc 0%, #cfdef3 50%, #e8f0f9 100%);
-    --glass-bg: rgba(255, 255, 255, 0.6);
-    --glass-border: rgba(255, 255, 255, 0.8);
-    --text-main: #1e293b;
+    --bg: #f5f7fa;
+    --white: #ffffff;
+    --text: #1e293b;
     --text-sub: #64748b;
-    --acc: #2563eb;
+    --blue: #2563eb;
+    --blue-light: #eff6ff;
+    --border: #e2e8f0;
     --danger: #ef4444;
     --success: #10b981;
   }
   *{box-sizing:border-box;margin:0;padding:0}
-  body{
-    background: var(--bg-gradient);
-    background-attachment: fixed;
-    color: var(--text-main);
-    font: 14px/1.6 -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
+  body {
+    background-color: var(--bg);
+    color: var(--text);
+    font: 14px/1.6 -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
     -webkit-font-smoothing: antialiased;
-    min-height: 100vh;
+    height: 100vh; overflow: hidden;
   }
-  
-  /* 顶部导航区 */
-  .header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px 24px;
-    background: var(--glass-bg);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border-bottom: 1px solid var(--glass-border);
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    flex-wrap: wrap;
-    gap: 15px;
-  }
-  
-  .logo-area { display: flex; align-items: center; gap: 12px; }
-  .logo-area img { height: 40px; border-radius: 50%; background: #000; padding: 2px; }
-  .logo-text h1 { font-size: 18px; font-weight: 700; letter-spacing: 1px; color: var(--text-main); }
-  .logo-text p { font-size: 12px; color: var(--text-sub); letter-spacing: 2px; }
 
-  /* 输入区 */
-  .input-group { display: flex; gap: 10px; width: 100%; max-width: 500px; }
-  input[type="text"], input[type="password"] {
-    flex: 1; padding: 12px 16px; background: rgba(255,255,255,0.8);
-    border: 1px solid var(--glass-border); border-radius: 12px; color: var(--text-main);
-    outline: none; transition: 0.3s; font-size: 14px;
+  /* ================= 登录页样式 (完美复刻图2) ================= */
+  #login-page {
+    display: flex; align-items: center; justify-content: center;
+    height: 100vh; background-color: var(--white);
   }
-  input:focus { background: #fff; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); border-color: var(--acc); }
-  
-  button {
-    cursor: pointer; border: none; border-radius: 12px; padding: 12px 20px;
-    font-weight: bold; color: #fff; transition: 0.2s; font-size: 14px;
+  .login-card {
+    width: 100%; max-width: 420px; padding: 40px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.02);
   }
-  .btn-primary { background: var(--acc); box-shadow: 0 4px 12px rgba(37,99,235,0.2); }
-  .btn-primary:hover { background: #1d4ed8; transform: translateY(-1px); }
-  .btn-danger { background: var(--danger); }
-  .btn-danger:hover { background: #dc2626; }
-  .btn-success { background: var(--success); }
-  .btn-success:hover { background: #059669; }
+  .login-card h1 { font-size: 24px; font-weight: 600; margin-bottom: 4px; }
+  .login-card p.sub { color: var(--text-sub); font-size: 14px; margin-bottom: 30px; }
+  .form-group { margin-bottom: 20px; }
+  .form-group label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 8px; }
+  .form-group input {
+    width: 100%; padding: 12px 16px;
+    border: 1px solid var(--border); border-radius: 8px;
+    font-size: 14px; outline: none; transition: 0.2s;
+  }
+  .form-group input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-light); }
+  .btn-login {
+    width: 100%; padding: 14px; background: #000; color: #fff;
+    border: none; border-radius: 8px; font-size: 16px; font-weight: 500;
+    cursor: pointer; margin-top: 10px; transition: 0.2s;
+  }
+  .btn-login:hover { background: #333; }
+  .copyright { text-align: center; color: #94a3b8; font-size: 12px; margin-top: 40px; }
 
-  /* 主面板 */
-  #main-panel { padding: 30px 24px; max-width: 1200px; margin: 0 auto; }
-  #loading { display: none; color: var(--acc); margin-bottom: 20px; font-weight: bold; }
+  /* ================= 主面板样式 (完美复刻图1) ================= */
+  #dashboard {
+    display: none; height: 100vh; display: flex;
+  }
+  /* 侧边栏 */
+  .sidebar {
+    width: 260px; background: var(--white);
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column;
+  }
+  .sidebar-header {
+    padding: 24px; display: flex; align-items: center; gap: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .sidebar-header img { width: 32px; height: 32px; border-radius: 8px; background: #000; }
+  .sidebar-header span { font-weight: 600; font-size: 16px; }
+  
+  .menu-group { padding: 20px 12px 10px; color: var(--text-sub); font-size: 12px; font-weight: 600; letter-spacing: 1px; }
+  .menu-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 16px; margin-bottom: 4px;
+    border-radius: 8px; cursor: pointer; color: var(--text);
+    font-weight: 500; transition: 0.2s;
+  }
+  .menu-item:hover { background: var(--bg); }
+  .menu-item.active { background: var(--blue-light); color: var(--blue); }
+  .menu-item svg { width: 18px; height: 18px; fill: currentColor; }
+
+  /* 主内容区 */
+  .main-content {
+    flex: 1; display: flex; flex-direction: column; background: var(--bg); overflow-y: auto;
+  }
+  .top-bar {
+    height: 64px; background: var(--white); border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: flex-end; padding: 0 24px; gap: 16px;
+  }
+  .user-profile { display: flex; align-items: center; gap: 8px; font-weight: 500; cursor: pointer; }
+  
+  .content-area { padding: 30px; max-width: 1200px; margin: 0 auto; width: 100%; }
+  .page-title { font-size: 20px; font-weight: 600; margin-bottom: 24px; }
+
+  /* 选品工具条 */
+  .toolbar {
+    display: flex; gap: 12px; margin-bottom: 24px;
+    background: var(--white); padding: 20px; border-radius: 12px;
+    border: 1px solid var(--border);
+  }
+  .toolbar input {
+    flex: 1; padding: 10px 16px; border: 1px solid var(--border);
+    border-radius: 8px; outline: none; font-size: 14px;
+  }
+  .toolbar input:focus { border-color: var(--blue); }
+  .btn-primary {
+    padding: 10px 24px; background: var(--blue); color: #fff;
+    border: none; border-radius: 8px; cursor: pointer; font-weight: 500; transition: 0.2s;
+  }
+  .btn-primary:hover { background: #1d4ed8; }
 
   /* 卡片网格 */
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
   .card {
-    background: var(--glass-bg); backdrop-filter: blur(20px);
-    border: 1px solid var(--glass-border); border-radius: 20px; overflow: hidden;
-    display: flex; flex-direction: column; transition: transform 0.3s;
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: 12px; overflow: hidden; transition: 0.3s;
   }
-  .card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
-  .card img { width: 100%; height: 200px; object-fit: cover; background: #eee; }
-  .card-body { padding: 16px; flex: 1; display: flex; flex-direction: column; gap: 10px; }
-  .title { font-size: 15px; font-weight: bold; line-height: 1.4; color: var(--text-main); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-  .price-row { display: flex; justify-content: space-between; align-items: center; margin-top: auto; }
-  .price { color: var(--acc); font-size: 16px; font-weight: bold; }
-  .actions { display: flex; gap: 8px; margin-top: 10px; }
-  .actions button { flex: 1; padding: 8px; font-size: 13px; border-radius: 8px; }
-
-  /* 登录遮罩 */
-  #login-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.4); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; z-index: 9999; }
-  .login-box { background: rgba(255, 255, 255, 0.9); padding: 40px; border-radius: 24px; border: 1px solid #fff; box-shadow: 0 20px 40px rgba(0,0,0,0.1); width: 100%; max-width: 360px; text-align: center; }
-  .login-box h2 { margin-bottom: 24px; font-size: 22px; color: var(--text-main); }
-  .login-box input { width: 100%; margin-bottom: 16px; text-align: center; background: #f1f5f9; border-color: transparent; }
+  .card:hover { box-shadow: 0 10px 20px rgba(0,0,0,0.03); transform: translateY(-2px); }
+  .card img { width: 100%; height: 180px; object-fit: cover; border-bottom: 1px solid var(--border); }
+  .card-body { padding: 16px; }
+  .card-title { font-size: 14px; font-weight: 600; margin-bottom: 12px; line-height: 1.4; height: 40px; overflow: hidden; }
+  .price-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .price-input { width: 70px; padding: 4px 8px; border: 1px solid var(--border); border-radius: 4px; outline: none; color: var(--blue); font-weight: bold; }
+  .price-input:focus { border-color: var(--blue); }
+  .actions { display: flex; gap: 10px; }
+  .actions button { flex: 1; padding: 8px; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 13px; }
+  .btn-success { background: var(--blue-light); color: var(--blue); }
+  .btn-success:hover { background: #dbeafe; }
+  .btn-danger { background: #fef2f2; color: var(--danger); }
+  .btn-danger:hover { background: #fee2e2; }
+  #loading { display: none; color: var(--blue); font-weight: 500; margin-bottom: 20px; }
 </style>
 </head>
 <body>
 
-<!-- 密码锁 -->
-<div id="login-overlay">
-  <div class="login-box">
+<!-- ================= 登录页 ================= -->
+<div id="login-page">
+  <div class="login-card">
     <div style="margin-bottom: 20px;">
-      <img src="./logo.png" style="height: 50px; border-radius: 50%; background: #000; padding: 2px;">
+      <img src="./logo.png" style="width: 48px; height: 48px; border-radius: 12px; background: #000; padding: 4px;">
     </div>
-    <h2>微澜 LYNLI</h2>
-    <input type="password" id="pwd-input" placeholder="请输入管理密码" onkeypress="if(event.key==='Enter') checkPassword()">
-    <button class="btn-primary" style="width:100%;" onclick="checkPassword()">进入选品中心</button>
+    <h1>Lynli 管理后台</h1>
+    <p class="sub">AI 选品中心控制台</p>
+    
+    <div class="form-group">
+      <label>管理员密码</label>
+      <input type="password" id="pwd-input" placeholder="请输入密码" onkeypress="if(event.key==='Enter') checkPassword()">
+    </div>
+    
+    <button class="btn-login" onclick="checkPassword()">登录</button>
+    <div class="copyright">© 2026 Lynli. All rights reserved.</div>
   </div>
 </div>
 
-<!-- 主面板 -->
-<div id="main-panel" style="display:none;">
-  <div class="header">
-    <div class="logo-area">
-      <img src="./logo.png" alt="LYNLI" />
-      <div class="logo-text">
-        <h1>微澜 LYNLI</h1>
-        <p>AI 选品中心</p>
-      </div>
+<!-- ================= 主面板 ================= -->
+<div id="dashboard" style="display: none;">
+  
+  <!-- 侧边栏 -->
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <img src="./logo.png">
+      <span>Lynli Panel</span>
     </div>
     
-    <div class="input-group">
-      <input type="text" id="keyword" placeholder="输入商品关键词，如：私密护理仪" onkeypress="if(event.key==='Enter') startSpider()">
-      <button class="btn-primary" onclick="startSpider()">开始抓取</button>
+    <div class="menu-group">功能</div>
+    
+    <div class="menu-item active">
+      <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zm0 9l2.5-1.25L12 8.5l-2.5 1.25L12 11zm0 2.5l-5-2.5-5 2.5L12 22l10-8.5-5-2.5-5 2.5z"/></svg>
+      AI 选品采集
+    </div>
+    
+    <div class="menu-item">
+      <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+      商品管理
     </div>
   </div>
 
-  <div id="loading">⏳ 正在调度爬虫抓取并上传至 OSS...</div>
-  <div class="grid" id="list"></div>
+  <!-- 主内容 -->
+  <div class="main-content">
+    <div class="top-bar">
+      <div class="user-profile">
+        <img src="./logo.png" style="width: 24px; height: 24px; border-radius: 50%;">
+        超级管理员
+      </div>
+    </div>
+
+    <div class="content-area">
+      <div class="page-title">AI 选品采集</div>
+      
+      <div class="toolbar">
+        <input type="text" id="keyword" placeholder="输入想要抓取的商品关键词，例如：私密护理仪" onkeypress="if(event.key==='Enter') startSpider()">
+        <button class="btn-primary" onclick="startSpider()">开始抓取</button>
+      </div>
+
+      <div id="loading">⏳ 正在调度爬虫抓取并上传至 OSS，请稍候...</div>
+      <div class="grid" id="list"></div>
+    </div>
+  </div>
 </div>
 
 <script>
-// ⚠️ 你的独立爬虫域名
 const API = 'https://spider.lynli.me';
-// ⚠️ 你的管理密码
-const ADMIN_PASSWORD = 'lynli888'; 
+const ADMIN_PASSWORD = 'lynli888'; // 你的管理密码
 
 // 检查密码
 function checkPassword() {
   const pwd = document.getElementById('pwd-input').value;
   if (pwd === ADMIN_PASSWORD) {
     localStorage.setItem('spider_auth', 'true');
-    document.getElementById('login-overlay').style.display = 'none';
-    document.getElementById('main-panel').style.display = 'block';
+    document.getElementById('login-page').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'flex';
     loadDrafts();
   } else {
     alert('密码错误！');
   }
 }
 
-// 页面加载时检查是否已登录
+// 页面加载检查登录状态
 if (localStorage.getItem('spider_auth') === 'true') {
-  document.getElementById('login-overlay').style.display = 'none';
-  document.getElementById('main-panel').style.display = 'block';
+  document.getElementById('login-page').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'flex';
   loadDrafts();
 }
 
@@ -179,17 +250,17 @@ async function loadDrafts() {
     loading.style.display = 'none';
     if (data.code !== 1) throw new Error(data.msg);
     if (data.data.length === 0) {
-      document.getElementById('list').innerHTML = '<div style="color:var(--text-sub); width:100%;">暂无草稿数据，换个词试试。</div>';
+      document.getElementById('list').innerHTML = '<div style="color:#64748b; width:100%;">暂无草稿数据，请输入关键词开始抓取。</div>';
       return;
     }
     document.getElementById('list').innerHTML = data.data.map(item => `
       <div class="card" id="card-${item.id}">
         <img src="${item.image_url}" alt="商品图">
         <div class="card-body">
-          <div class="title">${item.title}</div>
+          <div class="card-title">${item.title}</div>
           <div class="price-row">
-            <span style="color:var(--text-sub);font-size:12px;">进价: ¥${item.price}</span>
-            <span class="price">售价: ¥<input type="number" id="price-${item.id}" value="${Math.floor(item.price * 3)}" style="width:60px; background:transparent; border:none; border-bottom:1px solid #cbd5e1; color:var(--acc); font-size:16px; font-weight:bold; outline:none; padding:0;"></span>
+            <span style="color:#64748b; font-size:12px;">进价: ¥${item.price}</span>
+            <span style="font-size:12px; color:#64748b;">售价: ¥<input type="number" class="price-input" id="price-${item.id}" value="${Math.floor(item.price * 3)}"></span>
           </div>
           <div class="actions">
             <button class="btn-success" onclick="publish(${item.id})">确认上架</button>
@@ -203,7 +274,7 @@ async function loadDrafts() {
 
 async function publish(id) {
   const price = document.getElementById(`price-${id}`).value;
-  const btn = event.target; btn.innerText = '处理中...'; btn.disabled = true;
+  const btn = event.target; btn.innerText = '处理中'; btn.disabled = true;
   try {
     const res = await fetch(`${API}/api/v1/admin/spider/publish`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, price })
@@ -217,7 +288,7 @@ async function publish(id) {
 
 async function discard(id) {
   if (!confirm('确定丢弃吗？会同时删除 OSS 上的图片！')) return;
-  const btn = event.target; btn.innerText = '删除中...'; btn.disabled = true;
+  const btn = event.target; btn.innerText = '删除中'; btn.disabled = true;
   try {
     const res = await fetch(`${API}/api/v1/admin/spider/discard`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id })
