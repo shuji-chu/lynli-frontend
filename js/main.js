@@ -43,7 +43,6 @@ const ROLE_LABEL = {
 
 register("dashboard", () => import("./views/dashboard.js"));
 
-/* ---------- 登录交互 ---------- */
 function showError(msg) {
   const el = $("#login-error");
   el.textContent = msg;
@@ -57,41 +56,23 @@ function clearError() {
   el.hidden = true;
 }
 
-const REMEMBER_KEY = "lynli.remember.account";
-
-function restoreRememberedAccount() {
-  const saved = localStorage.getItem(REMEMBER_KEY);
-  if (!saved) return;
-  const input = $('#login-form [name="account"]');
-  const check = $('#login-form [name="remember"]');
-  if (!input || !check) return;
-  input.value = saved;
-  check.checked = true;
-}
-
-function persistRememberedAccount(account, remember) {
-  if (remember) localStorage.setItem(REMEMBER_KEY, account);
-  else localStorage.removeItem(REMEMBER_KEY);
-}
-
-// 核心登录逻辑（目前模拟登录）
 async function handleLogin(e) {
   e.preventDefault();
   if (state.loading) return;
-
   clearError();
 
   const form = e.currentTarget;
-  const account = form.account.value.trim();
+  // 兼容你 HTML 里目前叫 email 还是叫 account
+  const emailInput = form.querySelector('input[type="text"], input[type="email"]');
+  const account = emailInput.value.trim();
   const password = form.password.value;
-  const remember = form.remember.checked;
 
   if (!account) {
-    form.account.classList.add("is-invalid");
-    showError("请输入账号");
+    emailInput.classList.add("is-invalid");
+    showError("请输入账号/邮箱");
     return;
   }
-  form.account.classList.remove("is-invalid");
+  emailInput.classList.remove("is-invalid");
 
   if (!password || password.length < 6) {
     form.password.classList.add("is-invalid");
@@ -106,48 +87,25 @@ async function handleLogin(e) {
   submitBtn.disabled = true;
 
   try {
-    // 模拟网络延迟，显得真实一点
-    await new Promise((resolve) => setTimeout(resolve, 600));
+    // 模拟 0.5 秒的加载动画
+    await new Promise((resolve) => setTimeout(resolve, 500));
 
-    // ==========================================
-    // 【超级管理员测试账号】
-    // 账号：admin
-    // 密码：123456
-    // ==========================================
+    // 核心逻辑：只要输入 admin / 123456 就放行
     if (account === "admin" && password === "123456") {
-      
-      const user = { 
-        email: "admin@lynli.me", 
-        role: "super_admin", 
-        nickname: "最高指挥官" 
-      };
-      
+      const user = { email: "admin@lynli.me", role: "super_admin", nickname: "最高指挥官" };
       localStorage.setItem(TOKEN_KEY, "mock_token_123456");
       localStorage.setItem(USER_KEY, JSON.stringify(user));
-
-      persistRememberedAccount(account, remember);
       enterApp(user);
-      
     } else if (account === "yunying" && password === "123456") {
-      
-      // 运营测试账号：yunying / 123456
-      const user = { 
-        email: "yunying@lynli.me", 
-        role: "operator", 
-        nickname: "运营专员" 
-      };
-      
+      const user = { email: "yunying@lynli.me", role: "operator", nickname: "运营专员" };
       localStorage.setItem(TOKEN_KEY, "mock_token_operator");
       localStorage.setItem(USER_KEY, JSON.stringify(user));
-
-      persistRememberedAccount(account, remember);
       enterApp(user);
-
     } else {
       throw new Error("账号或密码错误，请重试");
     }
   } catch (err) {
-    showError(err.message || "网络异常，请稍后重试");
+    showError(err.message);
   } finally {
     state.loading = false;
     submitBtn.classList.remove("is-loading");
@@ -155,7 +113,6 @@ async function handleLogin(e) {
   }
 }
 
-/* ---------- 主布局 ---------- */
 function enterApp(user) {
   state.user = user;
   $("#login-view").hidden = true;
@@ -268,16 +225,15 @@ function logout() {
   history.replaceState(null, "", location.pathname);
 }
 
-/* ---------- 启动 ---------- */
 function boot() {
-  restoreRememberedAccount();
-
   const form = $("#login-form");
-  form.addEventListener("submit", handleLogin);
-  form.addEventListener("input", (e) => {
-    e.target.classList.remove("is-invalid");
-    clearError();
-  });
+  if (form) {
+    form.addEventListener("submit", handleLogin);
+    form.addEventListener("input", (e) => {
+      e.target.classList.remove("is-invalid");
+      clearError();
+    });
+  }
 
   const token = localStorage.getItem(TOKEN_KEY);
   const cached = localStorage.getItem(USER_KEY);
