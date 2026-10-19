@@ -46,8 +46,11 @@
             btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> 验证中...';
 
             try {
-                const res = await fetch('/api/login', {
-                    method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({username: u, password: p})
+                // 关键修复：直接写死后端域名，不依赖 Vercel 代理
+                const res = await fetch('https://spider.lynli.me/api/login', {
+                    method: 'POST', 
+                    headers: {'Content-Type':'application/json'}, 
+                    body: JSON.stringify({username: u, password: p})
                 }).then(r => r.json());
 
                 if (res.code === 200) {
@@ -59,7 +62,7 @@
                 } else {
                     alert(res.msg); btn.innerHTML = '登录';
                 }
-            } catch (err) { alert('网络错误'); btn.innerHTML = '登录'; }
+            } catch (err) { alert('网络错误，请检查后端服务'); btn.innerHTML = '登录'; }
         });
     </script>
 </body>
