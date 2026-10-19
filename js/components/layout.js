@@ -6,9 +6,12 @@ export function renderLayout() {
   const user = storage.getUser() || {};
   const role = user.role || "super_admin";
 
-  // 渲染侧边栏菜单
+  // 渲染侧边栏菜单（加回了 SVG 图标）
   const navHtml = ROUTES.filter(r => r.roles.includes(role)).map(r => `
     <button class="nav-item" type="button" data-route="${r.key}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;flex:none;">
+        ${r.icon}
+      </svg>
       <span>${r.label}</span>
     </button>
   `).join("");
