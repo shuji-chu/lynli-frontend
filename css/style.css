@@ -60,3 +60,6 @@ body { background: var(--bg); color: var(--text); height: 100vh; overflow: hidde
   .card { padding: 16px; }
   .page-title { font-size: 16px; }
 }
+
+/* 修复表格文字挤压换行 */
+.table th, .table td { white-space: nowrap; }
