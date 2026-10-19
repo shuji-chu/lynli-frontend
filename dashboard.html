@@ -7,155 +7,67 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
-    <style>
-        /* 隐藏滚动条但保留滚动功能 */
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    </style>
 </head>
-<body class="flex h-screen overflow-hidden bg-slate-100 font-sans relative text-sm">
+<body class="flex h-screen overflow-hidden bg-slate-50 font-sans text-sm relative">
 
-    <!-- 移动端遮罩层 -->
-    <div id="sidebar-overlay" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 hidden md:hidden transition-opacity" onclick="toggleSidebar()"></div>
+    <!-- 全局 Toast 容器 -->
+    <div id="toast-container" class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 flex flex-col gap-2"></div>
+
+    <!-- 移动端遮罩 -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-slate-900/50 z-40 hidden md:hidden" onclick="toggleSidebar()"></div>
 
     <!-- 侧边栏 -->
-    <aside id="sidebar" class="w-64 bg-[#0f172a] text-slate-300 flex flex-col z-50 absolute md:relative h-full transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out">
-        
-        <!-- Logo & 环境标识 -->
-        <div class="h-16 flex items-center justify-between px-5 border-b border-slate-800/50 shrink-0">
-            <div class="flex items-center gap-2">
-                <span class="text-lg font-black text-white tracking-wide">LYNLI</span>
-                <span class="px-1.5 py-0.5 bg-blue-500/20 text-blue-400 border border-blue-500/30 text-[10px] font-bold rounded">PRO</span>
-            </div>
-            <button onclick="toggleSidebar()" class="md:hidden text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+    <aside id="sidebar" class="w-64 bg-[#0f172a] text-slate-300 flex flex-col z-50 absolute md:relative h-full transform -translate-x-full md:translate-x-0 transition-transform duration-300">
+        <div class="h-16 flex items-center justify-between px-5 border-b border-slate-800/50">
+            <span class="text-lg font-black text-white tracking-wide">LYNLI CONSOLE</span>
+            <button onclick="toggleSidebar()" class="md:hidden text-slate-400"><i class="fa-solid fa-xmark"></i></button>
         </div>
-
-        <!-- 菜单列表 -->
-        <nav class="flex-1 px-3 py-4 overflow-y-auto no-scrollbar space-y-6">
-            
-            <!-- 仪表盘 -->
-            <div>
-                <p class="px-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">总览</p>
-                <a href="#dashboard" class="nav-link flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
-                    <i class="fa-solid fa-chart-pie w-6 text-center text-slate-400"></i> 数据看板
-                </a>
-            </div>
-
-            <!-- 商品模块 -->
-            <div>
-                <p class="px-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">商品管理</p>
-                <a href="#products" class="nav-link flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
-                    <i class="fa-solid fa-box-open w-6 text-center text-slate-400"></i> 商品库
-                    <span class="ml-auto bg-slate-800 text-xs px-2 py-0.5 rounded-full text-slate-400">856</span>
-                </a>
-                <a href="#drafts" class="nav-link flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
-                    <i class="fa-solid fa-file-signature w-6 text-center text-slate-400"></i> 抓取草稿箱
-                </a>
-                <a href="#assets" class="nav-link flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
-                    <i class="fa-solid fa-images w-6 text-center text-slate-400"></i> 素材图库
-                </a>
-            </div>
-
-            <!-- 交易模块 -->
-            <div>
-                <p class="px-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">交易中心</p>
-                <a href="#orders" class="nav-link flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
-                    <i class="fa-solid fa-file-invoice-dollar w-6 text-center text-slate-400"></i> 全部订单
-                </a>
-                <a href="#purchase" class="nav-link flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
-                    <i class="fa-solid fa-cart-shopping w-6 text-center text-slate-400"></i> 采购列表
-                    <span class="ml-auto bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">12</span>
-                </a>
-                <a href="#aftersales" class="nav-link flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
-                    <i class="fa-solid fa-headset w-6 text-center text-slate-400"></i> 售后工单
-                </a>
-            </div>
-
-            <!-- 智能工具 -->
-            <div>
-                <p class="px-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">AI 引擎</p>
-                <a href="#spider" class="nav-link flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
-                    <i class="fa-solid fa-robot w-6 text-center text-slate-400"></i> AI 智能选品
-                </a>
-                <a href="#logs" class="nav-link flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
-                    <i class="fa-solid fa-microchip w-6 text-center text-slate-400"></i> 任务运行日志
-                </a>
-            </div>
-
-            <!-- 系统设置 -->
-            <div>
-                <p class="px-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">系统</p>
-                <a href="#settings" class="nav-link flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
-                    <i class="fa-solid fa-gear w-6 text-center text-slate-400"></i> 店铺设置
-                </a>
-                <a href="#api" class="nav-link flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
-                    <i class="fa-solid fa-code w-6 text-center text-slate-400"></i> API 接口配置
-                </a>
-            </div>
+        <nav class="flex-1 px-3 py-4 overflow-y-auto space-y-1" id="nav-menu">
+            <!-- 路由动态注入 -->
         </nav>
-
-        <!-- 底部用户信息 -->
-        <div class="p-4 border-t border-slate-800/50 bg-[#0b1120]">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <img src="./logo.png" class="w-8 h-8 rounded-full bg-slate-800 p-1 object-contain">
-                    <div>
-                        <p class="text-xs font-bold text-white">超级管理员</p>
-                        <p class="text-[10px] text-slate-500">admin@lynli.me</p>
-                    </div>
+        <!-- 底部用户卡片 -->
+        <div class="p-4 border-t border-slate-800/50 bg-[#0b1120] cursor-pointer hover:bg-slate-800 transition" onclick="window.location.hash='#settings'">
+            <div class="flex items-center gap-3">
+                <img id="nav-avatar" src="" class="w-8 h-8 rounded-full bg-slate-700 object-cover">
+                <div class="flex-1 min-w-0">
+                    <p id="nav-nickname" class="text-xs font-bold text-white truncate">加载中...</p>
+                    <p id="nav-role" class="text-[10px] text-slate-500">-</p>
                 </div>
-                <button id="logoutBtn" class="text-slate-500 hover:text-red-400 transition-colors p-2" title="退出登录">
-                    <i class="fa-solid fa-power-off"></i>
-                </button>
+                <i class="fa-solid fa-gear text-slate-500 hover:text-white"></i>
             </div>
         </div>
     </aside>
 
-    <!-- 主内容区 -->
+    <!-- 主内容 -->
     <main class="flex-1 flex flex-col w-full h-full min-w-0">
-        <!-- 顶栏 -->
         <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 shrink-0 shadow-sm z-10">
             <div class="flex items-center">
-                <button onclick="toggleSidebar()" class="md:hidden mr-3 text-slate-600 hover:text-slate-900 focus:outline-none">
-                    <i class="fa-solid fa-bars text-lg"></i>
-                </button>
-                <div class="flex items-center text-sm">
-                    <span class="text-slate-400 hidden sm:inline">控制台</span>
-                    <i class="fa-solid fa-chevron-right text-[10px] mx-2 text-slate-300 hidden sm:inline"></i>
-                    <h2 id="page-title" class="text-base font-bold text-slate-800">数据看板</h2>
-                </div>
+                <button onclick="toggleSidebar()" class="md:hidden mr-3 text-slate-600"><i class="fa-solid fa-bars"></i></button>
+                <h2 id="page-title" class="text-base font-bold text-slate-800">数据看板</h2>
             </div>
-            
-            <!-- 顶栏右侧按钮 -->
-            <div class="flex items-center gap-3">
-                <button class="w-8 h-8 flex items-center justify-center rounded-full bg-slate-50 text-slate-500 hover:bg-slate-100 border border-slate-200"><i class="fa-solid fa-bell"></i></button>
-                <button class="w-8 h-8 flex items-center justify-center rounded-full bg-slate-50 text-slate-500 hover:bg-slate-100 border border-slate-200"><i class="fa-solid fa-circle-question"></i></button>
-            </div>
+            <button onclick="logout()" class="text-xs text-red-500 font-medium hover:underline">退出登录</button>
         </header>
-        
-        <!-- 内容渲染区 -->
-        <div id="app-view" class="flex-1 p-4 overflow-y-auto w-full"></div>
+        <div id="app-view" class="flex-1 p-4 md:p-6 overflow-y-auto w-full"></div>
     </main>
 
     <script>
-        // 侧边栏滑动
         function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('sidebar-overlay');
-            if (sidebar.classList.contains('-translate-x-full')) {
-                sidebar.classList.remove('-translate-x-full');
-                overlay.classList.remove('hidden');
-            } else {
-                sidebar.classList.add('-translate-x-full');
-                overlay.classList.add('hidden');
-            }
+            document.getElementById('sidebar').classList.toggle('-translate-x-full');
+            document.getElementById('sidebar-overlay').classList.toggle('hidden');
         }
-
-        // 退出登录逻辑
-        document.getElementById('logoutBtn').addEventListener('click', () => {
-            localStorage.removeItem('lynli_token');
-            window.location.href = '/';
-        });
+        // 全局大厂级 Toast
+        function toast(msg, type='success') {
+            const colors = { success: 'bg-emerald-500', error: 'bg-red-500', info: 'bg-blue-500' };
+            const el = document.createElement('div');
+            el.className = `${colors[type]} text-white px-6 py-3 rounded-xl shadow-lg font-medium text-sm transition-all duration-300 opacity-0 transform -translate-y-4 flex items-center gap-2`;
+            el.innerHTML = `<i class="fa-solid ${type==='success'?'fa-check-circle':(type==='error'?'fa-circle-xmark':'fa-circle-info')}"></i> ${msg}`;
+            document.getElementById('toast-container').appendChild(el);
+            setTimeout(() => el.classList.remove('opacity-0', '-translate-y-4'), 10);
+            setTimeout(() => { el.classList.add('opacity-0', '-translate-y-4'); setTimeout(() => el.remove(), 300); }, 3000);
+        }
+        function logout() {
+            localStorage.removeItem('token'); localStorage.removeItem('user_info'); window.location.href = '/';
+        }
     </script>
     <script type="module" src="./js/router.js"></script>
 </body>
