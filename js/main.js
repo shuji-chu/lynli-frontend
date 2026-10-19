@@ -5,19 +5,20 @@ import { renderLayout } from "./components/layout.js";
 import { initAuth } from "./views/auth.js";
 import { $ } from "./utils/dom.js";
 
-registerRoute("dashboard", () => import("./views/dashboard.js"));
-registerRoute("orders-all", () => import("./views/orders.js"));
-registerRoute("products-list", () => import("./views/products.js"));
-registerRoute("finance", () => import("./views/finance.js"));
-registerRoute("users", () => import("./views/users.js"));
-registerRoute("settings", () => import("./views/settings.js"));
-registerRoute("spider", () => import("./views/spider.js"));
-registerRoute("cs-chat", () => import("./views/customer-service.js"));
-registerRoute("cs-tickets", () => import("./views/customer-tickets.js"));
-registerRoute("logistics", () => import("./views/logistics.js")); // 物流地图挂载
+const pages = {
+  "dashboard": "./views/dashboard.js", "data-screen": "./views/data-screen.js",
+  "orders-all": "./views/orders.js", "logistics": "./views/logistics.js",
+  "purchase-pending": "./views/purchase.js",
+  "cs-chat": "./views/customer-service.js", "cs-tickets": "./views/customer-tickets.js",
+  "products-list": "./views/products.js", "spider": "./views/spider.js", "materials": "./views/materials.js",
+  "marketing-coupon": "./views/marketing-coupon.js", "marketing-seckill": "./views/marketing-seckill.js",
+  "finance": "./views/finance.js", "users": "./views/users.js", "settings": "./views/settings.js"
+};
+
+Object.entries(pages).forEach(([k, path]) => registerRoute(k, () => import(path)));
 
 const PlaceholderView = { render: async (mount) => { mount.innerHTML = '<div class="view-empty"><h2>模块建设中</h2></div>'; } };
-["data-center","orders-delivery","orders-refund","products-category","marketing-coupon"].forEach(k => registerRoute(k, () => Promise.resolve(PlaceholderView)));
+["orders-refund","purchase-shipped","products-category"].forEach(k => registerRoute(k, () => Promise.resolve(PlaceholderView)));
 
 function boot() {
   if (!storage.getToken()) { initAuth(); return; }
