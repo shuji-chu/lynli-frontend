@@ -4,6 +4,7 @@ import { routes } from "./router.js";
 import { renderLayout } from "./views/layout.js";
 import { showModal, toast } from "./ui.js";
 import { initAICopilot } from "./views/ai-copilot.js";
+import { renderLogin } from "./views/login.js";
 
 import * as Dashboard from "./views/dashboard.js";
 import * as Orders from "./views/orders.js";
@@ -80,22 +81,6 @@ function switchPage(page) {
   }, 50);
 }
 
-function renderLogin() {
-  app.innerHTML = `
-    <div class="login-view">
-      <div class="login-box">
-        <h1>LYNLI OS</h1><p>未来级商业智能系统</p>
-        <form id="login-form">
-          <div class="field"><label>账号</label><input type="text" name="account" value="admin" required></div>
-          <div class="field"><label>密码</label><input type="password" name="password" value="123456" required></div>
-          <button type="submit" class="btn" id="login-btn">安全登录</button>
-        </form>
-      </div>
-    </div>
-  `;
-  document.getElementById('login-form').onsubmit = (e) => { e.preventDefault(); renderApp(); };
-}
-
 function renderApp() {
   app.innerHTML = renderLayout();
   initAICopilot(); 
@@ -107,20 +92,17 @@ function renderApp() {
   document.getElementById('menu-btn').onclick = () => { sidebar.classList.add('open'); overlay.classList.add('show'); };
   overlay.onclick = () => { sidebar.classList.remove('open'); overlay.classList.remove('show'); };
   
-  // 全屏
   document.getElementById('fullscreen-btn').onclick = () => {
     if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(e => toast('浏览器不支持全屏', 'error'));
     else document.exitFullscreen();
   };
 
-  // 主题切换
   document.getElementById('theme-btn').onclick = () => {
     document.body.classList.toggle('light-mode');
     localStorage.setItem('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
     if(currentPage === 'dashboard') switchPage('dashboard'); 
   };
 
-  // 真实消息通知
   document.getElementById('notice-btn').onclick = () => {
     showModal({
       title: "系统通知",
@@ -128,7 +110,6 @@ function renderApp() {
         <div class="notice-list">
           <div class="notice-item"><b>系统升级完成</b><p>V2.0 版本已上线，全新支持 AI 副驾驶功能。</p><div class="notice-time">10分钟前</div></div>
           <div class="notice-item" style="border-left-color:#f87171;"><b>库存预警</b><p>华南仓 3 款商品库存低于 10 件，请及时补货。</p><div class="notice-time">1小时前</div></div>
-          <div class="notice-item" style="border-left-color:#eab308;"><b>财务对账提醒</b><p>昨日账单已生成，请前往财务中心查看。</p><div class="notice-time">3小时前</div></div>
         </div>
       `,
       onConfirm: (mask, close) => close()
@@ -136,9 +117,8 @@ function renderApp() {
   };
 
   document.getElementById('user-profile').onclick = (e) => { e.stopPropagation(); document.getElementById('dropdown-menu').classList.toggle('show'); };
-  document.getElementById('logout-btn').onclick = renderLogin;
+  document.getElementById('logout-btn').onclick = () => renderLogin(renderApp);
 
-  // 个人中心 (真实文件上传)
   document.getElementById('profile-btn').onclick = () => {
     const userInfo = JSON.parse(localStorage.getItem("lynli_user") || '{"name":"系统管理员","avatar":"管"}');
     const hasImg = userInfo.avatar.startsWith('data:image');
@@ -159,36 +139,27 @@ function renderApp() {
         const newName = mask.querySelector('#m-nickname').value;
         const imgPreview = mask.querySelector('#avatar-img-preview');
         let newAvatar = userInfo.avatar;
-        
-        // 如果上传了新图片，用 Base64
-        if (imgPreview.src && imgPreview.src.startsWith('data:image')) {
-          newAvatar = imgPreview.src;
-        }
-        
+        if (imgPreview.src && imgPreview.src.startsWith('data:image')) newAvatar = imgPreview.src;
         if (!newName) return toast("昵称不能为空", "error");
         localStorage.setItem("lynli_user", JSON.stringify({ name: newName, avatar: newAvatar }));
         close(); renderApp(); switchPage("dashboard"); toast("更新成功");
       }
     });
 
-    // 绑定文件上传事件
     setTimeout(() => {
-      const fileInput = document.getElementById('avatar-upload');
-      if (fileInput) {
-        fileInput.onchange = (e) => {
-          const file = e.target.files[0];
-          if (file) {
-            const reader = new FileReader();
-            reader.onload = (re) => {
-              const img = document.getElementById('avatar-img-preview');
-              img.src = re.target.result;
-              img.style.display = 'block';
-              document.getElementById('avatar-text').style.display = 'none';
-            };
-            reader.readAsDataURL(file);
-          }
-        };
-      }
+      document.getElementById('avatar-upload').onchange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (re) => {
+            const img = document.getElementById('avatar-img-preview');
+            img.src = re.target.result;
+            img.style.display = 'block';
+            document.getElementById('avatar-text').style.display = 'none';
+          };
+          reader.readAsDataURL(file);
+        }
+      };
     }, 100);
   };
 
@@ -196,4 +167,5 @@ function renderApp() {
   switchPage("dashboard");
 }
 
-renderLogin();
+// 启动入口
+renderLogin(renderApp);
