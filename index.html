@@ -1,28 +1,15 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <script>
-    window.onerror = function(msg, url, line) {
-      alert("系统报错: " + msg + "\n文件: " + url + "\n行号: " + line);
-    };
-  </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#070b14">
   <title>LYNLI · 管理控制台</title>
   <link rel="icon" href="logo.png">
   <link rel="stylesheet" href="css/style.css">
-  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
 </head>
 <body>
   <div id="app">
-    <!-- 登录视图 -->
     <section id="login-view" class="auth">
-      <div class="auth__bg" aria-hidden="true">
-        <span class="auth__orb auth__orb--a"></span>
-        <span class="auth__orb auth__orb--b"></span>
-        <span class="auth__grid"></span>
-      </div>
       <div class="auth__panel">
         <header class="brand">
           <div class="brand__mark"><img src="logo.png" alt="LYNLI Logo"></div>
@@ -30,52 +17,38 @@
         </header>
         <div class="auth__card">
           <div class="auth__head"><h2>登录</h2><p>请输入您的账号信息</p></div>
-          <form id="login-form" novalidate>
+          <form id="login-form">
             <label class="field">
               <span class="field__label">账号</span>
-              <input class="field__input" type="text" name="account" autocomplete="username" placeholder="请输入账号" required>
+              <input class="field__input" type="text" name="account" placeholder="请输入账号" required>
             </label>
             <label class="field">
               <span class="field__label">密码</span>
-              <input class="field__input" type="password" name="password" autocomplete="current-password" placeholder="••••••••" required>
+              <input class="field__input" type="password" name="password" placeholder="••••••••" required>
             </label>
-            <div class="auth__row">
-              <label class="check"><input type="checkbox" name="remember"><span>记住账号</span></label>
-            </div>
-            <p class="auth__error" id="login-error" role="alert" hidden></p>
-            <button class="btn btn--primary" type="submit" onclick="alert('按钮真的被点到了！正在执行JS...')">
-              <span class="btn__label">进入控制台</span>
-            </button>
+            <button class="btn btn--primary" type="submit">进入控制台</button>
           </form>
         </div>
       </div>
     </section>
 
-    <!-- 主布局 -->
     <section id="app-view" class="app" hidden>
       <aside class="sidebar" id="sidebar">
         <div class="sidebar__brand">
           <div class="brand__mark brand__mark--sm"><img src="logo.png" alt="LYNLI"></div>
           <div class="sidebar__brand-text"><strong>LYNLI</strong><span>控制台</span></div>
         </div>
-        <nav class="sidebar__nav" id="nav" aria-label="主菜单"></nav>
-        <div class="sidebar__foot" id="sidebar-foot"></div>
+        <nav class="sidebar__nav" id="nav"></nav>
       </aside>
       <div class="sidebar__scrim" id="sidebar-scrim"></div>
       <div class="app__main">
         <header class="topbar">
-          <button class="icon-btn" id="menu-toggle" type="button">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
-          </button>
-          <div class="topbar__title hide-mobile">
+          <div class="topbar__title">
             <h1 id="page-title">数据看板</h1>
             <p id="page-sub">经营概览</p>
           </div>
-          <div class="topbar__actions">
-            <div class="topbar__user" id="topbar-user"></div>
-          </div>
         </header>
-        <main class="content" id="content" tabindex="-1"></main>
+        <main class="content" id="content"></main>
       </div>
     </section>
   </div>
