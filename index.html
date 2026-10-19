@@ -46,8 +46,8 @@
             btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> 验证中...';
 
             try {
-                // 关键修复：直接写死后端域名，不依赖 Vercel 代理
-                const res = await fetch('https://spider.lynli.me/api/login', {
+                // 使用相对路径，走 Vercel 代理，同源请求无跨域！
+                const res = await fetch('/api/login', {
                     method: 'POST', 
                     headers: {'Content-Type':'application/json'}, 
                     body: JSON.stringify({username: u, password: p})
