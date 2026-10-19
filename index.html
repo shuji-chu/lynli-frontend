@@ -20,14 +20,15 @@
     .field input:focus { border-color: var(--pri); box-shadow: 0 0 0 3px rgba(59,130,246,0.15); }
     .btn { width: 100%; padding: 12px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); border: none; border-radius: 8px; color: #fff; font-weight: bold; cursor: pointer; margin-top: 10px; }
     
-    /* 主界面 */
+    /* 主界面布局 */
     #app-view { display: none; height: 100vh; width: 100%; }
     .layout { display: flex; height: 100%; width: 100%; flex-direction: row; }
     
     /* 侧边栏 */
-    .sidebar { width: 240px; flex-shrink: 0; background: rgba(9,13,22,0.95); border-right: 1px solid var(--line); padding: 20px 10px; display: flex; flex-direction: column; }
+    .sidebar { width: 240px; flex-shrink: 0; background: rgba(9,13,22,0.95); border-right: 1px solid var(--line); padding: 20px 10px; display: flex; flex-direction: column; overflow-y: auto; }
     .sidebar h2 { font-size: 18px; padding: 0 10px 20px; border-bottom: 1px solid var(--line); margin-bottom: 15px; letter-spacing: 2px; }
-    .nav-item { padding: 12px; border-radius: 8px; color: var(--dim); cursor: pointer; margin-bottom: 5px; font-size: 14px; transition: 0.2s; border-left: 3px solid transparent; }
+    .nav-group { font-size: 11px; color: var(--dim); margin: 15px 10px 5px; letter-spacing: 1px; }
+    .nav-item { padding: 10px 12px; border-radius: 8px; color: var(--dim); cursor: pointer; font-size: 14px; transition: 0.2s; border-left: 3px solid transparent; margin-bottom: 2px; }
     .nav-item:hover, .nav-item.active { background: rgba(59,130,246,0.15); color: var(--pri); border-left-color: var(--pri); }
     
     /* 右侧主体 */
@@ -48,10 +49,11 @@
     /* ============ 手机端适配 ============ */
     @media (max-width: 768px) {
       .layout { flex-direction: column; }
-      .sidebar { width: 100%; height: auto; flex-direction: row; overflow-x: auto; padding: 10px; border-right: none; border-bottom: 1px solid var(--line); align-items: center; }
-      .sidebar h2 { display: none; }
-      .nav-item { margin-bottom: 0; margin-right: 8px; white-space: nowrap; border-left: none; border-bottom: 3px solid transparent; padding: 8px 12px; }
-      .nav-item.active { border-left: none; border-bottom-color: var(--pri); }
+      .sidebar { width: 100%; height: 50px; flex-direction: row; overflow-x: auto; padding: 0 10px; border-right: none; border-bottom: 1px solid var(--line); align-items: center; scrollbar-width: none; }
+      .sidebar::-webkit-scrollbar { display: none; }
+      .sidebar h2, .nav-group { display: none; }
+      .nav-item { margin-bottom: 0; margin-right: 8px; white-space: nowrap; border-left: none; border-bottom: 3px solid transparent; padding: 10px 12px; border-radius: 0; }
+      .nav-item.active { border-left: none; border-bottom-color: var(--pri); background: transparent; }
       .kpi-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
       .kpi-val { font-size: 22px; }
       .card { padding: 15px; }
@@ -76,10 +78,25 @@
     <div class="layout">
       <div class="sidebar">
         <h2>LYNLI</h2>
+        
+        <div class="nav-group">概览</div>
         <div class="nav-item active" data-page="dashboard">数据看板</div>
+        
+        <div class="nav-group">交易中心</div>
         <div class="nav-item" data-page="orders">全部订单</div>
+        <div class="nav-item" data-page="purchases">采购与代发</div>
+        
+        <div class="nav-group">商品中心</div>
         <div class="nav-item" data-page="products">商品库</div>
-        <div class="nav-item" data-page="spider">AI选品</div>
+        <div class="nav-item" data-page="spider">AI选品矩阵</div>
+        
+        <div class="nav-group">营销与客服</div>
+        <div class="nav-item" data-page="marketing">优惠券</div>
+        <div class="nav-item" data-page="cs">客服工单</div>
+        
+        <div class="nav-group">财务与系统</div>
+        <div class="nav-item" data-page="finance">财务对账</div>
+        <div class="nav-item" data-page="settings">系统设置</div>
       </div>
       <div class="main">
         <div class="topbar">
@@ -95,11 +112,11 @@
   </div>
 
   <script>
+    // 登录逻辑
     document.getElementById('login-form').onsubmit = async (e) => {
       e.preventDefault();
       const btn = document.getElementById('login-btn');
       btn.textContent = "认证中...";
-      
       try {
         const res = await fetch("https://spider.lynli.me/api/auth/login", {
           method: "POST",
@@ -107,7 +124,6 @@
           body: JSON.stringify({ account: e.target.account.value, password: e.target.password.value })
         });
         const data = await res.json();
-        
         if (data.code === 200) {
           document.getElementById('login-view').style.display = 'none';
           document.getElementById('app-view').style.display = 'block';
@@ -115,17 +131,19 @@
         } else {
           alert("登录失败: " + data.message);
         }
-      } catch (err) {
-        alert("网络错误，请检查服务器");
-      } finally {
-        btn.textContent = "进入控制台";
-      }
+      } catch (err) { alert("网络错误，请检查服务器"); } 
+      finally { btn.textContent = "进入控制台"; }
     };
 
+    // 路由与渲染逻辑
     window.loadPage = async (page) => {
       document.querySelectorAll('.nav-item').forEach(el => el.classList.toggle('active', el.dataset.page === page));
-      const titles = { dashboard: '数据看板', orders: '全部订单', products: '商品库', spider: 'AI选品' };
-      document.getElementById('page-title').textContent = titles[page];
+      const titles = { 
+        dashboard: '数据看板', orders: '全部订单', purchases: '采购与代发', 
+        products: '商品库', spider: 'AI选品矩阵', marketing: '优惠券', 
+        cs: '客服工单', finance: '财务对账', settings: '系统设置' 
+      };
+      document.getElementById('page-title').textContent = titles[page] || 'LYNLI';
       
       const content = document.getElementById('content');
       content.innerHTML = '<div class="card">数据加载中...</div>';
@@ -141,40 +159,23 @@
               <div class="card"><div class="kpi-label">待发货</div><div class="kpi-val" style="color:#f87171;">${data.pending_ship}</div></div>
               <div class="card"><div class="kpi-label">在售商品</div><div class="kpi-val">${data.total_prod}</div></div>
             </div>
-            <div class="card"><h3>欢迎回来，系统管理员！</h3><p style="color:var(--dim);margin-top:10px;">系统运行正常，数据库已连接。</p></div>
+            <div class="card"><h3>欢迎回来，系统管理员！</h3><p style="color:var(--dim);margin-top:10px;">左侧菜单已全面恢复，数据已接入服务器。</p></div>
           `;
-        } else if (page === 'orders') {
+        } 
+        else if (page === 'orders') {
           const res = await fetch("https://spider.lynli.me/api/orders");
           const { data } = await res.json();
-          if(data.length === 0) {
-            content.innerHTML = '<div class="card" style="text-align:center;color:var(--dim);">暂无订单数据</div>';
-          } else {
-            content.innerHTML = `
-              <div class="card" style="overflow-x:auto;">
-                <table class="table">
-                  <thead><tr><th>订单号</th><th>买家</th><th>金额</th><th>状态</th></tr></thead>
-                  <tbody>${data.map(o => `<tr><td>${o.id}</td><td>${o.buyer}</td><td>¥${o.amount}</td><td>${o.status}</td></tr>`).join('')}</tbody>
-                </table>
-              </div>
-            `;
-          }
-        } else if (page === 'products') {
+          if(data.length === 0) content.innerHTML = '<div class="card" style="text-align:center;color:var(--dim);">暂无订单数据</div>';
+          else content.innerHTML = `<div class="card" style="overflow-x:auto;"><table class="table"><thead><tr><th>订单号</th><th>买家</th><th>金额</th><th>状态</th></tr></thead><tbody>${data.map(o => `<tr><td>${o.id}</td><td>${o.buyer}</td><td>¥${o.amount}</td><td>${o.status}</td></tr>`).join('')}</tbody></table></div>`;
+        } 
+        else if (page === 'products') {
           const res = await fetch("https://spider.lynli.me/api/products");
           const { data } = await res.json();
-          if(data.length === 0) {
-             content.innerHTML = '<div class="card" style="text-align:center;color:var(--dim);">暂无商品，请去AI选品抓取。</div>';
-          } else {
-            content.innerHTML = `
-              <div class="card" style="overflow-x:auto;">
-                <table class="table">
-                  <thead><tr><th>商品名称</th><th>成本</th><th>售价</th><th>库存</th></tr></thead>
-                  <tbody>${data.map(p => `<tr><td>${p.title}</td><td>¥${p.cost}</td><td>¥${p.price}</td><td>${p.stock}</td></tr>`).join('')}</tbody>
-                </table>
-              </div>
-            `;
-          }
-        } else if (page === 'spider') {
-          content.innerHTML = '<div class="card">AI选品模块，输入关键词开始抓取。</div>';
+          if(data.length === 0) content.innerHTML = '<div class="card" style="text-align:center;color:var(--dim);">暂无商品，请去AI选品抓取。</div>';
+          else content.innerHTML = `<div class="card" style="overflow-x:auto;"><table class="table"><thead><tr><th>商品名称</th><th>成本</th><th>售价</th><th>库存</th></tr></thead><tbody>${data.map(p => `<tr><td>${p.title}</td><td>¥${p.cost}</td><td>¥${p.price}</td><td>${p.stock}</td></tr>`).join('')}</tbody></table></div>`;
+        } 
+        else {
+          content.innerHTML = `<div class="card" style="text-align:center;padding:50px 20px;"><h3>${titles[page]} 模块</h3><p style="color:var(--dim);margin-top:10px;">大厂级 UI 已恢复，等待填充具体业务表单。</p></div>`;
         }
       } catch (e) {
         content.innerHTML = '<div class="card" style="color:#f87171;">数据获取失败，请检查网络。</div>';
