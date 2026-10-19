@@ -1,10 +1,12 @@
 import { api } from './api.js';
 
+// 手机端侧边栏控制
 window.toggleSidebar = () => {
     document.getElementById('sidebar').classList.toggle('open');
     document.getElementById('overlay').classList.toggle('open');
 };
 
+// 提示框
 function toast(msg, isError = false) {
     const box = document.getElementById('toast-box');
     const el = document.createElement('div');
@@ -44,7 +46,7 @@ async function switchPage(pageId) {
         if (el.dataset.target === pageId) el.classList.add('active');
         else el.classList.remove('active');
     });
-    // 关侧边栏
+    // 手机端自动收起侧边栏
     if(window.innerWidth < 768) {
         document.getElementById('sidebar').classList.remove('open');
         document.getElementById('overlay').classList.remove('open');
@@ -52,7 +54,7 @@ async function switchPage(pageId) {
     document.getElementById('breadcrumb').innerText = pageId.toUpperCase();
 
     const content = document.getElementById('page-content');
-    content.innerHTML = '<div style="text-align:center; padding:40px; color:#64748b;">加载中...</div>';
+    content.innerHTML = '<div style="text-align:center; padding:40px; color:#64748b;">数据加载中...</div>';
 
     try {
         if (pageId === 'dashboard') {
@@ -110,7 +112,7 @@ async function switchPage(pageId) {
             content.innerHTML = `<div class="fade-in">${
                 res.data.map(u=>`
                 <div class="card" style="display:flex; align-items:center; gap:12px;">
-                    <img src="${u.avatar||'https://via.placeholder.com/40'}" style="width:40px; height:40px; border-radius:50%;">
+                    <img src="${u.avatar||'https://api.dicebear.com/7.x/adventurer/svg?seed=fallback'}" style="width:40px; height:40px; border-radius:50%;">
                     <div>
                         <div style="font-weight:bold;">${u.nickname||'未命名'}</div>
                         <div style="font-size:12px; color:#64748b;">${u.email}</div>
