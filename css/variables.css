@@ -7,8 +7,11 @@
   --text-muted: #4b5563;
   --shadow-glass: 0 20px 40px -10px rgba(0, 0, 0, 0.1);
   
-  /* 全局高级透光背景 (类似你提供的半身像质感) */
-  --global-bg-url: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop');
+  /* 核心：换成极具高级感的未来感女性半身像 (灰紫调) */
+  --global-bg-url: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2000&auto=format&fit=crop');
+  
+  /* 如果更喜欢真实人物侧脸，可以替换为下面这张，去掉前面注释即可 */
+  /* --global-bg-url: url('https://images.unsplash.com/photo-1531123897727-8f129e1688ce?q=80&w=2000&auto=format&fit=crop'); */
 }
 
 body {
@@ -21,12 +24,20 @@ body {
   overflow: hidden;
 }
 
-/* 全局渐变白雾遮罩，保证文字清晰度且保留人像 */
+/* 关键：加厚纯白+浅灰渐变遮罩，让背景变成半透明，且文字极其清晰 */
 body::before {
   content: '';
   position: fixed;
   inset: 0;
-  background: linear-gradient(135deg, rgba(240, 244, 248, 0.6) 0%, rgba(226, 232, 240, 0.3) 100%);
+  background: linear-gradient(135deg, rgba(248, 250, 252, 0.85) 0%, rgba(241, 245, 249, 0.65) 100%);
   z-index: -1;
   pointer-events: none;
+}
+
+/* 由于遮罩加厚，卡片背景稍微调透一点，露出人物轮廓 */
+.card, .table-container, .login-box-new {
+  background: rgba(255, 255, 255, 0.55) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.9) !important;
 }
