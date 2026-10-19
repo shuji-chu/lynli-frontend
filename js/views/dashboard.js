@@ -5,7 +5,7 @@ export async function render(container) {
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
       <h2 style="font-size: 20px;">老板驾驶舱 👋</h2>
       <button class="btn" id="btn-bigscreen" style="width: auto; padding: 10px 20px; margin: 0; background: linear-gradient(135deg, #8b5cf6, #3b82f6); box-shadow: 0 0 20px rgba(59,130,246,0.5); border-radius: 30px;">
-        🚀 开启全屏大屏
+        开启全景大屏
       </button>
     </div>
     

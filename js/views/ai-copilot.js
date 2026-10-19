@@ -16,7 +16,7 @@ export function initAICopilot() {
           <button class="ai-send-btn" id="ai-send">发送</button>
         </div>
       </div>
-      <div class="ai-btn" id="ai-btn">✨</div>
+      <div class="ai-btn" id="ai-btn">AI</div>
     </div>
   `;
   document.body.insertAdjacentHTML('beforeend', html);

@@ -1,17 +1,4 @@
-// 🔥 无死角捕获所有 JS 报错，如果有错直接显示在屏幕上！
-window.onerror = function(msg, url, line, col, error) {
-  document.getElementById('app').innerHTML = `
-    <div style="color:#f87171; padding:40px; font-family:monospace; background:#070b14; height:100vh;">
-      <h2 style="font-size:24px; margin-bottom:20px;">⚠️ 页面加载出错 (请截图发给AI)</h2>
-      <div style="background:rgba(248,113,113,0.1); padding:20px; border-radius:8px; border:1px solid #f87171;">
-        <p style="margin-bottom:10px; word-break:break-all;"><b>错误信息:</b> ${msg}</p>
-        <p style="margin-bottom:10px; word-break:break-all;"><b>出错文件:</b> ${url}</p>
-        <p><b>行号:</b> ${line}:${col}</p>
-      </div>
-    </div>
-  `;
-  return false;
-};
+window.onerror = function(msg) { document.getElementById('app').innerHTML = `<div style="color:#f87171; padding:20px;">报错: ${msg}</div>`; };
 
 import { routes } from "./router.js";
 import { renderLayout } from "./views/layout.js";
@@ -86,7 +73,7 @@ function switchPage(page) {
   }
   
   const content = document.getElementById('content');
-  content.innerHTML = '<div class="skeleton sk-card"></div><div class="skeleton sk-card"></div>'; 
+  content.innerHTML = '<div class="skeleton sk-card"></div>'; 
   
   setTimeout(() => {
     if (routes[page].render) routes[page].render(content);
@@ -112,7 +99,6 @@ function renderLogin() {
 function renderApp() {
   app.innerHTML = renderLayout();
   initAICopilot(); 
-  
   openTabs = ["dashboard"];
   currentPage = "dashboard";
   
@@ -121,45 +107,88 @@ function renderApp() {
   document.getElementById('menu-btn').onclick = () => { sidebar.classList.add('open'); overlay.classList.add('show'); };
   overlay.onclick = () => { sidebar.classList.remove('open'); overlay.classList.remove('show'); };
   
+  // 全屏
   document.getElementById('fullscreen-btn').onclick = () => {
-    if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+    if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(e => toast('浏览器不支持全屏', 'error'));
     else document.exitFullscreen();
   };
 
+  // 主题切换
   document.getElementById('theme-btn').onclick = () => {
     document.body.classList.toggle('light-mode');
     localStorage.setItem('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
     if(currentPage === 'dashboard') switchPage('dashboard'); 
   };
 
+  // 真实消息通知
+  document.getElementById('notice-btn').onclick = () => {
+    showModal({
+      title: "系统通知",
+      contentHTML: `
+        <div class="notice-list">
+          <div class="notice-item"><b>系统升级完成</b><p>V2.0 版本已上线，全新支持 AI 副驾驶功能。</p><div class="notice-time">10分钟前</div></div>
+          <div class="notice-item" style="border-left-color:#f87171;"><b>库存预警</b><p>华南仓 3 款商品库存低于 10 件，请及时补货。</p><div class="notice-time">1小时前</div></div>
+          <div class="notice-item" style="border-left-color:#eab308;"><b>财务对账提醒</b><p>昨日账单已生成，请前往财务中心查看。</p><div class="notice-time">3小时前</div></div>
+        </div>
+      `,
+      onConfirm: (mask, close) => close()
+    });
+  };
+
   document.getElementById('user-profile').onclick = (e) => { e.stopPropagation(); document.getElementById('dropdown-menu').classList.toggle('show'); };
   document.getElementById('logout-btn').onclick = renderLogin;
 
+  // 个人中心 (真实文件上传)
   document.getElementById('profile-btn').onclick = () => {
     const userInfo = JSON.parse(localStorage.getItem("lynli_user") || '{"name":"系统管理员","avatar":"管"}');
+    const hasImg = userInfo.avatar.startsWith('data:image');
+    
     showModal({
       title: "个人中心设置",
       contentHTML: `
-        <div style="display:flex; flex-direction:column; align-items:center; margin-bottom:20px;">
-          <div id="modal-avatar-preview" style="width:80px; height:80px; background:linear-gradient(135deg,#3b82f6,#8b5cf6); border-radius:50%; display:grid; place-items:center; font-size:32px; color:#fff; font-weight:bold; margin-bottom:10px;">${userInfo.avatar}</div>
-          <button class="btn" id="change-avatar-btn" style="width:auto; padding:6px 12px; font-size:12px; background:rgba(255,255,255,0.1); border:1px solid var(--line);">随机换头像</button>
+        <div style="text-align:center; margin-bottom:20px;">
+          <label class="upload-avatar-wrap" for="avatar-upload">
+            <img id="avatar-img-preview" src="${hasImg ? userInfo.avatar : ''}" style="display:${hasImg ? 'block' : 'none'};">
+            <span id="avatar-text" style="display:${hasImg ? 'none' : 'block'};">点击上传<br>头像</span>
+          </label>
+          <input type="file" id="avatar-upload" accept="image/*" style="display:none;">
         </div>
         <div class="field"><label>修改昵称</label><input type="text" id="m-nickname" value="${userInfo.name}" style="width:100%;"></div>
       `,
       onConfirm: (mask, close) => {
         const newName = mask.querySelector('#m-nickname').value;
-        const newAvatar = mask.querySelector('#modal-avatar-preview').textContent.trim();
+        const imgPreview = mask.querySelector('#avatar-img-preview');
+        let newAvatar = userInfo.avatar;
+        
+        // 如果上传了新图片，用 Base64
+        if (imgPreview.src && imgPreview.src.startsWith('data:image')) {
+          newAvatar = imgPreview.src;
+        }
+        
         if (!newName) return toast("昵称不能为空", "error");
         localStorage.setItem("lynli_user", JSON.stringify({ name: newName, avatar: newAvatar }));
         close(); renderApp(); switchPage("dashboard"); toast("更新成功");
       }
     });
+
+    // 绑定文件上传事件
     setTimeout(() => {
-      const changeBtn = document.querySelector('#change-avatar-btn');
-      if(changeBtn) changeBtn.onclick = () => {
-        const emojis = ['🐱', '🐶', '🦊', '🐻', '🐼', '🚀', '😎', '⚡'];
-        document.querySelector('#modal-avatar-preview').textContent = emojis[Math.floor(Math.random() * emojis.length)];
-      };
+      const fileInput = document.getElementById('avatar-upload');
+      if (fileInput) {
+        fileInput.onchange = (e) => {
+          const file = e.target.files[0];
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = (re) => {
+              const img = document.getElementById('avatar-img-preview');
+              img.src = re.target.result;
+              img.style.display = 'block';
+              document.getElementById('avatar-text').style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+          }
+        };
+      }
     }, 100);
   };
 

@@ -215,3 +215,22 @@ body.light-mode .card { background: rgba(255, 255, 255, 0.6); border: 1px solid 
 .ai-input-box { padding: 10px; border-top: 1px solid var(--line); display: flex; gap: 10px; background: rgba(0,0,0,0.2); }
 .ai-input-box input { flex: 1; background: none; border: none; color: #fff; outline: none; }
 .ai-send-btn { background: var(--pri); border: none; color: #fff; padding: 6px 12px; border-radius: 6px; cursor: pointer; }
+
+/* 强制全屏大屏，修复手机端不占满 */
+.big-screen { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 999999 !important; background: #040a18; display: none; flex-direction: column; overflow: hidden; color: #fff; }
+
+/* 通用 SVG 图标样式 */
+.icon { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.icon-btn { background: none; border: none; color: var(--dim); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 6px; border-radius: 8px; transition: 0.2s; }
+.icon-btn:hover { background: rgba(255,255,255,0.1); color: var(--text); }
+
+/* 消息通知抽屉 */
+.notice-list { display: flex; flex-direction: column; gap: 12px; margin-top: 10px; }
+.notice-item { padding: 12px; background: rgba(255,255,255,0.03); border-radius: 8px; border-left: 3px solid var(--pri); font-size: 13px; }
+.notice-time { font-size: 11px; color: var(--dim); margin-top: 6px; }
+
+/* 自定义上传头像预览 */
+.upload-avatar-wrap { position: relative; width: 80px; height: 80px; margin: 0 auto 20px; border-radius: 50%; overflow: hidden; cursor: pointer; border: 2px dashed var(--line); display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.2); }
+.upload-avatar-wrap:hover { border-color: var(--pri); }
+.upload-avatar-wrap img { width: 100%; height: 100%; object-fit: cover; display: none; }
+.upload-avatar-wrap span { font-size: 12px; color: var(--dim); }
