@@ -7,48 +7,80 @@
 <style>
   :root { --bg: #f5f7fa; --white: #ffffff; --text: #1e293b; --text-sub: #64748b; --blue: #2563eb; --border: #e2e8f0; }
   *{box-sizing:border-box;margin:0;padding:0}
-  body { background: var(--bg); color: var(--text); font: 14px/1.6 sans-serif; display: flex; height: 100vh; }
-  .sidebar { width: 200px; background: var(--white); border-right: 1px solid var(--border); padding: 20px 0; }
-  .menu { padding: 12px 20px; cursor: pointer; color: var(--text-sub); }
-  .menu.active { background: #eff6ff; color: var(--blue); font-weight: bold; border-left: 4px solid var(--blue); }
-  .main { flex: 1; padding: 20px; overflow-y: auto; }
-  .card { background: var(--white); border-radius: 12px; padding: 20px; border: 1px solid var(--border); margin-bottom: 20px; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
-  table { width: 100%; border-collapse: collapse; text-align: left; }
+  
+  /* 基础布局：手机端上下 */
+  body { background: var(--bg); color: var(--text); font: 14px/1.6 sans-serif; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+  
+  /* 侧边栏：手机端变成顶部横向导航 */
+  .sidebar { background: var(--white); border-bottom: 1px solid var(--border); display: flex; overflow-x: auto; white-space: nowrap; }
+  .sidebar-title { display: none; }
+  .menu { padding: 15px 20px; cursor: pointer; color: var(--text-sub); border-bottom: 3px solid transparent; }
+  .menu.active { color: var(--blue); font-weight: bold; border-bottom-color: var(--blue); background: #eff6ff; }
+  
+  /* 主内容区 */
+  .main { flex: 1; padding: 15px; overflow-y: auto; overflow-x: hidden; }
+  
+  .card { background: var(--white); border-radius: 12px; padding: 15px; border: 1px solid var(--border); margin-bottom: 20px; }
+  .grid { display: grid; grid-template-columns: 1fr; gap: 15px; }
+  
+  /* 表格容器允许左右滑动 */
+  .table-wrap { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  table { width: 100%; border-collapse: collapse; text-align: left; white-space: nowrap; }
   th, td { padding: 12px; border-bottom: 1px solid var(--border); }
-  .btn { background: var(--blue); color: #fff; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; }
+  
+  .btn { background: var(--blue); color: #fff; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; }
+  .btn-outline { background: #eff6ff; color: var(--blue); }
+
+  /* 电脑端恢复左右布局 */
+  @media (min-width: 768px) {
+    body { flex-direction: row; }
+    .sidebar { width: 200px; flex-direction: column; border-right: 1px solid var(--border); border-bottom: none; padding: 20px 0; overflow-x: hidden; }
+    .sidebar-title { display: block; font-weight: bold; padding: 0 20px 20px; border-bottom: 1px solid var(--border); margin-bottom: 10px; }
+    .menu { border-bottom: none; border-left: 4px solid transparent; }
+    .menu.active { border-bottom: none; border-left-color: var(--blue); }
+    .main { padding: 30px; }
+    .grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+    table { white-space: normal; }
+  }
 </style>
 </head>
 <body>
+  <!-- 侧边栏/顶部导航 -->
   <div class="sidebar">
-    <div style="font-weight: bold; padding: 0 20px 20px; border-bottom: 1px solid var(--border);">电商后台</div>
+    <div class="sidebar-title">电商后台</div>
     <div class="menu active" onclick="switchTab('orders', this)">订单管理</div>
     <div class="menu" onclick="switchTab('spider', this)">AI 选品</div>
     <div class="menu" onclick="switchTab('products', this)">商品库</div>
   </div>
 
+  <!-- 主内容 -->
   <div class="main">
+    <!-- 订单管理 -->
     <div id="tab-orders" class="tab-content">
-      <h2>订单管理</h2>
+      <h2 style="margin-bottom: 15px;">订单管理</h2>
       <div class="card">
-        <table>
-          <thead><tr><th>订单号</th><th>收件人</th><th>地址</th><th>状态</th><th>操作</th></tr></thead>
-          <tbody id="order-list"></tbody>
-        </table>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>订单号</th><th>收件人</th><th>地址</th><th>状态</th><th>操作</th></tr></thead>
+            <tbody id="order-list"></tbody>
+          </table>
+        </div>
       </div>
     </div>
 
+    <!-- AI 选品 -->
     <div id="tab-spider" class="tab-content" style="display:none;">
-      <h2>AI 抓取</h2>
-      <div class="card" style="display:flex; gap:10px;">
-        <input type="text" id="keyword" placeholder="输入关键词" style="flex:1; padding:10px; border:1px solid var(--border); border-radius:6px;">
-        <button class="btn" onclick="startSpider()">开始抓取</button>
+      <h2 style="margin-bottom: 15px;">AI 抓取</h2>
+      <div class="card" style="display:flex; gap:10px; flex-direction: column;">
+        <input type="text" id="keyword" placeholder="输入商品关键词" style="padding:12px; border:1px solid var(--border); border-radius:6px; outline:none;">
+        <button class="btn" onclick="startSpider()" style="padding:12px;">开始抓取</button>
       </div>
       <div class="grid" id="spider-list"></div>
     </div>
     
+    <!-- 商品库 -->
     <div id="tab-products" class="tab-content" style="display:none;">
-      <h2>商品库</h2>
+      <h2 style="margin-bottom: 15px;">商品库</h2>
       <div class="grid" id="product-list"></div>
     </div>
   </div>
@@ -61,6 +93,7 @@ function switchTab(tabId, el) {
   document.querySelectorAll('.menu').forEach(m => m.classList.remove('active'));
   document.getElementById('tab-' + tabId).style.display = 'block';
   el.classList.add('active');
+  
   if (tabId === 'orders') loadOrders();
   if (tabId === 'spider') loadSpider();
   if (tabId === 'products') loadProducts();
@@ -73,10 +106,10 @@ async function loadOrders() {
     document.getElementById('order-list').innerHTML = data.data.map(o => `
       <tr>
         <td>${o.trade_no}</td>
-        <td>${o.receiver}<br><span style="color:#64748b">${o.phone}</span></td>
-        <td>${o.address}</td>
-        <td style="color:${o.status==='待发货'?'red':'green'}">${o.status}</td>
-        <td>${o.status === '待发货' ? `<button class="btn" onclick="ship('${o.trade_no}')">发货</button>` : o.tracking_no}</td>
+        <td>${o.receiver}<br><span style="color:#64748b; font-size:12px;">${o.phone}</span></td>
+        <td style="max-width: 150px; overflow: hidden; text-overflow: ellipsis;">${o.address}</td>
+        <td style="color:${o.status==='待发货'?'#ef4444':'#10b981'}; font-weight:bold;">${o.status}</td>
+        <td>${o.status === '待发货' ? `<button class="btn" onclick="ship('${o.trade_no}')">发货</button>` : `<span style="color:#64748b">${o.tracking_no}</span>`}</td>
       </tr>
     `).join('');
   }
@@ -96,11 +129,15 @@ async function loadProducts() {
   const res = await fetch(`${API}/api/shop/products`);
   const data = await res.json();
   if (data.code === 1) {
+    if(data.data.length === 0) {
+       document.getElementById('product-list').innerHTML = '<p style="color:#64748b;">暂无商品</p>';
+       return;
+    }
     document.getElementById('product-list').innerHTML = data.data.map(p => `
-      <div class="card">
-        <img src="${p.image}" style="width:100%; height:120px; object-fit:cover; border-radius:6px;">
-        <div style="font-weight:bold; margin-top:8px;">${p.name}</div>
-        <div style="color:red;">售价: ¥${p.price}</div>
+      <div class="card" style="margin-bottom:0;">
+        <img src="${p.image}" style="width:100%; height:150px; object-fit:cover; border-radius:6px; margin-bottom:10px;">
+        <div style="font-weight:bold;">${p.name}</div>
+        <div style="color:#ef4444; font-weight:bold; margin-top:5px;">售价: ¥${p.price}</div>
       </div>
     `).join('');
   }
@@ -108,6 +145,8 @@ async function loadProducts() {
 
 async function startSpider() {
   const kw = document.getElementById('keyword').value;
+  if(!kw) return alert('输入关键词');
+  document.getElementById('spider-list').innerHTML = '<p style="color:var(--blue)">抓取中，请稍候...</p>';
   await fetch(`${API}/api/spider/start`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ keyword: kw }) });
   setTimeout(loadSpider, 3000);
 }
@@ -116,13 +155,17 @@ async function loadSpider() {
   const res = await fetch(`${API}/api/spider/list`);
   const data = await res.json();
   if (data.code === 1) {
+    if(data.data.length === 0) {
+       document.getElementById('spider-list').innerHTML = '<p style="color:#64748b;">暂无草稿数据</p>';
+       return;
+    }
     document.getElementById('spider-list').innerHTML = data.data.map(item => `
-      <div class="card">
-        <img src="${item.image_url.replace('http://', 'https://')}" style="width:100%; height:150px; object-fit:cover; border-radius:6px;">
-        <div style="font-weight:bold; margin-top:8px;">${item.title}</div>
-        <div style="display:flex; justify-content:space-between; margin-top:10px;">
-          <span>进价: ¥${item.price}</span>
-          <button class="btn" onclick="publish(${item.id})">上架</button>
+      <div class="card" style="margin-bottom:0;">
+        <img src="${item.image_url.replace('http://', 'https://')}" style="width:100%; height:150px; object-fit:cover; border-radius:6px; margin-bottom:10px;">
+        <div style="font-weight:bold; height: 40px; overflow: hidden;">${item.title}</div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
+          <span style="color:#64748b; font-size:12px;">进价: ¥${item.price}</span>
+          <button class="btn btn-outline" onclick="publish(${item.id})">上架</button>
         </div>
       </div>
     `).join('');
