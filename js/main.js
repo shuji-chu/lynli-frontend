@@ -4,7 +4,6 @@ import { findMeta } from "./router/routes.js";
 import { initAuth } from "./views/auth.js";
 import { bus } from "./store/eventBus.js";
 
-// 注册全部核心页面
 register("dashboard", () => import("./views/dashboard.js"));
 register("trade-orders", () => import("./views/trade/orders.js"));
 register("trade-purchase", () => import("./views/trade/purchase.js"));
@@ -13,6 +12,7 @@ register("product-spider", () => import("./views/product/spider.js"));
 register("marketing-coupon", () => import("./views/marketing/coupon.js"));
 register("finance-report", () => import("./views/finance/report.js"));
 register("system-users", () => import("./views/system/users.js"));
+register("system-email", () => import("./views/system/email.js")); // 注册邮件系统
 
 window.addEventListener("hashchange", () => {
   const key = location.hash.replace(/^#\/?/, "") || "dashboard";
