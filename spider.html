@@ -3,105 +3,193 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>LYNLI - AI 自动选品中心</title>
+<title>微澜 LYNLI - AI 选品中心</title>
 <style>
-  :root{--bg:#0f1115;--surface:#191c22;--text:#e8eaed;--sub:#9aa3ad;--acc:#2563eb;--danger:#ef4444;--success:#10b981}
+  :root {
+    --bg-gradient: linear-gradient(135deg, #e0eafc 0%, #cfdef3 50%, #e8f0f9 100%);
+    --glass-bg: rgba(255, 255, 255, 0.6);
+    --glass-border: rgba(255, 255, 255, 0.8);
+    --text-main: #1e293b;
+    --text-sub: #64748b;
+    --acc: #2563eb;
+    --danger: #ef4444;
+    --success: #10b981;
+  }
   *{box-sizing:border-box;margin:0;padding:0}
-  body{background:var(--bg);color:var(--text);font:14px/1.6 sans-serif;padding:20px}
-  .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid #333;flex-wrap:wrap;gap:10px}
-  .input-group{display:flex;gap:10px;width:100%;max-width:500px}
-  input[type="text"]{flex:1;padding:12px;background:var(--surface);border:1px solid #333;border-radius:8px;color:#fff;outline:none}
-  button{cursor:pointer;border:none;border-radius:8px;padding:12px 20px;font-weight:bold;color:#fff;transition:0.2s}
-  .btn-primary{background:var(--acc)}
-  .btn-primary:hover{background:#1d4ed8}
-  .btn-danger{background:var(--danger)}
-  .btn-danger:hover{background:#dc2626}
-  .btn-success{background:var(--success)}
-  .btn-success:hover{background:#059669}
+  body{
+    background: var(--bg-gradient);
+    background-attachment: fixed;
+    color: var(--text-main);
+    font: 14px/1.6 -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+  }
   
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px}
-  .card{background:var(--surface);border:1px solid #333;border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
-  .card img{width:100%;height:200px;object-fit:cover;background:#222}
-  .card-body{padding:16px;flex:1;display:flex;flex-direction:column;gap:10px}
-  .title{font-size:15px;font-weight:bold;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-  .price-row{display:flex;justify-content:space-between;align-items:center;margin-top:auto}
-  .price{color:#f43f5e;font-size:18px;font-weight:bold}
-  .actions{display:flex;gap:10px;margin-top:10px}
-  .actions button{flex:1;padding:8px;font-size:13px}
+  /* 顶部导航区 */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--glass-border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    flex-wrap: wrap;
+    gap: 15px;
+  }
   
-  #loading{display:none;color:var(--acc);margin-top:20px;font-size:16px}
+  .logo-area { display: flex; align-items: center; gap: 12px; }
+  .logo-area img { height: 40px; border-radius: 50%; background: #000; padding: 2px; }
+  .logo-text h1 { font-size: 18px; font-weight: 700; letter-spacing: 1px; color: var(--text-main); }
+  .logo-text p { font-size: 12px; color: var(--text-sub); letter-spacing: 2px; }
+
+  /* 输入区 */
+  .input-group { display: flex; gap: 10px; width: 100%; max-width: 500px; }
+  input[type="text"], input[type="password"] {
+    flex: 1; padding: 12px 16px; background: rgba(255,255,255,0.8);
+    border: 1px solid var(--glass-border); border-radius: 12px; color: var(--text-main);
+    outline: none; transition: 0.3s; font-size: 14px;
+  }
+  input:focus { background: #fff; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); border-color: var(--acc); }
+  
+  button {
+    cursor: pointer; border: none; border-radius: 12px; padding: 12px 20px;
+    font-weight: bold; color: #fff; transition: 0.2s; font-size: 14px;
+  }
+  .btn-primary { background: var(--acc); box-shadow: 0 4px 12px rgba(37,99,235,0.2); }
+  .btn-primary:hover { background: #1d4ed8; transform: translateY(-1px); }
+  .btn-danger { background: var(--danger); }
+  .btn-danger:hover { background: #dc2626; }
+  .btn-success { background: var(--success); }
+  .btn-success:hover { background: #059669; }
+
+  /* 主面板 */
+  #main-panel { padding: 30px 24px; max-width: 1200px; margin: 0 auto; }
+  #loading { display: none; color: var(--acc); margin-bottom: 20px; font-weight: bold; }
+
+  /* 卡片网格 */
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; }
+  .card {
+    background: var(--glass-bg); backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border); border-radius: 20px; overflow: hidden;
+    display: flex; flex-direction: column; transition: transform 0.3s;
+  }
+  .card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+  .card img { width: 100%; height: 200px; object-fit: cover; background: #eee; }
+  .card-body { padding: 16px; flex: 1; display: flex; flex-direction: column; gap: 10px; }
+  .title { font-size: 15px; font-weight: bold; line-height: 1.4; color: var(--text-main); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .price-row { display: flex; justify-content: space-between; align-items: center; margin-top: auto; }
+  .price { color: var(--acc); font-size: 16px; font-weight: bold; }
+  .actions { display: flex; gap: 8px; margin-top: 10px; }
+  .actions button { flex: 1; padding: 8px; font-size: 13px; border-radius: 8px; }
+
+  /* 登录遮罩 */
+  #login-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.4); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; z-index: 9999; }
+  .login-box { background: rgba(255, 255, 255, 0.9); padding: 40px; border-radius: 24px; border: 1px solid #fff; box-shadow: 0 20px 40px rgba(0,0,0,0.1); width: 100%; max-width: 360px; text-align: center; }
+  .login-box h2 { margin-bottom: 24px; font-size: 22px; color: var(--text-main); }
+  .login-box input { width: 100%; margin-bottom: 16px; text-align: center; background: #f1f5f9; border-color: transparent; }
 </style>
 </head>
 <body>
 
-<div class="header">
-  <h2>🤖 AI 选品控制台</h2>
-  <div class="input-group">
-    <input type="text" id="keyword" placeholder="输入商品关键词，如：私密护理仪" onkeypress="if(event.key==='Enter') startSpider()">
-    <button class="btn-primary" onclick="startSpider()">开始抓取</button>
+<!-- 密码锁 -->
+<div id="login-overlay">
+  <div class="login-box">
+    <div style="margin-bottom: 20px;">
+      <img src="./logo.png" style="height: 50px; border-radius: 50%; background: #000; padding: 2px;">
+    </div>
+    <h2>微澜 LYNLI</h2>
+    <input type="password" id="pwd-input" placeholder="请输入管理密码" onkeypress="if(event.key==='Enter') checkPassword()">
+    <button class="btn-primary" style="width:100%;" onclick="checkPassword()">进入选品中心</button>
   </div>
 </div>
 
-<div id="loading">⏳ 正在调度爬虫抓取并上传至 OSS，请稍候...（大约 3 秒）</div>
+<!-- 主面板 -->
+<div id="main-panel" style="display:none;">
+  <div class="header">
+    <div class="logo-area">
+      <img src="./logo.png" alt="LYNLI" />
+      <div class="logo-text">
+        <h1>微澜 LYNLI</h1>
+        <p>AI 选品中心</p>
+      </div>
+    </div>
+    
+    <div class="input-group">
+      <input type="text" id="keyword" placeholder="输入商品关键词，如：私密护理仪" onkeypress="if(event.key==='Enter') startSpider()">
+      <button class="btn-primary" onclick="startSpider()">开始抓取</button>
+    </div>
+  </div>
 
-<div class="grid" id="list"></div>
+  <div id="loading">⏳ 正在调度爬虫抓取并上传至 OSS...</div>
+  <div class="grid" id="list"></div>
+</div>
 
 <script>
-// ⚠️ 独立爬虫域名
+// ⚠️ 你的独立爬虫域名
 const API = 'https://spider.lynli.me';
+// ⚠️ 你的管理密码
+const ADMIN_PASSWORD = 'lynli888'; 
 
-// 启动抓取
-async function startSpider() {
-  const kw = document.getElementById('keyword').value;
-  if (!kw) return alert('请输入关键词');
-  
-  const loading = document.getElementById('loading');
-  loading.style.display = 'block';
-  document.getElementById('list').innerHTML = '';
-
-  try {
-    const res = await fetch(`${API}/api/v1/admin/spider/start`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ keyword: kw })
-    });
-    const data = await res.json();
-    
-    if (data.code === 1) {
-      setTimeout(loadDrafts, 3000);
-    } else {
-      alert(data.msg);
-      loading.style.display = 'none';
-    }
-  } catch (err) {
-    alert('请求失败: ' + err.message);
-    loading.style.display = 'none';
+// 检查密码
+function checkPassword() {
+  const pwd = document.getElementById('pwd-input').value;
+  if (pwd === ADMIN_PASSWORD) {
+    localStorage.setItem('spider_auth', 'true');
+    document.getElementById('login-overlay').style.display = 'none';
+    document.getElementById('main-panel').style.display = 'block';
+    loadDrafts();
+  } else {
+    alert('密码错误！');
   }
 }
 
-// 拉取草稿列表
+// 页面加载时检查是否已登录
+if (localStorage.getItem('spider_auth') === 'true') {
+  document.getElementById('login-overlay').style.display = 'none';
+  document.getElementById('main-panel').style.display = 'block';
+  loadDrafts();
+}
+
+async function startSpider() {
+  const kw = document.getElementById('keyword').value;
+  if (!kw) return alert('请输入关键词');
+  const loading = document.getElementById('loading');
+  loading.style.display = 'block';
+  document.getElementById('list').innerHTML = '';
+  try {
+    const res = await fetch(`${API}/api/v1/admin/spider/start`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ keyword: kw })
+    });
+    const data = await res.json();
+    if (data.code === 1) { setTimeout(loadDrafts, 3000); } 
+    else { alert(data.msg); loading.style.display = 'none'; }
+  } catch (err) { alert('请求失败: ' + err.message); loading.style.display = 'none'; }
+}
+
 async function loadDrafts() {
   const loading = document.getElementById('loading');
   try {
     const res = await fetch(`${API}/api/v1/admin/spider/list`);
     const data = await res.json();
     loading.style.display = 'none';
-
     if (data.code !== 1) throw new Error(data.msg);
-
     if (data.data.length === 0) {
-      document.getElementById('list').innerHTML = '<div style="color:#9aa3ad">暂无草稿数据，换个词试试。</div>';
+      document.getElementById('list').innerHTML = '<div style="color:var(--text-sub); width:100%;">暂无草稿数据，换个词试试。</div>';
       return;
     }
-
     document.getElementById('list').innerHTML = data.data.map(item => `
       <div class="card" id="card-${item.id}">
         <img src="${item.image_url}" alt="商品图">
         <div class="card-body">
           <div class="title">${item.title}</div>
           <div class="price-row">
-            <span style="color:#9aa3ad;font-size:12px;">进价: ¥${item.price}</span>
-            <span class="price">售价: ¥<input type="number" id="price-${item.id}" value="${Math.floor(item.price * 3)}" style="width:60px; background:transparent; border:none; border-bottom:1px solid #555; color:#f43f5e; font-size:16px; font-weight:bold; outline:none;"></span>
+            <span style="color:var(--text-sub);font-size:12px;">进价: ¥${item.price}</span>
+            <span class="price">售价: ¥<input type="number" id="price-${item.id}" value="${Math.floor(item.price * 3)}" style="width:60px; background:transparent; border:none; border-bottom:1px solid #cbd5e1; color:var(--acc); font-size:16px; font-weight:bold; outline:none; padding:0;"></span>
           </div>
           <div class="actions">
             <button class="btn-success" onclick="publish(${item.id})">确认上架</button>
@@ -110,64 +198,35 @@ async function loadDrafts() {
         </div>
       </div>
     `).join('');
-  } catch (err) {
-    loading.style.display = 'none';
-    alert('拉取列表失败: ' + err.message);
-  }
+  } catch (err) { loading.style.display = 'none'; alert('拉取列表失败: ' + err.message); }
 }
 
-// 上架
 async function publish(id) {
   const price = document.getElementById(`price-${id}`).value;
-  const btn = event.target;
-  btn.innerText = '处理中...'; btn.disabled = true;
-
+  const btn = event.target; btn.innerText = '处理中...'; btn.disabled = true;
   try {
     const res = await fetch(`${API}/api/v1/admin/spider/publish`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id, price })
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, price })
     });
     const data = await res.json();
     alert(data.msg);
-    if (data.code === 1) {
-      document.getElementById(`card-${id}`).remove();
-    } else {
-      btn.innerText = '确认上架'; btn.disabled = false;
-    }
-  } catch (err) {
-    alert('上架失败');
-    btn.innerText = '确认上架'; btn.disabled = false;
-  }
+    if (data.code === 1) { document.getElementById(`card-${id}`).remove(); } 
+    else { btn.innerText = '确认上架'; btn.disabled = false; }
+  } catch (err) { alert('上架失败'); btn.innerText = '确认上架'; btn.disabled = false; }
 }
 
-// 丢弃
 async function discard(id) {
   if (!confirm('确定丢弃吗？会同时删除 OSS 上的图片！')) return;
-  const btn = event.target;
-  btn.innerText = '删除中...'; btn.disabled = true;
-
+  const btn = event.target; btn.innerText = '删除中...'; btn.disabled = true;
   try {
     const res = await fetch(`${API}/api/v1/admin/spider/discard`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id })
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id })
     });
     const data = await res.json();
-    if (data.code === 1) {
-      document.getElementById(`card-${id}`).remove();
-    } else {
-      alert(data.msg);
-      btn.innerText = '丢弃'; btn.disabled = false;
-    }
-  } catch (err) {
-    alert('删除失败');
-    btn.innerText = '丢弃'; btn.disabled = false;
-  }
+    if (data.code === 1) { document.getElementById(`card-${id}`).remove(); } 
+    else { alert(data.msg); btn.innerText = '丢弃'; btn.disabled = false; }
+  } catch (err) { alert('删除失败'); btn.innerText = '丢弃'; btn.disabled = false; }
 }
-
-// 页面加载自动拉一次
-loadDrafts();
 </script>
 </body>
 </html>
