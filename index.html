@@ -3,34 +3,57 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LYNLI 控制台</title>
-  <link rel="stylesheet" href="css/style.css">
+  <title>LYNLI 终极测试</title>
+  <style>
+    body { background: #070b14; color: #fff; font-family: sans-serif; padding: 20px; text-align: center; }
+    .box { max-width: 400px; margin: 50px auto; background: #111827; padding: 30px; border-radius: 12px; border: 1px solid #374151; }
+    input, button { width: 100%; padding: 12px; margin: 10px 0; border-radius: 6px; border: 1px solid #374151; background: #1f2937; color: #fff; box-sizing: border-box; }
+    button { background: #3b82f6; border: none; font-weight: bold; cursor: pointer; }
+  </style>
 </head>
 <body>
-  <div id="app">
-    <section id="login-view" class="auth">
-      <div class="auth-card">
-        <h1>LYNLI</h1>
-        <p>大厂级无货源管理后台</p>
-        <form id="login-form">
-          <input type="text" name="account" value="admin" placeholder="账号" required>
-          <input type="password" name="password" value="123456" placeholder="密码" required>
-          <button type="submit" id="login-btn">进入控制台</button>
-        </form>
-      </div>
-    </section>
-
-    <section id="app-view" class="app" hidden>
-      <aside class="sidebar">
-        <div class="logo">LYNLI</div>
-        <nav id="nav-menu"></nav>
-      </aside>
-      <div class="main">
-        <header class="topbar"><h1 id="page-title">数据看板</h1></header>
-        <main class="content" id="content"></main>
-      </div>
-    </section>
+  <div class="box">
+    <h2>LYNLI 登录测试</h2>
+    <form id="login-form">
+      <input type="text" id="account" value="admin" placeholder="账号">
+      <input type="password" id="password" value="123456" placeholder="密码">
+      <button type="submit" id="btn">点击登录</button>
+    </form>
   </div>
-  <script type="module" src="js/main.js"></script>
+
+  <script>
+    document.getElementById("login-form").onsubmit = async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById("btn");
+      btn.textContent = "请求中...";
+
+      alert("【步骤1】准备发送请求！账号：" + document.getElementById("account").value);
+
+      try {
+        const res = await fetch("https://spider.lynli.me/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            account: document.getElementById("account").value,
+            password: document.getElementById("password").value
+          })
+        });
+
+        alert("【步骤2】服务器返回状态码：" + res.status);
+
+        const data = await res.json();
+        
+        if (data.code === 200) {
+          alert("【步骤3】登录成功！后端返回：" + JSON.stringify(data));
+        } else {
+          alert("【步骤3】登录失败！" + JSON.stringify(data));
+        }
+      } catch (err) {
+        alert("【报错】网络请求异常：\n" + err.message);
+      } finally {
+        btn.textContent = "点击登录";
+      }
+    };
+  </script>
 </body>
 </html>
