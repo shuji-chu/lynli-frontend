@@ -161,3 +161,66 @@ a { color: inherit; text-decoration: none; }
   .topbar { padding: 14px 16px; }
   .content { padding: 18px 16px; }
 }
+
+/* 多平台卡片网格 */
+.platform-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  gap: 10px;
+  margin: 16px 0;
+}
+.platform-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  border-radius: var(--radius-sm);
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--line);
+  cursor: pointer;
+  transition: all 0.2s;
+  user-select: none;
+}
+.platform-card input {
+  display: none; /* 隐藏原生复选框 */
+}
+.platform-name {
+  font-size: 13px;
+  color: var(--text-dim);
+}
+/* 选中态 */
+.platform-card:has(input:checked) {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: var(--primary);
+}
+.platform-card:has(input:checked) .platform-name {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+/* 搜索栏适配 */
+.search-bar {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+.search-bar .field__input {
+  flex: 1;
+}
+.search-bar .btn {
+  width: 120px;
+  flex: none;
+}
+
+/* 移动端按钮换行防挤压 */
+@media (max-width: 560px) {
+  .search-bar {
+    flex-direction: column;
+  }
+  .search-bar .btn {
+    width: 100%;
+  }
+  .platform-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
