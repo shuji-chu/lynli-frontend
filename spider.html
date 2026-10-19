@@ -3,118 +3,221 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Lynli 独立电商后台</title>
+<title>Lynli 电商管理后台</title>
 <style>
-  :root { --bg: #f5f7fa; --white: #ffffff; --text: #1e293b; --text-sub: #64748b; --blue: #2563eb; --border: #e2e8f0; }
+  :root { 
+    --bg: #f5f7fa; --white: #ffffff; --text: #1e293b; --text-sub: #64748b; 
+    --blue: #2563eb; --blue-light: #eff6ff; --border: #e2e8f0; --danger: #ef4444; --success: #10b981;
+    --shadow: 0 2px 10px rgba(0,0,0,0.03);
+  }
   *{box-sizing:border-box;margin:0;padding:0}
-  
-  /* 基础布局：手机端上下 */
-  body { background: var(--bg); color: var(--text); font: 14px/1.6 sans-serif; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-  
-  /* 侧边栏：手机端变成顶部横向导航 */
-  .sidebar { background: var(--white); border-bottom: 1px solid var(--border); display: flex; overflow-x: auto; white-space: nowrap; }
-  .sidebar-title { display: none; }
-  .menu { padding: 15px 20px; cursor: pointer; color: var(--text-sub); border-bottom: 3px solid transparent; }
-  .menu.active { color: var(--blue); font-weight: bold; border-bottom-color: var(--blue); background: #eff6ff; }
-  
-  /* 主内容区 */
-  .main { flex: 1; padding: 15px; overflow-y: auto; overflow-x: hidden; }
-  
-  .card { background: var(--white); border-radius: 12px; padding: 15px; border: 1px solid var(--border); margin-bottom: 20px; }
-  .grid { display: grid; grid-template-columns: 1fr; gap: 15px; }
-  
-  /* 表格容器允许左右滑动 */
-  .table-wrap { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-  table { width: 100%; border-collapse: collapse; text-align: left; white-space: nowrap; }
-  th, td { padding: 12px; border-bottom: 1px solid var(--border); }
-  
-  .btn { background: var(--blue); color: #fff; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; }
-  .btn-outline { background: #eff6ff; color: var(--blue); }
+  body { background: var(--bg); color: var(--text); font: 14px/1.6 -apple-system, sans-serif; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
 
-  /* 电脑端恢复左右布局 */
-  @media (min-width: 768px) {
-    body { flex-direction: row; }
-    .sidebar { width: 200px; flex-direction: column; border-right: 1px solid var(--border); border-bottom: none; padding: 20px 0; overflow-x: hidden; }
-    .sidebar-title { display: block; font-weight: bold; padding: 0 20px 20px; border-bottom: 1px solid var(--border); margin-bottom: 10px; }
-    .menu { border-bottom: none; border-left: 4px solid transparent; }
-    .menu.active { border-bottom: none; border-left-color: var(--blue); }
-    .main { padding: 30px; }
-    .grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
-    table { white-space: normal; }
+  /* ========= 登录页 ========= */
+  #login-screen { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 999; }
+  .login-box { background: var(--white); width: 100%; max-width: 400px; padding: 40px 30px; border-radius: 16px; box-shadow: var(--shadow); }
+  .login-box h2 { margin-bottom: 20px; font-size: 22px; text-align: center; }
+  .login-box select, .login-box input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid var(--border); border-radius: 8px; outline: none; }
+  .login-btn { width: 100%; padding: 14px; background: #000; color: #fff; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; }
+
+  /* ========= 主应用 ========= */
+  #app { display: none; flex-direction: column; height: 100%; }
+  
+  /* 顶部导航栏 */
+  .top-nav { background: var(--white); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; height: 60px; }
+  .nav-tabs { display: flex; gap: 10px; height: 100%; }
+  .tab-btn { padding: 0 20px; display: flex; align-items: center; cursor: pointer; color: var(--text-sub); font-weight: 500; border-bottom: 3px solid transparent; transition: 0.2s; }
+  .tab-btn:hover { color: var(--blue); }
+  .tab-btn.active { color: var(--blue); border-bottom-color: var(--blue); font-weight: 600; }
+  .user-info { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+  .role-badge { background: var(--blue-light); color: var(--blue); padding: 4px 10px; border-radius: 20px; font-weight: bold; }
+
+  /* 页面容器 */
+  .main-content { flex: 1; padding: 20px; overflow-y: auto; }
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* 数据看板卡片 */
+  .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+  .stat-card { background: var(--white); padding: 24px; border-radius: 16px; border: 1px solid var(--border); box-shadow: var(--shadow); }
+  .stat-title { color: var(--text-sub); font-size: 13px; margin-bottom: 8px; }
+  .stat-value { font-size: 32px; font-weight: 700; color: var(--text); }
+
+  /* 数据卡片通用 (订单、商品、选品) */
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+  .data-card { background: var(--white); border-radius: 16px; border: 1px solid var(--border); box-shadow: var(--shadow); overflow: hidden; display: flex; flex-direction: column; }
+  .card-img { width: 100%; height: 180px; object-fit: cover; background: #f1f5f9; }
+  .card-body { padding: 20px; flex: 1; display: flex; flex-direction: column; gap: 10px; }
+  .card-title { font-weight: 600; font-size: 15px; line-height: 1.4; margin-bottom: 5px; }
+  .card-row { display: flex; justify-content: space-between; font-size: 13px; color: var(--text-sub); }
+  .price { color: var(--danger); font-weight: bold; font-size: 16px; }
+  
+  /* 按钮 */
+  .btn { padding: 10px 16px; border-radius: 8px; border: none; cursor: pointer; font-weight: 500; font-size: 13px; transition: 0.2s; text-align: center; }
+  .btn-primary { background: var(--blue); color: white; }
+  .btn-primary:hover { background: #1d4ed8; }
+  .btn-outline { background: var(--white); border: 1px solid var(--border); color: var(--text); }
+  .btn-danger { background: #fef2f2; color: var(--danger); }
+
+  /* 输入框 */
+  .search-box { display: flex; gap: 10px; margin-bottom: 20px; background: var(--white); padding: 15px; border-radius: 12px; border: 1px solid var(--border); }
+  .search-box input { flex: 1; padding: 12px; border: 1px solid var(--border); border-radius: 8px; outline: none; }
+
+  /* 手机适配 */
+  @media (max-width: 768px) {
+    .top-nav { flex-direction: column; height: auto; padding: 0; }
+    .nav-tabs { width: 100%; overflow-x: auto; white-space: nowrap; border-bottom: 1px solid var(--border); }
+    .tab-btn { padding: 15px; }
+    .user-info { width: 100%; padding: 10px 15px; justify-content: space-between; }
+    .card-grid { grid-template-columns: 1fr; }
   }
 </style>
 </head>
 <body>
-  <!-- 侧边栏/顶部导航 -->
-  <div class="sidebar">
-    <div class="sidebar-title">电商后台</div>
-    <div class="menu active" onclick="switchTab('orders', this)">订单管理</div>
-    <div class="menu" onclick="switchTab('spider', this)">AI 选品</div>
-    <div class="menu" onclick="switchTab('products', this)">商品库</div>
+
+<!-- 登录页 -->
+<div id="login-screen">
+  <div class="login-box">
+    <h2>Lynli 电商后台</h2>
+    <select id="login-role">
+      <option value="super">超级管理员 (全权限)</option>
+      <option value="op">运营人员 (无发货权限)</option>
+    </select>
+    <input type="password" placeholder="请输入密码 (123456)" value="123456" id="login-pwd">
+    <button class="login-btn" onclick="doLogin()">登录</button>
+  </div>
+</div>
+
+<!-- 主界面 -->
+<div id="app">
+  <div class="top-nav">
+    <div class="nav-tabs">
+      <div class="tab-btn active" onclick="switchTab('dashboard', this)">数据看板</div>
+      <div class="tab-btn" onclick="switchTab('orders', this)">订单管理</div>
+      <div class="tab-btn" onclick="switchTab('products', this)">商品库</div>
+      <div class="tab-btn" onclick="switchTab('spider', this)">AI 选品</div>
+      <div class="tab-btn admin-only" onclick="switchTab('settings', this)" style="display:none;">系统设置</div>
+    </div>
+    <div class="user-info">
+      <span id="role-text" class="role-badge">超级管理员</span>
+      <button class="btn btn-outline" onclick="location.reload()">退出</button>
+    </div>
   </div>
 
-  <!-- 主内容 -->
-  <div class="main">
-    <!-- 订单管理 -->
-    <div id="tab-orders" class="tab-content">
-      <h2 style="margin-bottom: 15px;">订单管理</h2>
-      <div class="card">
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>订单号</th><th>收件人</th><th>地址</th><th>状态</th><th>操作</th></tr></thead>
-            <tbody id="order-list"></tbody>
-          </table>
-        </div>
+  <div class="main-content">
+    <!-- 看板 -->
+    <div id="page-dashboard" class="page active">
+      <div class="dashboard-grid">
+        <div class="stat-card"><div class="stat-title">总销售额</div><div class="stat-value">¥ 8,420</div></div>
+        <div class="stat-card"><div class="stat-title">待发货订单</div><div class="stat-value" style="color:var(--danger)">1</div></div>
+        <div class="stat-card"><div class="stat-title">商品总数</div><div class="stat-value">3</div></div>
       </div>
+    </div>
+
+    <!-- 订单卡片视图 -->
+    <div id="page-orders" class="page">
+      <div class="card-grid" id="order-list">
+        <!-- 卡片动态渲染 -->
+      </div>
+    </div>
+
+    <!-- 商品库卡片视图 -->
+    <div id="page-products" class="page">
+      <div class="card-grid" id="product-list"></div>
     </div>
 
     <!-- AI 选品 -->
-    <div id="tab-spider" class="tab-content" style="display:none;">
-      <h2 style="margin-bottom: 15px;">AI 抓取</h2>
-      <div class="card" style="display:flex; gap:10px; flex-direction: column;">
-        <input type="text" id="keyword" placeholder="输入商品关键词" style="padding:12px; border:1px solid var(--border); border-radius:6px; outline:none;">
-        <button class="btn" onclick="startSpider()" style="padding:12px;">开始抓取</button>
+    <div id="page-spider" class="page">
+      <div class="search-box">
+        <input type="text" id="keyword" placeholder="输入商品关键词...">
+        <button class="btn btn-primary" onclick="startSpider()">开始抓取</button>
       </div>
-      <div class="grid" id="spider-list"></div>
+      <div class="card-grid" id="spider-list"></div>
     </div>
-    
-    <!-- 商品库 -->
-    <div id="tab-products" class="tab-content" style="display:none;">
-      <h2 style="margin-bottom: 15px;">商品库</h2>
-      <div class="grid" id="product-list"></div>
+
+    <!-- 仅管理员可见 -->
+    <div id="page-settings" class="page">
+      <div class="stat-card">
+        <h3>系统设置</h3>
+        <p style="color:var(--text-sub); margin-top:10px;">API 域名: https://spider.lynli.me</p>
+      </div>
     </div>
   </div>
+</div>
 
 <script>
 const API = 'https://spider.lynli.me';
+let currentRole = 'super'; // 默认超级管理员
 
-function switchTab(tabId, el) {
-  document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
-  document.querySelectorAll('.menu').forEach(m => m.classList.remove('active'));
-  document.getElementById('tab-' + tabId).style.display = 'block';
-  el.classList.add('active');
+// 登录与权限控制
+function doLogin() {
+  const role = document.getElementById('login-role').value;
+  const pwd = document.getElementById('login-pwd').value;
+  if(pwd !== '123456') return alert('密码错误');
   
-  if (tabId === 'orders') loadOrders();
-  if (tabId === 'spider') loadSpider();
-  if (tabId === 'products') loadProducts();
+  currentRole = role;
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+
+  if (role === 'super') {
+    document.getElementById('role-text').innerText = '超级管理员';
+    document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'flex');
+  } else {
+    document.getElementById('role-text').innerText = '运营人员';
+    document.getElementById('role-text').style.background = '#fef2f2';
+    document.getElementById('role-text').style.color = '#ef4444';
+    document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
+  }
+  loadOrders();
 }
 
+// Tab 切换
+function switchTab(tabId, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + tabId).classList.add('active');
+  el.classList.add('active');
+
+  if (tabId === 'orders') loadOrders();
+  if (tabId === 'products') loadProducts();
+  if (tabId === 'spider') loadSpider();
+}
+
+// 加载订单（卡片渲染）
 async function loadOrders() {
   const res = await fetch(`${API}/api/shop/orders`);
   const data = await res.json();
   if (data.code === 1) {
-    document.getElementById('order-list').innerHTML = data.data.map(o => `
-      <tr>
-        <td>${o.trade_no}</td>
-        <td>${o.receiver}<br><span style="color:#64748b; font-size:12px;">${o.phone}</span></td>
-        <td style="max-width: 150px; overflow: hidden; text-overflow: ellipsis;">${o.address}</td>
-        <td style="color:${o.status==='待发货'?'#ef4444':'#10b981'}; font-weight:bold;">${o.status}</td>
-        <td>${o.status === '待发货' ? `<button class="btn" onclick="ship('${o.trade_no}')">发货</button>` : `<span style="color:#64748b">${o.tracking_no}</span>`}</td>
-      </tr>
-    `).join('');
+    if(data.data.length === 0) {
+      document.getElementById('order-list').innerHTML = '<p style="color:var(--text-sub);">暂无订单</p>';
+      return;
+    }
+    
+    document.getElementById('order-list').innerHTML = data.data.map(o => {
+      // 权限控制：如果是运营人员，则看不到发货按钮
+      const canShip = currentRole === 'super';
+      const shipBtn = o.status === '待发货' 
+        ? (canShip ? `<button class="btn btn-primary" onclick="ship('${o.trade_no}')">去发货</button>` : `<span style="color:var(--text-sub);font-size:12px;">无权限操作</span>`)
+        : `<span style="color:var(--success);font-weight:bold;">单号: ${o.tracking_no}</span>`;
+
+      return `
+        <div class="data-card">
+          <div class="card-body">
+            <div class="card-row"><span>订单号:</span><span style="font-weight:600; color:var(--text)">${o.trade_no}</span></div>
+            <div class="card-title" style="margin-top:10px;">${o.receiver} <span style="font-size:13px;color:var(--text-sub);font-weight:normal;">(${o.phone})</span></div>
+            <div class="card-row" style="margin-bottom:10px;"><span>地址:</span><span style="text-align:right; color:var(--text);">${o.address}</span></div>
+            <div class="card-row" style="align-items:center; margin-top:auto; padding-top:10px; border-top:1px solid var(--border);">
+              <span class="price">¥${o.amount}</span>
+              ${shipBtn}
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
   }
 }
 
+// 发货
 async function ship(trade_no) {
   const tracking_no = prompt("请输入快递单号:");
   if (!tracking_no) return;
@@ -125,28 +228,35 @@ async function ship(trade_no) {
   loadOrders();
 }
 
+// 加载商品库（卡片）
 async function loadProducts() {
   const res = await fetch(`${API}/api/shop/products`);
   const data = await res.json();
   if (data.code === 1) {
     if(data.data.length === 0) {
-       document.getElementById('product-list').innerHTML = '<p style="color:#64748b;">暂无商品</p>';
-       return;
+      document.getElementById('product-list').innerHTML = '<p style="color:var(--text-sub);">暂无商品，请去 AI 选品抓取</p>';
+      return;
     }
     document.getElementById('product-list').innerHTML = data.data.map(p => `
-      <div class="card" style="margin-bottom:0;">
-        <img src="${p.image}" style="width:100%; height:150px; object-fit:cover; border-radius:6px; margin-bottom:10px;">
-        <div style="font-weight:bold;">${p.name}</div>
-        <div style="color:#ef4444; font-weight:bold; margin-top:5px;">售价: ¥${p.price}</div>
+      <div class="data-card">
+        <img src="${p.image}" class="card-img">
+        <div class="card-body">
+          <div class="card-title">${p.name}</div>
+          <div class="card-row" style="margin-top:auto;">
+            <span>进价: ¥${p.cost_price}</span>
+            <span class="price">售价: ¥${p.price}</span>
+          </div>
+        </div>
       </div>
     `).join('');
   }
 }
 
+// AI 选品抓取
 async function startSpider() {
   const kw = document.getElementById('keyword').value;
   if(!kw) return alert('输入关键词');
-  document.getElementById('spider-list').innerHTML = '<p style="color:var(--blue)">抓取中，请稍候...</p>';
+  document.getElementById('spider-list').innerHTML = '<p style="color:var(--blue)">正在调度爬虫抓取...</p>';
   await fetch(`${API}/api/spider/start`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ keyword: kw }) });
   setTimeout(loadSpider, 3000);
 }
@@ -156,16 +266,18 @@ async function loadSpider() {
   const data = await res.json();
   if (data.code === 1) {
     if(data.data.length === 0) {
-       document.getElementById('spider-list').innerHTML = '<p style="color:#64748b;">暂无草稿数据</p>';
-       return;
+      document.getElementById('spider-list').innerHTML = '<p style="color:var(--text-sub);">暂无草稿</p>';
+      return;
     }
     document.getElementById('spider-list').innerHTML = data.data.map(item => `
-      <div class="card" style="margin-bottom:0;">
-        <img src="${item.image_url.replace('http://', 'https://')}" style="width:100%; height:150px; object-fit:cover; border-radius:6px; margin-bottom:10px;">
-        <div style="font-weight:bold; height: 40px; overflow: hidden;">${item.title}</div>
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
-          <span style="color:#64748b; font-size:12px;">进价: ¥${item.price}</span>
-          <button class="btn btn-outline" onclick="publish(${item.id})">上架</button>
+      <div class="data-card">
+        <img src="${item.image_url.replace('http://', 'https://')}" class="card-img">
+        <div class="card-body">
+          <div class="card-title" style="height: 42px; overflow: hidden;">${item.title}</div>
+          <div class="card-row" style="margin-top:auto; align-items:center;">
+            <span class="price">进价 ¥${item.price}</span>
+            <button class="btn btn-primary" onclick="publish(${item.id})">上架</button>
+          </div>
         </div>
       </div>
     `).join('');
@@ -178,8 +290,6 @@ async function publish(id) {
   await fetch(`${API}/api/shop/publish`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, price }) });
   loadSpider();
 }
-
-loadOrders();
 </script>
 </body>
 </html>
