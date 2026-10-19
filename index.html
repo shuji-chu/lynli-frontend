@@ -8,7 +8,8 @@
     <link rel="stylesheet" href="./css/style.css">
 </head>
 <body>
-    <!-- 登录页 -->
+    <div id="toast-container"></div>
+
     <div id="login-screen">
         <div class="bg-person"></div>
         <div class="login-card">
@@ -29,13 +30,11 @@
                 <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
                     <input type="checkbox" id="remember-pwd" style="accent-color: #2563eb;"> 记住密码
                 </label>
-                <a href="#" style="color: #2563eb; text-decoration: none;">忘记密码？</a>
             </div>
             <button class="btn-primary" onclick="window.handleLogin()">安全登录</button>
         </div>
     </div>
 
-    <!-- 侧边栏 -->
     <div id="sidebar" class="sidebar" style="padding-top: 20px;">
         <div style="padding: 0 20px 20px; font-weight: 800; font-size: 18px; border-bottom: 1px solid #f1f5f9; margin-bottom: 10px;">LYNLI PRO</div>
         <a href="#" data-target="dashboard" class="nav-item active">📊 数据大盘</a>
@@ -46,17 +45,19 @@
     </div>
     <div id="overlay" class="overlay" onclick="toggleSidebar()"></div>
 
-    <!-- 顶部 -->
     <div class="top-bar">
-        <div style="display: flex; align-items: center; gap: 12px;">
+        <div style="display: flex; align-items: center; gap: 12px; flex: 1;">
             <button class="menu-btn" onclick="toggleSidebar()" style="background:none; border:none; font-size:24px; cursor:pointer;">☰</button>
-            <span id="breadcrumb" style="font-weight: bold; font-size: 16px;">数据大盘</span>
+            <span id="breadcrumb" style="font-weight: bold; font-size: 16px; min-width: 80px;">数据大盘</span>
+            <div style="display: none; align-items: center; background: #f1f5f9; border-radius: 8px; padding: 8px 12px; flex: 1; max-width: 300px; margin-left: 20px;" class="search-box">
+                <svg style="width:16px; height:16px; color:#64748b; margin-right:8px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <input type="text" placeholder="全局搜索订单/商品..." style="border:none; background:transparent; outline:none; width:100%; font-size:13px;">
+            </div>
         </div>
-        <img src="https://api.dicebear.com/7.x/adventurer/svg?seed=Admin" style="width: 32px; height: 32px; border-radius: 50%; background: #e2e8f0;">
+        <img src="https://api.dicebear.com/7.x/adventurer/svg?seed=Admin" style="width: 36px; height: 36px; border-radius: 50%; background: #e2e8f0;">
     </div>
 
     <div class="main-content" id="page-content"></div>
-
     <script type="module" src="./js/main.js"></script>
 </body>
 </html>

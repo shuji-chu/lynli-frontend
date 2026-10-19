@@ -18,7 +18,18 @@ export async function switchPage(pageId) {
     }[pageId] || pageId;
 
     const content = document.getElementById('page-content');
-    content.innerHTML = '<div style="text-align:center; padding:40px; color:#94a3b8;">加载中...</div>';
+    
+    // 骨架屏
+    content.innerHTML = `
+        <div style="display:flex; gap:16px; flex-direction:column;">
+            <div class="skeleton" style="height:120px; width:100%;"></div>
+            <div style="display:flex; gap:16px;">
+                <div class="skeleton" style="height:80px; width:50%;"></div>
+                <div class="skeleton" style="height:80px; width:50%;"></div>
+            </div>
+            <div class="skeleton" style="height:200px; width:100%;"></div>
+        </div>
+    `;
 
     try {
         if (pageId === 'dashboard') content.innerHTML = await dashboard.render();
