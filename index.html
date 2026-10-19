@@ -3,32 +3,265 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Lynli 独立电商后台</title>
-    <link rel="stylesheet" href="./css/style.css">
+    <title>LYNLI 商家运营中心</title>
+    <!-- Tailwind CSS (大厂极速开发首选) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- ECharts (大厂数据看板标配) -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', -apple-system, sans-serif; background-color: #f3f4f6; }
+        /* 自定义滚动条，更有质感 */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+    </style>
 </head>
-<body>
-    <div class="top-nav">
-        <div class="nav-tabs">
-            <div class="tab-btn active" data-id="dashboard" onclick="switchPage('dashboard', this)">数据看板</div>
-            <div class="tab-btn" data-id="orders" onclick="switchPage('orders', this)">订单与物流</div>
-            <div class="tab-btn" data-id="users" onclick="switchPage('users', this)">用户管理</div>
-            <div class="tab-btn" data-id="products" onclick="switchPage('products', this)">商品库</div>
-            <div class="tab-btn" data-id="spider" onclick="switchPage('spider', this)">AI 选品</div>
-        </div>
-        <div class="user-profile">
-            <img src="https://via.placeholder.com/32" class="avatar">
-            <span>admin@lynli.com</span>
-        </div>
-    </div>
+<body class="text-gray-800 h-screen flex overflow-hidden">
 
-    <div class="main-content">
-        <div id="page-dashboard" class="page active"><div id="content-dashboard"></div></div>
-        <div id="page-orders" class="page"><div id="content-orders"></div></div>
-        <div id="page-users" class="page"><div id="content-users"></div></div>
-        <div id="page-products" class="page"><div id="content-products"></div></div>
-        <div id="page-spider" class="page"><div id="content-spider"></div></div>
-    </div>
+    <!-- 左侧多级折叠菜单 -->
+    <aside class="w-64 bg-slate-900 text-slate-300 flex flex-col shadow-2xl z-20">
+        <!-- Logo区 -->
+        <div class="h-16 flex items-center px-6 text-white font-bold text-xl tracking-wider border-b border-slate-800">
+            <svg class="w-8 h-8 mr-3 text-blue-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+            LYNLI PRO
+        </div>
+        <!-- 菜单项 -->
+        <nav class="flex-1 py-4 space-y-1">
+            <a href="#" class="flex items-center px-6 py-3 bg-blue-600 text-white border-l-4 border-blue-400">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                数据大盘
+            </a>
+            <div class="px-6 py-2 text-xs font-semibold text-slate-500 uppercase tracking-wider mt-4">业务管理</div>
+            <a href="#" class="flex items-center px-6 py-3 hover:bg-slate-800 hover:text-white transition-colors">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+                订单中心
+                <span class="ml-auto bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">12</span>
+            </a>
+            <a href="#" class="flex items-center px-6 py-3 hover:bg-slate-800 hover:text-white transition-colors">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                商品库
+            </a>
+            <a href="#" class="flex items-center px-6 py-3 hover:bg-slate-800 hover:text-white transition-colors">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                用户管理
+            </a>
+            <a href="#" class="flex items-center px-6 py-3 hover:bg-slate-800 hover:text-white transition-colors">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                AI 选品采购
+            </a>
+            <div class="px-6 py-2 text-xs font-semibold text-slate-500 uppercase tracking-wider mt-4">营销与财务</div>
+            <a href="#" class="flex items-center px-6 py-3 hover:bg-slate-800 hover:text-white transition-colors">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                邮件群发
+            </a>
+        </nav>
+        <!-- 底部用户信息 -->
+        <div class="p-4 border-t border-slate-800 flex items-center">
+            <img src="https://api.dicebear.com/7.x/adventurer/svg?seed=Felix" class="w-10 h-10 rounded-full border-2 border-slate-600 bg-slate-700">
+            <div class="ml-3">
+                <p class="text-sm font-medium text-white">超级管理员</p>
+                <p class="text-xs text-slate-400">admin@lynli.com</p>
+            </div>
+        </div>
+    </aside>
 
-    <script type="module" src="./js/main.js"></script>
+    <!-- 右侧主体 -->
+    <main class="flex-1 flex flex-col relative">
+        <!-- 顶部 Header -->
+        <header class="h-16 bg-white shadow-sm flex items-center justify-between px-8 z-10">
+            <!-- 面包屑 -->
+            <div class="flex items-center text-sm text-gray-500">
+                <span>首页</span>
+                <svg class="w-4 h-4 mx-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                <span class="font-medium text-gray-800">数据大盘</span>
+            </div>
+            <!-- 操作区 -->
+            <div class="flex items-center space-x-6">
+                <div class="relative">
+                    <input type="text" placeholder="全局搜索..." class="bg-gray-100 border-none rounded-full py-2 px-4 w-64 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+                </div>
+                <button class="text-gray-400 hover:text-gray-600 relative">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                    <span class="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
+                </button>
+                <button class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm font-medium shadow-lg shadow-blue-500/30 transition-all">
+                    + 新增商品
+                </button>
+            </div>
+        </header>
+
+        <!-- 页面内容 -->
+        <div class="flex-1 overflow-y-auto p-8">
+            <!-- 数据卡片区 -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col">
+                    <span class="text-gray-500 text-sm font-medium">今日销售额</span>
+                    <div class="flex items-end mt-2">
+                        <span class="text-3xl font-bold text-gray-800">¥ 124,500</span>
+                        <span class="text-sm text-green-500 ml-2 font-medium flex items-center mb-1">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg> 12.5%
+                        </span>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col">
+                    <span class="text-gray-500 text-sm font-medium">待发货订单</span>
+                    <div class="flex items-end mt-2">
+                        <span class="text-3xl font-bold text-gray-800">342</span>
+                        <span class="text-sm text-red-500 ml-2 font-medium mb-1">需尽快处理</span>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col">
+                    <span class="text-gray-500 text-sm font-medium">新增会员</span>
+                    <div class="flex items-end mt-2">
+                        <span class="text-3xl font-bold text-gray-800">1,204</span>
+                        <span class="text-sm text-green-500 ml-2 font-medium flex items-center mb-1">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg> 8.2%
+                        </span>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col">
+                    <span class="text-gray-500 text-sm font-medium">转化率</span>
+                    <div class="flex items-end mt-2">
+                        <span class="text-3xl font-bold text-gray-800">4.6%</span>
+                        <span class="text-sm text-gray-400 ml-2 font-medium mb-1">较昨日持平</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ECharts 图表区 -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 lg:col-span-2">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">近 7 日销售趋势</h3>
+                    <div id="chart-line" style="width: 100%; height: 300px;"></div>
+                </div>
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">品类销售占比</h3>
+                    <div id="chart-pie" style="width: 100%; height: 300px;"></div>
+                </div>
+            </div>
+
+            <!-- 表格区 -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="p-6 border-b border-gray-100 flex justify-between items-center">
+                    <h3 class="text-lg font-bold text-gray-800">最新订单列表</h3>
+                    <div class="flex space-x-2">
+                        <input type="date" class="border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-600 focus:outline-none focus:border-blue-500">
+                        <button class="border border-gray-200 text-gray-600 px-4 py-2 rounded-lg text-sm hover:bg-gray-50">导出数据</button>
+                    </div>
+                </div>
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-50 text-gray-500 text-sm uppercase tracking-wider">
+                            <th class="p-4 font-medium">订单号</th>
+                            <th class="p-4 font-medium">客户</th>
+                            <th class="p-4 font-medium">金额</th>
+                            <th class="p-4 font-medium">状态</th>
+                            <th class="p-4 font-medium">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="p-4 font-mono text-sm text-gray-600">ORD-20261019-001</td>
+                            <td class="p-4">
+                                <div class="flex items-center">
+                                    <img src="https://api.dicebear.com/7.x/adventurer/svg?seed=Aneka" class="w-8 h-8 rounded-full mr-3 bg-gray-100">
+                                    <div>
+                                        <div class="font-medium text-gray-800">王小明</div>
+                                        <div class="text-xs text-gray-400">user@lynli.com</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="p-4 font-medium text-gray-800">¥ 299.00</td>
+                            <td class="p-4"><span class="bg-orange-100 text-orange-600 px-3 py-1 rounded-full text-xs font-medium">待发货</span></td>
+                            <td class="p-4"><a href="#" class="text-blue-500 hover:text-blue-700 font-medium text-sm">去发货</a></td>
+                        </tr>
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="p-4 font-mono text-sm text-gray-600">ORD-20261018-042</td>
+                            <td class="p-4">
+                                <div class="flex items-center">
+                                    <img src="https://api.dicebear.com/7.x/adventurer/svg?seed=Felix" class="w-8 h-8 rounded-full mr-3 bg-gray-100">
+                                    <div>
+                                        <div class="font-medium text-gray-800">李小红</div>
+                                        <div class="text-xs text-gray-400">vip@lynli.com</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="p-4 font-medium text-gray-800">¥ 1,299.00</td>
+                            <td class="p-4"><span class="bg-green-100 text-green-600 px-3 py-1 rounded-full text-xs font-medium">已发货</span></td>
+                            <td class="p-4"><a href="#" class="text-blue-500 hover:text-blue-700 font-medium text-sm">查看物流</a></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <!-- 分页 -->
+                <div class="p-4 border-t border-gray-100 flex justify-between items-center text-sm text-gray-500">
+                    <span>显示 1 到 2 条，共 128 条记录</span>
+                    <div class="flex space-x-1">
+                        <button class="px-3 py-1 border border-gray-200 rounded hover:bg-gray-50">上一页</button>
+                        <button class="px-3 py-1 bg-blue-600 text-white rounded shadow-sm">1</button>
+                        <button class="px-3 py-1 border border-gray-200 rounded hover:bg-gray-50">2</button>
+                        <button class="px-3 py-1 border border-gray-200 rounded hover:bg-gray-50">3</button>
+                        <button class="px-3 py-1 border border-gray-200 rounded hover:bg-gray-50">下一页</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 图表初始化脚本 -->
+    <script>
+        // 折线图
+        var lineChart = echarts.init(document.getElementById('chart-line'));
+        lineChart.setOption({
+            tooltip: { trigger: 'axis' },
+            grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+            xAxis: { type: 'category', boundaryGap: false, data: ['10-13', '10-14', '10-15', '10-16', '10-17', '10-18', '10-19'] },
+            yAxis: { type: 'value' },
+            series: [{
+                name: '销售额',
+                type: 'line',
+                smooth: true,
+                symbolSize: 8,
+                itemStyle: { color: '#2563eb' },
+                areaStyle: { 
+                    color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                        { offset: 0, color: 'rgba(37,99,235,0.3)' },
+                        { offset: 1, color: 'rgba(37,99,235,0.01)' }
+                    ])
+                },
+                data: [12000, 18000, 15000, 24000, 32000, 28000, 45000]
+            }]
+        });
+
+        // 饼图
+        var pieChart = echarts.init(document.getElementById('chart-pie'));
+        pieChart.setOption({
+            tooltip: { trigger: 'item' },
+            legend: { top: 'bottom' },
+            series: [{
+                name: '品类',
+                type: 'pie',
+                radius: ['40%', '70%'],
+                avoidLabelOverlap: false,
+                itemStyle: { borderRadius: 10, borderColor: '#fff', borderWidth: 2 },
+                label: { show: false, position: 'center' },
+                emphasis: {
+                    label: { show: true, fontSize: 20, fontWeight: 'bold' }
+                },
+                data: [
+                    { value: 1048, name: '智能互动', itemStyle: { color: '#3b82f6' } },
+                    { value: 735, name: '私密护理', itemStyle: { color: '#8b5cf6' } },
+                    { value: 580, name: '情趣玩具', itemStyle: { color: '#ec4899' } },
+                    { value: 484, name: '润滑保养', itemStyle: { color: '#10b981' } }
+                ]
+            }]
+        });
+
+        // 响应式自适应
+        window.addEventListener('resize', function() {
+            lineChart.resize();
+            pieChart.resize();
+        });
+    </script>
 </body>
 </html>
