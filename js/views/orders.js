@@ -1,9 +1,7 @@
 import { api } from '../api.js';
-
 export async function renderOrders() {
     const res = await api.getOrders();
     const orders = res.data || [];
-    
     const cards = orders.map(o => `
         <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100 flex flex-col gap-3">
             <div class="flex justify-between items-center pb-3 border-b border-gray-100">
@@ -18,11 +16,13 @@ export async function renderOrders() {
                 <span class="text-lg font-bold text-red-500">¥${o.total_amount}</span>
                 ${o.status === 0 
                     ? `<button onclick="window.doShip('${o.trade_no}')" class="bg-blue-600 text-white text-sm px-4 py-2 rounded-lg hover:bg-blue-700">立即发货</button>`
-                    : `<button onclick="window.showMap('${o.tracking_no}')" class="text-blue-600 text-sm font-medium hover:underline">查看物流 (${o.tracking_no})</button>`
+                    : `<div class="text-right">
+                         <button onclick="window.showLogistics('${o.tracking_no}')" class="text-blue-600 text-sm font-medium hover:underline">查看物流</button>
+                         <p class="text-xs text-gray-400 mt-1">${o.tracking_no}</p>
+                       </div>`
                 }
             </div>
         </div>
     `).join('');
-
     return `<div class="fade-in grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">${cards || '暂无订单'}</div>`;
 }
