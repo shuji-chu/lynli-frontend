@@ -11,6 +11,7 @@
 <body>
   <div id="app">
 
+    <!-- 登录视图 -->
     <section id="login-view" class="auth">
       <div class="auth__bg" aria-hidden="true">
         <span class="auth__orb auth__orb--a"></span>
@@ -75,7 +76,45 @@
       </div>
     </section>
 
-    <section id="app-view" class="app" hidden></section>
+    <!-- 主布局 -->
+    <section id="app-view" class="app" hidden>
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar__brand">
+          <div class="brand__mark brand__mark--sm">
+            <img src="logo.png" alt="LYNLI">
+          </div>
+          <div class="sidebar__brand-text">
+            <strong>LYNLI</strong>
+            <span>控制台</span>
+          </div>
+        </div>
+
+        <nav class="sidebar__nav" id="nav" aria-label="主菜单"></nav>
+
+        <div class="sidebar__foot" id="sidebar-foot"></div>
+      </aside>
+
+      <div class="sidebar__scrim" id="sidebar-scrim"></div>
+
+      <div class="app__main">
+        <header class="topbar">
+          <button class="icon-btn" id="menu-toggle" type="button" aria-label="打开菜单">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+              <path d="M4 7h16M4 12h16M4 17h16"/>
+            </svg>
+          </button>
+
+          <div class="topbar__title">
+            <h1 id="page-title">数据看板</h1>
+            <p id="page-sub">经营概览</p>
+          </div>
+
+          <div class="topbar__user" id="topbar-user"></div>
+        </header>
+
+        <main class="content" id="content" tabindex="-1"></main>
+      </div>
+    </section>
 
   </div>
 
