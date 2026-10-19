@@ -7,29 +7,41 @@
 <style>
   :root { --bg: #f5f7fa; --white: #ffffff; --text: #1e293b; --text-sub: #64748b; --blue: #2563eb; --blue-light: #eff6ff; --border: #e2e8f0; --danger: #ef4444; }
   *{box-sizing:border-box;margin:0;padding:0}
-  body { background: var(--bg); color: var(--text); font: 14px/1.6 -apple-system, sans-serif; height: 100vh; display: flex; }
-  .sidebar { width: 240px; background: var(--white); border-right: 1px solid var(--border); padding: 20px 0; }
-  .sidebar-logo { padding: 0 20px 20px; font-weight: bold; font-size: 18px; border-bottom: 1px solid var(--border); margin-bottom: 10px; }
-  .menu-item { padding: 12px 20px; color: var(--text-sub); cursor: pointer; }
-  .menu-item.active { background: var(--blue-light); color: var(--blue); border-right: 3px solid var(--blue); font-weight: 600; }
-  .main { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
-  .topbar { height: 60px; background: var(--white); border-bottom: 1px solid var(--border); display: flex; justify-content: flex-end; align-items: center; padding: 0 24px; }
-  .content { padding: 30px; max-width: 1200px; width: 100%; margin: 0 auto; }
-  .toolbar { display: flex; gap: 12px; margin-bottom: 24px; background: var(--white); padding: 20px; border-radius: 12px; border: 1px solid var(--border); }
-  .toolbar input { flex: 1; padding: 10px 16px; border: 1px solid var(--border); border-radius: 8px; outline: none; }
-  .btn { padding: 10px 24px; background: var(--blue); color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 500; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
+  body { background: var(--bg); color: var(--text); font: 14px/1.6 -apple-system, sans-serif; display: flex; flex-direction: column; min-height: 100vh; }
+  .sidebar { background: var(--white); border-bottom: 1px solid var(--border); display: flex; overflow-x: auto; white-space: nowrap; }
+  .sidebar-logo { padding: 15px 20px; font-weight: bold; font-size: 16px; display: none; }
+  .menu-item { padding: 15px 20px; color: var(--text-sub); cursor: pointer; border-bottom: 3px solid transparent; }
+  .menu-item.active { color: var(--blue); border-bottom-color: var(--blue); font-weight: 600; }
+  .main { flex: 1; display: flex; flex-direction: column; width: 100%; }
+  .topbar { display: none; }
+  .content { padding: 15px; width: 100%; }
+  .toolbar { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; background: var(--white); padding: 15px; border-radius: 12px; border: 1px solid var(--border); }
+  .toolbar input { width: 100%; padding: 12px 16px; border: 1px solid var(--border); border-radius: 8px; outline: none; font-size: 14px; }
+  .btn { width: 100%; padding: 12px 24px; background: var(--blue); color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 500; font-size: 15px;}
+  .grid { display: grid; grid-template-columns: 1fr; gap: 15px; }
   .card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
-  .card img { width: 100%; height: 180px; object-fit: cover; }
-  .card-body { padding: 16px; }
-  .title { font-size: 14px; font-weight: 600; margin-bottom: 12px; height: 40px; overflow: hidden; }
-  .price-row { display: flex; justify-content: space-between; margin-bottom: 16px; }
-  .price-input { width: 60px; border: 1px solid var(--border); border-radius: 4px; padding: 4px; color: var(--blue); font-weight: bold; }
+  .card img { width: 100%; height: 220px; object-fit: cover; }
+  .card-body { padding: 15px; }
+  .title { font-size: 14px; font-weight: 600; margin-bottom: 12px; height: 40px; overflow: hidden; line-height: 1.4;}
+  .price-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .price-input { width: 70px; border: 1px solid var(--border); border-radius: 4px; padding: 4px 8px; color: var(--blue); font-weight: bold; font-size: 14px;}
   .actions { display: flex; gap: 10px; }
-  .actions button { flex: 1; padding: 8px; border: none; border-radius: 6px; cursor: pointer; }
+  .actions button { flex: 1; padding: 10px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: bold;}
   .btn-up { background: var(--blue-light); color: var(--blue); }
   .btn-del { background: #fef2f2; color: var(--danger); }
-  #loading { display: none; color: var(--blue); margin-bottom: 20px; }
+  #loading { display: none; color: var(--blue); margin-bottom: 15px; text-align: center; font-weight: bold;}
+  @media (min-width: 768px) {
+    body { flex-direction: row; height: 100vh; overflow: hidden; }
+    .sidebar { width: 240px; border-right: 1px solid var(--border); border-bottom: none; flex-direction: column; padding: 20px 0; overflow-x: hidden; }
+    .sidebar-logo { display: block; border-bottom: 1px solid var(--border); margin-bottom: 10px; font-size: 18px; }
+    .menu-item { border-bottom: none; border-right: 3px solid transparent; padding: 12px 20px; }
+    .menu-item.active { border-right-color: var(--blue); border-bottom: none; background: var(--blue-light); }
+    .topbar { display: flex; height: 60px; background: var(--white); border-bottom: 1px solid var(--border); justify-content: flex-end; align-items: center; padding: 0 24px; }
+    .content { padding: 30px; max-width: 1200px; margin: 0 auto; }
+    .toolbar { flex-direction: row; padding: 20px; }
+    .btn { width: auto; }
+    .grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
+  }
 </style>
 </head>
 <body>
@@ -43,7 +55,7 @@
     <div class="topbar"><span style="font-weight: 500;">超级管理员</span></div>
     <div class="content">
       <div class="toolbar">
-        <input type="text" id="keyword" placeholder="输入商品关键词，例如：私密护理仪" onkeypress="if(event.key==='Enter') startSpider()">
+        <input type="text" id="keyword" placeholder="输入商品关键词" onkeypress="if(event.key==='Enter') startSpider()">
         <button class="btn" onclick="startSpider()">开始抓取</button>
       </div>
       <div id="loading">⏳ 正在调度爬虫抓取并上传至 OSS...</div>
@@ -68,7 +80,7 @@ async function loadDrafts() {
     const data = await res.json();
     document.getElementById('loading').style.display = 'none';
     if (data.code !== 1) throw new Error(data.msg);
-    if (data.data.length === 0) { document.getElementById('list').innerHTML = '<div style="color:#64748b">暂无数据。</div>'; return; }
+    if (data.data.length === 0) { document.getElementById('list').innerHTML = '<div style="color:#64748b; text-align:center; padding:20px;">暂无草稿数据，请抓取。</div>'; return; }
     document.getElementById('list').innerHTML = data.data.map(item => `
       <div class="card" id="card-${item.id}">
         <img src="${item.image_url.replace('http://', 'https://')}">
@@ -85,7 +97,7 @@ async function loadDrafts() {
         </div>
       </div>
     `).join('');
-  } catch (err) { document.getElementById('loading').style.display = 'none'; alert('拉取失败'); }
+  } catch (err) { document.getElementById('loading').style.display = 'none'; document.getElementById('list').innerHTML = '<div style="color:red; text-align:center; padding:20px;">拉取失败</div>'; }
 }
 async function publish(id) {
   const price = document.getElementById(`price-${id}`).value;
