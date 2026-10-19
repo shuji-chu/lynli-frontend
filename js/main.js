@@ -5,9 +5,49 @@ window.toggleSidebar = () => {
     document.getElementById('overlay').classList.toggle('open');
 };
 
+// 密码显隐切换
+window.togglePassword = () => {
+    const pwdInput = document.getElementById('login-pwd');
+    const icon = document.getElementById('eye-icon');
+    if (pwdInput.type === 'password') {
+        pwdInput.type = 'text';
+        icon.style.color = '#3b82f6';
+    } else {
+        pwdInput.type = 'password';
+        icon.style.color = '#64748b';
+    }
+};
+
+// 初始化：读取记住的密码
+window.onload = () => {
+    const savedUser = localStorage.getItem('lynli_user');
+    const savedPwd = localStorage.getItem('lynli_pwd');
+    if (savedUser && savedPwd) {
+        document.getElementById('login-user').value = savedUser;
+        document.getElementById('login-pwd').value = savedPwd;
+    }
+};
+
 window.handleLogin = () => {
-    document.getElementById('login-screen').style.display = 'none';
-    switchPage('dashboard');
+    const user = document.getElementById('login-user').value;
+    const pwd = document.getElementById('login-pwd').value;
+    const remember = document.getElementById('remember-pwd').checked;
+
+    // 简单的演示校验，你可以对接后端的登录接口
+    if (user === 'admin' && pwd === '123456') {
+        if (remember) {
+            localStorage.setItem('lynli_user', user);
+            localStorage.setItem('lynli_pwd', pwd);
+        } else {
+            localStorage.removeItem('lynli_user');
+            localStorage.removeItem('lynli_pwd');
+        }
+        
+        document.getElementById('login-screen').style.display = 'none';
+        switchPage('dashboard');
+    } else {
+        alert('账号或密码错误！\n演示账号: admin\n演示密码: 123456');
+    }
 };
 
 window.doPublish = async (id) => {
