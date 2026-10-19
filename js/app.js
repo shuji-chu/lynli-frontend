@@ -11,19 +11,22 @@ import * as Orders from "./views/orders.js";
 import * as Aftersales from "./views/aftersales.js";
 import * as Products from "./views/products.js";
 import * as Spider from "./views/spider.js";
+import * as Proxy from "./views/proxy.js"; // 新
 import * as Purchases from "./views/purchases.js";
 import * as Suppliers from "./views/suppliers.js";
 import * as Marketing from "./views/marketing.js";
-import * as CRM from "./views/crm.js";
+import * as CRM from "./views/crm.js"; // 已重写
+import * as Finance from "./views/finance.js"; // 已重写
+import * as Logistics from "./views/logistics.js"; // 新
 import * as Organization from "./views/organization.js";
-import * as Finance from "./views/finance.js";
-import * as System from "./views/system.js";
+import * as Roles from "./views/roles.js"; // 新
+import * as System from "./views/system.js"; // 已重写
 
 const app = document.getElementById("app");
 let openTabs = ["dashboard"];
 let currentPage = "dashboard";
 
-document.body.classList.add('light-mode'); // 强制默认明亮模式
+document.body.classList.add('light-mode'); 
 document.addEventListener('click', () => { document.getElementById('dropdown-menu')?.classList.remove('show'); });
 
 Object.assign(routes.dashboard, { render: Dashboard.render });
@@ -31,12 +34,15 @@ Object.assign(routes.orders, { render: Orders.render });
 Object.assign(routes.aftersales, { render: Aftersales.render });
 Object.assign(routes.products, { render: Products.render });
 Object.assign(routes.spider, { render: Spider.render });
+Object.assign(routes.proxy, { render: Proxy.render });
 Object.assign(routes.purchases, { render: Purchases.render });
 Object.assign(routes.suppliers, { render: Suppliers.render });
 Object.assign(routes.marketing, { render: Marketing.render });
 Object.assign(routes.crm, { render: CRM.render });
-Object.assign(routes.organization, { render: Organization.render });
 Object.assign(routes.finance, { render: Finance.render });
+Object.assign(routes.logistics, { render: Logistics.render });
+Object.assign(routes.organization, { render: Organization.render });
+Object.assign(routes.roles, { render: Roles.render });
 Object.assign(routes.system, { render: System.render });
 
 function renderTabs() {
@@ -99,19 +105,13 @@ function renderApp() {
 
   document.getElementById('theme-btn').onclick = () => {
     document.body.classList.toggle('light-mode');
-    localStorage.setItem('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
     if(currentPage === 'dashboard') switchPage('dashboard'); 
   };
 
   document.getElementById('notice-btn').onclick = () => {
     showModal({
       title: "系统通知",
-      contentHTML: `
-        <div class="notice-list">
-          <div class="notice-item"><b>系统升级完成</b><p>V2.0 版本已上线，全新支持 AI 副驾驶功能。</p><div class="notice-time">10分钟前</div></div>
-          <div class="notice-item" style="border-left-color:#f87171;"><b>库存预警</b><p>华南仓 3 款商品库存低于 10 件，请及时补货。</p><div class="notice-time">1小时前</div></div>
-        </div>
-      `,
+      contentHTML: `<div class="notice-list"><div class="notice-item"><b>系统升级完成</b><p>V3.0 版本已上线，新增代理池与提现审核模块。</p></div></div>`,
       onConfirm: (mask, close) => close()
     });
   };
@@ -122,7 +122,6 @@ function renderApp() {
   document.getElementById('profile-btn').onclick = () => {
     const userInfo = JSON.parse(localStorage.getItem("lynli_user") || '{"name":"系统管理员","avatar":"管"}');
     const hasImg = userInfo.avatar.startsWith('data:image');
-    
     showModal({
       title: "个人中心设置",
       contentHTML: `
@@ -145,7 +144,6 @@ function renderApp() {
         close(); renderApp(); switchPage("dashboard"); toast("更新成功");
       }
     });
-
     setTimeout(() => {
       document.getElementById('avatar-upload').onchange = (e) => {
         const file = e.target.files[0];
@@ -167,5 +165,4 @@ function renderApp() {
   switchPage("dashboard");
 }
 
-// 启动入口
 renderLogin(renderApp);

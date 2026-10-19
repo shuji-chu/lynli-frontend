@@ -1,11 +1,33 @@
+import { toast } from "../ui.js";
 export async function render(container) {
   container.innerHTML = `
-    <div class="card" style="overflow-x:auto;">
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <input type="text" class="filter-input" placeholder="搜索昵称/手机号">
+        <button class="btn" style="width:auto; padding:8px 16px; margin:0;">查询</button>
+      </div>
+      <button class="btn" style="width:auto; padding:8px 16px; margin:0;">导出用户数据</button>
+    </div>
+    <div class="table-container" style="overflow-x:auto;">
       <table class="table">
-        <thead><tr><th>买家昵称</th><th>消费总额</th><th>订单数</th><th>最后购买时间</th><th>标签</th></tr></thead>
+        <thead><tr><th>用户信息</th><th>会员等级</th><th>账户余额</th><th>消费总额</th><th>状态</th><th>操作</th></tr></thead>
         <tbody>
-          <tr><td>爱吃猫的鱼</td><td>¥ 4,520.00</td><td>18</td><td>2023-10-24</td><td><span class="badge badge-warning">高净值</span></td></tr>
-          <tr><td>匿名用户_992</td><td>¥ 129.00</td><td>1</td><td>2023-10-20</td><td><span class="badge badge-info">新客</span></td></tr>
+          <tr>
+            <td><div style="font-weight:bold;">张三 (138****1111)</div><div style="font-size:12px; color:var(--dim);">注册: 2023-01-01</div></td>
+            <td><span class="badge badge-warning">黄金VIP</span></td>
+            <td style="color:#10b981; font-weight:bold;">¥ 1,250.00</td>
+            <td>¥ 8,400.00</td>
+            <td><span class="badge badge-success">正常</span></td>
+            <td><a href="javascript:;" style="color:var(--pri); margin-right:8px;" onclick="alert('打开余额修改弹窗')">调整余额</a><a href="javascript:;" style="color:#f87171;" onclick="alert('已封禁')">封禁</a></td>
+          </tr>
+          <tr>
+            <td><div style="font-weight:bold;">李四 (139****2222)</div><div style="font-size:12px; color:var(--dim);">注册: 2023-05-12</div></td>
+            <td><span class="badge badge-info">普通会员</span></td>
+            <td style="color:#10b981; font-weight:bold;">¥ 0.00</td>
+            <td>¥ 120.00</td>
+            <td><span class="badge badge-success">正常</span></td>
+            <td><a href="javascript:;" style="color:var(--pri); margin-right:8px;">调整余额</a><a href="javascript:;" style="color:#f87171;">封禁</a></td>
+          </tr>
         </tbody>
       </table>
     </div>
