@@ -3,54 +3,163 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LYNLI 后台</title>
+  <title>LYNLI 管理控制台</title>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
   <style>
-    body { background: #070b14; color: #fff; font-family: sans-serif; padding: 20px; }
-    .card { background: #111827; border: 1px solid #374151; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
-    .error { color: #f87171; }
-    .success { color: #34d399; }
-    button { background: #3b82f6; color: #fff; border: 0; padding: 10px 20px; border-radius: 4px; cursor: pointer; }
+    :root { --bg: #070b14; --sur: rgba(17,24,39,0.7); --line: rgba(255,255,255,0.08); --text: #e8edf7; --dim: #8b97ad; --pri: #3b82f6; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, sans-serif; }
+    body { background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; }
+    
+    /* 登录页 */
+    #login-view { height: 100vh; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at top right, rgba(59,130,246,0.15), transparent 40%); }
+    .login-box { width: 90%; max-width: 400px; background: var(--sur); padding: 30px; border-radius: 20px; border: 1px solid var(--line); box-shadow: 0 30px 60px -20px rgba(0,0,0,0.8); backdrop-filter: blur(20px); }
+    .login-box h1 { font-size: 26px; letter-spacing: 2px; margin-bottom: 5px; background: linear-gradient(90deg,#fff,#b8c4dd); -webkit-background-clip:text; color:transparent; }
+    .login-box p { color: var(--dim); font-size: 13px; margin-bottom: 24px; }
+    .field { margin-bottom: 16px; }
+    .field label { display: block; font-size: 12px; color: var(--dim); margin-bottom: 6px; }
+    .field input { width: 100%; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid var(--line); border-radius: 8px; color: #fff; outline: none; transition: 0.2s; }
+    .field input:focus { border-color: var(--pri); box-shadow: 0 0 0 3px rgba(59,130,246,0.15); }
+    .btn { width: 100%; padding: 12px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); border: none; border-radius: 8px; color: #fff; font-weight: bold; cursor: pointer; margin-top: 10px; }
+    
+    /* 主界面 */
+    #app-view { display: none; height: 100vh; }
+    .layout { display: flex; height: 100%; }
+    .sidebar { width: 240px; background: rgba(9,13,22,0.95); border-right: 1px solid var(--line); padding: 20px 10px; display: flex; flex-direction: column; }
+    .sidebar h2 { font-size: 18px; padding: 0 10px 20px; border-bottom: 1px solid var(--line); margin-bottom: 15px; letter-spacing: 2px; }
+    .nav-item { padding: 12px; border-radius: 8px; color: var(--dim); cursor: pointer; margin-bottom: 5px; font-size: 14px; transition: 0.2s; }
+    .nav-item:hover, .nav-item.active { background: rgba(59,130,246,0.15); color: var(--pri); border-left: 3px solid var(--pri); }
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .topbar { padding: 20px; border-bottom: 1px solid var(--line); font-size: 18px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+    .user-info { font-size: 13px; color: var(--dim); font-weight: normal; display: flex; align-items: center; gap: 10px;}
+    .avatar { width: 30px; height: 30px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); border-radius: 50%; display: grid; place-items: center; font-size: 12px; color: #fff; font-weight: bold;}
+    .content { padding: 20px; overflow-y: auto; flex: 1; }
+    
+    /* 卡片和表格 */
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 20px; }
+    .card { background: var(--sur); border: 1px solid var(--line); border-radius: 12px; padding: 20px; box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5); }
+    .kpi-label { font-size: 13px; color: var(--dim); } .kpi-val { font-size: 28px; font-weight: bold; margin-top: 8px; }
+    .table { width: 100%; border-collapse: collapse; }
+    .table th, .table td { padding: 12px; border-bottom: 1px solid var(--line); text-align: left; font-size: 14px; }
+    .table th { color: var(--dim); font-weight: normal; }
   </style>
 </head>
 <body>
-  <h1>LYNLI 调试面板</h1>
-  
-  <div class="card">
-    <h3>后端接口测试</h3>
-    <p>点击下面按钮请求你的阿里云服务器</p>
-    <button id="test-btn">获取看板数据</button>
-    <div id="result" style="margin-top: 15px; font-family: monospace;"></div>
+  <div id="login-view">
+    <div class="login-box">
+      <h1>LYNLI</h1>
+      <p>管理控制台</p>
+      <form id="login-form">
+        <div class="field"><label>账号</label><input type="text" name="account" value="admin" required></div>
+        <div class="field"><label>密码</label><input type="password" name="password" value="123456" required></div>
+        <button type="submit" class="btn" id="login-btn">进入控制台</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="app-view">
+    <div class="layout">
+      <div class="sidebar">
+        <h2>LYNLI</h2>
+        <div class="nav-item active" data-page="dashboard">数据看板</div>
+        <div class="nav-item" data-page="orders">全部订单</div>
+        <div class="nav-item" data-page="products">商品库</div>
+        <div class="nav-item" data-page="spider">AI选品</div>
+      </div>
+      <div class="main">
+        <div class="topbar">
+          <span id="page-title">数据看板</span>
+          <div class="user-info">
+            <span>系统管理员</span>
+            <div class="avatar">管</div>
+          </div>
+        </div>
+        <div class="content" id="content"></div>
+      </div>
+    </div>
   </div>
 
   <script>
-    document.getElementById('test-btn').onclick = async () => {
-      const resDiv = document.getElementById('result');
-      resDiv.innerHTML = '正在请求...';
-      resDiv.className = '';
-
+    document.getElementById('login-form').onsubmit = async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('login-btn');
+      btn.textContent = "认证中...";
+      
       try {
-        // 真实请求后端
-        const res = await fetch("https://spider.lynli.me/api/dashboard");
+        const res = await fetch("https://spider.lynli.me/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ account: e.target.account.value, password: e.target.password.value })
+        });
+        const data = await res.json();
         
-        if (!res.ok) {
-          throw new Error(`服务器返回错误状态码: ${res.status}`);
+        if (data.code === 200) {
+          document.getElementById('login-view').style.display = 'none';
+          document.getElementById('app-view').style.display = 'block';
+          loadPage('dashboard');
+        } else {
+          alert("登录失败: " + data.message);
         }
-
-        const json = await res.json();
-        resDiv.innerHTML = `<span class="success">✅ 请求成功！</span><br><pre>${JSON.stringify(json, null, 2)}</pre>`;
-        
       } catch (err) {
-        // 把最详细的错误显示在屏幕上
-        resDiv.innerHTML = `
-          <span class="error">❌ 请求失败</span><br>
-          错误信息: ${err.message}<br>
-          <p style="font-size:12px;color:#9ca3af;margin-top:10px;">
-            如果提示 "Failed to fetch"，说明是跨域(CORS)被拦截了。<br>
-            请检查服务器端是否重启，以及 Cloudflare 是否拦截。
-          </p>
-        `;
+        alert("网络错误，请检查服务器");
+      } finally {
+        btn.textContent = "进入控制台";
       }
     };
+
+    window.loadPage = async (page) => {
+      document.querySelectorAll('.nav-item').forEach(el => el.classList.toggle('active', el.dataset.page === page));
+      const titles = { dashboard: '数据看板', orders: '全部订单', products: '商品库', spider: 'AI选品' };
+      document.getElementById('page-title').textContent = titles[page];
+      
+      const content = document.getElementById('content');
+      content.innerHTML = '<div class="card">数据加载中...</div>';
+
+      try {
+        if (page === 'dashboard') {
+          const res = await fetch("https://spider.lynli.me/api/dashboard");
+          const { data } = await res.json();
+          content.innerHTML = `
+            <div class="kpi-grid">
+              <div class="card"><div class="kpi-label">今日营收</div><div class="kpi-val" style="color:#3b82f6;">¥ ${data.revenue}</div></div>
+              <div class="card"><div class="kpi-label">今日订单</div><div class="kpi-val">${data.orders_today}</div></div>
+              <div class="card"><div class="kpi-label">待发货</div><div class="kpi-val" style="color:#f87171;">${data.pending_ship}</div></div>
+              <div class="card"><div class="kpi-label">在售商品</div><div class="kpi-val">${data.total_prod}</div></div>
+            </div>
+            <div class="card"><h3>欢迎回来，系统管理员！</h3><p style="color:var(--dim);margin-top:10px;">系统运行正常，数据库已连接。</p></div>
+          `;
+        } else if (page === 'orders') {
+          const res = await fetch("https://spider.lynli.me/api/orders");
+          const { data } = await res.json();
+          content.innerHTML = `
+            <div class="card">
+              <table class="table">
+                <thead><tr><th>订单号</th><th>买家</th><th>金额</th><th>状态</th></tr></thead>
+                <tbody>${data.map(o => `<tr><td>${o.id}</td><td>${o.buyer}</td><td>¥${o.amount}</td><td>${o.status}</td></tr>`).join('')}</tbody>
+              </table>
+            </div>
+          `;
+        } else if (page === 'products') {
+          const res = await fetch("https://spider.lynli.me/api/products");
+          const { data } = await res.json();
+          content.innerHTML = `
+            <div class="card">
+              <table class="table">
+                <thead><tr><th>商品名称</th><th>成本</th><th>售价</th><th>库存</th></tr></thead>
+                <tbody>${data.map(p => `<tr><td>${p.title}</td><td>¥${p.cost}</td><td>¥${p.price}</td><td>${p.stock}</td></tr>`).join('')}</tbody>
+              </table>
+            </div>
+          `;
+        } else if (page === 'spider') {
+          content.innerHTML = '<div class="card">AI选品模块，输入关键词开始抓取。</div>';
+        }
+      } catch (e) {
+        content.innerHTML = '<div class="card" style="color:#f87171;">数据获取失败，请检查网络。</div>';
+      }
+    };
+
+    document.querySelectorAll('.nav-item').forEach(el => {
+      el.onclick = () => loadPage(el.dataset.page);
+    });
   </script>
 </body>
 </html>
