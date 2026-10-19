@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LYNLI - AI 自动选品中心</title>
+<style>
+  :root{--bg:#0f1115;--surface:#191c22;--text:#e8eaed;--sub:#9aa3ad;--acc:#2563eb;--danger:#ef4444;--success:#10b981}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font:14px/1.6 sans-serif;padding:20px}
+  .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid #333;flex-wrap:wrap;gap:10px}
+  .input-group{display:flex;gap:10px;width:100%;max-width:500px}
+  input[type="text"]{flex:1;padding:12px;background:var(--surface);border:1px solid #333;border-radius:8px;color:#fff;outline:none}
+  button{cursor:pointer;border:none;border-radius:8px;padding:12px 20px;font-weight:bold;color:#fff;transition:0.2s}
+  .btn-primary{background:var(--acc)}
+  .btn-primary:hover{background:#1d4ed8}
+  .btn-danger{background:var(--danger)}
+  .btn-danger:hover{background:#dc2626}
+  .btn-success{background:var(--success)}
+  .btn-success:hover{background:#059669}
+  
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px}
+  .card{background:var(--surface);border:1px solid #333;border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
+  .card img{width:100%;height:200px;object-fit:cover;background:#222}
+  .card-body{padding:16px;flex:1;display:flex;flex-direction:column;gap:10px}
+  .title{font-size:15px;font-weight:bold;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .price-row{display:flex;justify-content:space-between;align-items:center;margin-top:auto}
+  .price{color:#f43f5e;font-size:18px;font-weight:bold}
+  .actions{display:flex;gap:10px;margin-top:10px}
+  .actions button{flex:1;padding:8px;font-size:13px}
+  
+  #loading{display:none;color:var(--acc);margin-top:20px;font-size:16px}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h2>🤖 AI 选品控制台</h2>
+  <div class="input-group">
+    <input type="text" id="keyword" placeholder="输入商品关键词，如：私密护理仪" onkeypress="if(event.key==='Enter') startSpider()">
+    <button class="btn-primary" onclick="startSpider()">开始抓取</button>
+  </div>
+</div>
+
+<div id="loading">⏳ 正在调度爬虫抓取并上传至 OSS，请稍候...（大约 3 秒）</div>
+
+<div class="grid" id="list"></div>
+
+<script>
+// ⚠️ 独立爬虫域名
+const API = 'https://spider.lynli.me';
+
+// 启动抓取
+async function startSpider() {
+  const kw = document.getElementById('keyword').value;
+  if (!kw) return alert('请输入关键词');
+  
+  const loading = document.getElementById('loading');
+  loading.style.display = 'block';
+  document.getElementById('list').innerHTML = '';
+
+  try {
+    const res = await fetch(`${API}/api/v1/admin/spider/start`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ keyword: kw })
+    });
+    const data = await res.json();
+    
+    if (data.code === 1) {
+      setTimeout(loadDrafts, 3000);
+    } else {
+      alert(data.msg);
+      loading.style.display = 'none';
+    }
+  } catch (err) {
+    alert('请求失败: ' + err.message);
+    loading.style.display = 'none';
+  }
+}
+
+// 拉取草稿列表
+async function loadDrafts() {
+  const loading = document.getElementById('loading');
+  try {
+    const res = await fetch(`${API}/api/v1/admin/spider/list`);
+    const data = await res.json();
+    loading.style.display = 'none';
+
+    if (data.code !== 1) throw new Error(data.msg);
+
+    if (data.data.length === 0) {
+      document.getElementById('list').innerHTML = '<div style="color:#9aa3ad">暂无草稿数据，换个词试试。</div>';
+      return;
+    }
+
+    document.getElementById('list').innerHTML = data.data.map(item => `
+      <div class="card" id="card-${item.id}">
+        <img src="${item.image_url}" alt="商品图">
+        <div class="card-body">
+          <div class="title">${item.title}</div>
+          <div class="price-row">
+            <span style="color:#9aa3ad;font-size:12px;">进价: ¥${item.price}</span>
+            <span class="price">售价: ¥<input type="number" id="price-${item.id}" value="${Math.floor(item.price * 3)}" style="width:60px; background:transparent; border:none; border-bottom:1px solid #555; color:#f43f5e; font-size:16px; font-weight:bold; outline:none;"></span>
+          </div>
+          <div class="actions">
+            <button class="btn-success" onclick="publish(${item.id})">确认上架</button>
+            <button class="btn-danger" onclick="discard(${item.id})">丢弃</button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  } catch (err) {
+    loading.style.display = 'none';
+    alert('拉取列表失败: ' + err.message);
+  }
+}
+
+// 上架
+async function publish(id) {
+  const price = document.getElementById(`price-${id}`).value;
+  const btn = event.target;
+  btn.innerText = '处理中...'; btn.disabled = true;
+
+  try {
+    const res = await fetch(`${API}/api/v1/admin/spider/publish`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, price })
+    });
+    const data = await res.json();
+    alert(data.msg);
+    if (data.code === 1) {
+      document.getElementById(`card-${id}`).remove();
+    } else {
+      btn.innerText = '确认上架'; btn.disabled = false;
+    }
+  } catch (err) {
+    alert('上架失败');
+    btn.innerText = '确认上架'; btn.disabled = false;
+  }
+}
+
+// 丢弃
+async function discard(id) {
+  if (!confirm('确定丢弃吗？会同时删除 OSS 上的图片！')) return;
+  const btn = event.target;
+  btn.innerText = '删除中...'; btn.disabled = true;
+
+  try {
+    const res = await fetch(`${API}/api/v1/admin/spider/discard`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id })
+    });
+    const data = await res.json();
+    if (data.code === 1) {
+      document.getElementById(`card-${id}`).remove();
+    } else {
+      alert(data.msg);
+      btn.innerText = '丢弃'; btn.disabled = false;
+    }
+  } catch (err) {
+    alert('删除失败');
+    btn.innerText = '丢弃'; btn.disabled = false;
+  }
+}
+
+// 页面加载自动拉一次
+loadDrafts();
+</script>
+</body>
+</html>
