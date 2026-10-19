@@ -1,6 +1,7 @@
 import { routes } from "./router.js";
 import { renderLayout } from "./views/layout.js";
 import { showModal, toast } from "./ui.js";
+import { initAICopilot } from "./views/ai-copilot.js";
 
 import * as Dashboard from "./views/dashboard.js";
 import * as Orders from "./views/orders.js";
@@ -69,18 +70,18 @@ function switchPage(page) {
   }
   
   const content = document.getElementById('content');
-  content.innerHTML = '<div class="skeleton sk-card"></div><div class="skeleton sk-card"></div>'; // 骨架屏
+  content.innerHTML = '<div class="skeleton sk-card"></div><div class="skeleton sk-card"></div>'; 
   
   setTimeout(() => {
     if (routes[page].render) routes[page].render(content);
-  }, 200); // 模拟网络请求延迟
+  }, 150);
 }
 
 function renderLogin() {
   app.innerHTML = `
     <div class="login-view">
       <div class="login-box">
-        <h1>LYNLI</h1><p>企业级全链路管理系统</p>
+        <h1>LYNLI OS</h1><p>未来级商业智能系统</p>
         <form id="login-form">
           <div class="field"><label>账号</label><input type="text" name="account" value="admin" required></div>
           <div class="field"><label>密码</label><input type="password" name="password" value="123456" required></div>
@@ -94,6 +95,8 @@ function renderLogin() {
 
 function renderApp() {
   app.innerHTML = renderLayout();
+  initAICopilot(); // 初始化 AI 助手
+  
   openTabs = ["dashboard"];
   currentPage = "dashboard";
   
@@ -110,7 +113,7 @@ function renderApp() {
   document.getElementById('theme-btn').onclick = () => {
     document.body.classList.toggle('light-mode');
     localStorage.setItem('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
-    if(currentPage === 'dashboard') switchPage('dashboard'); // 重绘图表
+    if(currentPage === 'dashboard') switchPage('dashboard'); 
   };
 
   document.getElementById('user-profile').onclick = (e) => { e.stopPropagation(); document.getElementById('dropdown-menu').classList.toggle('show'); };
