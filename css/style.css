@@ -1,0 +1,49 @@
+:root { 
+  --bg: #f5f7fa; --white: #ffffff; --text: #1e293b; --text-sub: #64748b; 
+  --blue: #2563eb; --blue-light: #eff6ff; --border: #e2e8f0; 
+  --danger: #ef4444; --success: #10b981;
+  --shadow: 0 4px 15px rgba(0,0,0,0.03);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body { background: var(--bg); color: var(--text); font: 14px/1.6 -apple-system, sans-serif; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+
+/* 登录页 */
+#login-screen { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 999; }
+.login-box { background: var(--white); width: 100%; max-width: 400px; padding: 40px 30px; border-radius: 16px; box-shadow: var(--shadow); }
+.login-box h2 { margin-bottom: 24px; font-size: 22px; text-align: center; }
+.login-box select, .login-box input { width: 100%; padding: 14px; margin-bottom: 16px; border: 1px solid var(--border); border-radius: 8px; outline: none; }
+.login-btn { width: 100%; padding: 14px; background: #0f172a; color: #fff; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; }
+
+/* 主框架 */
+#app { display: none; flex-direction: column; height: 100%; }
+.top-nav { background: var(--white); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; height: 60px; }
+.nav-tabs { display: flex; gap: 10px; height: 100%; }
+.tab-btn { padding: 0 20px; display: flex; align-items: center; cursor: pointer; color: var(--text-sub); border-bottom: 3px solid transparent; transition: 0.2s; }
+.tab-btn.active { color: var(--blue); border-bottom-color: var(--blue); font-weight: bold; }
+.user-info { display: flex; align-items: center; gap: 12px; font-size: 13px; }
+.role-badge { padding: 4px 10px; border-radius: 20px; font-weight: bold; }
+.role-badge.super { background: var(--blue-light); color: var(--blue); }
+.role-badge.op { background: #fef2f2; color: var(--danger); }
+
+/* 内容区 */
+.main-content { flex: 1; padding: 20px; overflow-y: auto; }
+.page { display: none; }
+.page.active { display: block; }
+.card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+.data-card { background: var(--white); border-radius: 16px; border: 1px solid var(--border); box-shadow: var(--shadow); overflow: hidden; }
+.card-img { width: 100%; height: 180px; object-fit: cover; }
+.card-body { padding: 20px; }
+.card-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.price { color: var(--danger); font-weight: bold; font-size: 18px; }
+.btn { padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer; font-weight: 500; }
+.btn-primary { background: var(--blue); color: white; }
+.btn-danger { background: var(--danger); color: white; }
+
+/* 手机适配 */
+@media (max-width: 768px) {
+  .top-nav { flex-direction: column; height: auto; padding: 0; }
+  .nav-tabs { width: 100%; overflow-x: auto; white-space: nowrap; border-bottom: 1px solid var(--border); }
+  .tab-btn { padding: 15px; }
+  .user-info { width: 100%; padding: 10px 15px; justify-content: space-between; }
+  .card-grid { grid-template-columns: 1fr; }
+}
