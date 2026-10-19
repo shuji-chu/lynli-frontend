@@ -2,15 +2,17 @@ import { $ } from "./core/utils.js";
 import { register, nav } from "./router/index.js";
 import { findMeta } from "./router/routes.js";
 import { initAuth } from "./views/auth.js";
-import { store } from "./store/data.js";
 import { bus } from "./store/eventBus.js";
 
+// 注册全部核心页面
 register("dashboard", () => import("./views/dashboard.js"));
 register("trade-orders", () => import("./views/trade/orders.js"));
 register("trade-purchase", () => import("./views/trade/purchase.js"));
 register("product-list", () => import("./views/product/list.js"));
 register("product-spider", () => import("./views/product/spider.js"));
+register("marketing-coupon", () => import("./views/marketing/coupon.js"));
 register("finance-report", () => import("./views/finance/report.js"));
+register("system-users", () => import("./views/system/users.js"));
 
 window.addEventListener("hashchange", () => {
   const key = location.hash.replace(/^#\/?/, "") || "dashboard";
@@ -19,10 +21,6 @@ window.addEventListener("hashchange", () => {
   nav(key);
 });
 
-// 核心联动：只要有数据改变，看板自动刷新
-bus.on("dataChanged", () => {
-  if(location.hash === "#/dashboard" || !location.hash) nav("dashboard");
-});
-
+bus.on("dataChanged", () => { if(location.hash === "#/dashboard" || !location.hash) nav("dashboard"); });
 initAuth();
 if(!location.hash) location.hash = "#/dashboard"; else nav(location.hash.replace(/^#\/?/, ""));

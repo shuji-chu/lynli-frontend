@@ -12,3 +12,5 @@
 .kpi-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; } .kpi-val { font-size:24px; font-weight:bold; margin-top:8px; }
 .input { width:100%; padding:8px; background:rgba(0,0,0,0.3); border:1px solid var(--line); color:#fff; border-radius:6px; }
 .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.6); display:grid; place-items:center; opacity:0; transition:0.3s; } .modal-overlay.active { opacity:1; } .modal-box { background:#111; padding:20px; border-radius:12px; min-width:300px; }
+.platform-tag { display:flex; align-items:center; gap:6px; padding:6px 12px; background:rgba(255,255,255,0.05); border:1px solid var(--line); border-radius:20px; font-size:13px; cursor:pointer; user-select:none; }
+.platform-tag input { accent-color: var(--pri); }
