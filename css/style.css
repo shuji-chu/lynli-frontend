@@ -223,3 +223,17 @@ html, body {
   min-height: min-content;
   height: auto;
 }
+
+/* ================= 修复侧边栏菜单无法上下滑动 ================= */
+.sidebar {
+  height: 100dvh !important;
+  overflow-y: auto !important; /* 允许侧边栏内部滚动 */
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; /* 隐藏滚动条 (Firefox) */
+}
+
+/* 隐藏侧边栏的滚动条 (Chrome/Safari) */
+.sidebar::-webkit-scrollbar {
+  display: none;
+}
