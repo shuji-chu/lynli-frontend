@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
+  <script>
+    window.onerror = function(msg, url, line) {
+      alert("系统报错: " + msg + "\n文件: " + url + "\n行号: " + line);
+    };
+  </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#070b14">
@@ -38,7 +43,7 @@
               <label class="check"><input type="checkbox" name="remember"><span>记住账号</span></label>
             </div>
             <p class="auth__error" id="login-error" role="alert" hidden></p>
-            <button class="btn btn--primary" type="submit">
+            <button class="btn btn--primary" type="submit" onclick="alert('按钮真的被点到了！正在执行JS...')">
               <span class="btn__label">进入控制台</span>
             </button>
           </form>
