@@ -23,7 +23,7 @@ const app = document.getElementById("app");
 let openTabs = ["dashboard"];
 let currentPage = "dashboard";
 
-if (localStorage.getItem('theme') === 'light') document.body.classList.add('light-mode');
+document.body.classList.add('light-mode'); // 强制默认明亮模式
 document.addEventListener('click', () => { document.getElementById('dropdown-menu')?.classList.remove('show'); });
 
 Object.assign(routes.dashboard, { render: Dashboard.render });

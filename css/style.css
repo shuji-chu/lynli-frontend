@@ -392,3 +392,81 @@ body, #app { height: 100dvh; overflow: hidden; } /* 使用 dvh 适配手机浏�
 .compare-title { font-size: 14px; font-weight: bold; margin-bottom: 6px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .compare-price { font-size: 18px; font-weight: bold; color: #f87171; }
 .compare-source { font-size: 12px; color: var(--dim); margin-bottom: 8px; }
+
+/* ================= 全局重磅 UI 重构 ================= */
+/* 固定底层背景 */
+body {
+  background: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop') no-repeat center center fixed !important;
+  background-size: cover !important;
+  color: #1f2937 !important; /* 强制深色文字，适配浅色背景 */
+}
+
+/* 给背景加一层极其轻微的浅色渐变遮罩，保证文字能看清，又不会太死板 */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(240, 244, 248, 0.7) 0%, rgba(226, 232, 240, 0.4) 100%);
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* 覆盖主题变量为明亮模式 */
+:root {
+  --bg: transparent;
+  --sur: rgba(255, 255, 255, 0.7); /* 高透明白色 */
+  --line: rgba(255, 255, 255, 0.8);
+  --text: #1f2937;
+  --dim: #4b5563;
+  --pri: #3b82f6;
+}
+
+/* 侧边栏与顶栏的大厂级毛玻璃 */
+.sidebar, .topbar {
+  background: rgba(255, 255, 255, 0.6) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.8) !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.8) !important;
+}
+
+/* 卡片的高级毛玻璃与悬浮感 */
+.card, .table-container {
+  background: rgba(255, 255, 255, 0.6) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.9) !important;
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.08) !important;
+  color: #1f2937 !important;
+}
+
+/* 调整表格文字颜色 */
+.table th { color: #6b7280 !important; }
+.table td { color: #1f2937 !important; border-bottom: 1px solid rgba(0,0,0,0.05) !important; }
+.table tbody tr:hover { background: rgba(255,255,255,0.4) !important; }
+
+/* 输入框变白 */
+.field input, .filter-input, .select-input, .form-select {
+  background: rgba(255, 255, 255, 0.8) !important;
+  color: #1f2937 !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+}
+.field input:focus, .filter-input:focus { border-color: var(--pri) !important; }
+
+/* 登录页适配 */
+.login-right { background: rgba(255, 255, 255, 0.7) !important; backdrop-filter: blur(20px) !important; }
+.login-left { background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0)) !important; border-right: 1px solid rgba(255,255,255,0.4) !important; }
+.login-left h1 { background: linear-gradient(90deg, #1f2937, #4b5563); -webkit-background-clip: text; color: transparent; }
+
+/* 侧边栏选中态 */
+.nav-item { color: #4b5563; }
+.nav-item:hover, .nav-item.active { background: rgba(59, 130, 246, 0.15) !important; color: #2563eb !important; }
+
+/* 顶部多页签毛玻璃 */
+.tabs-bar { background: transparent !important; border-bottom: none !important; }
+.tab-item { background: rgba(255,255,255,0.4) !important; border: 1px solid rgba(255,255,255,0.6) !important; color: #6b7280; }
+.tab-item.active { background: rgba(255,255,255,0.9) !important; color: #2563eb !important; border-top: 2px solid #2563eb !important; }
+
+/* 强制所有文本在浅色模式下清晰 */
+.page-title, h2, h3, h4 { color: #111827 !important; }
+.kpi-val { color: #1f2937 !important; }
