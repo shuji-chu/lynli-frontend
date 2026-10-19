@@ -3,90 +3,36 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LYNLI 管理后台</title>
-  <link rel="stylesheet" href="css/style.css">
+  <title>LYNLI V6</title>
 </head>
-<body style="position:relative;">
-  <!-- 顶部绿条，用于验证代码是否更新 -->
-  <div style="position:fixed;top:0;left:0;right:0;background:#10b981;color:white;text-align:center;z-index:9999;padding:4px;font-size:12px;font-weight:bold;">
-    系统运行正常 - V5版本 (如果看到这行字说明代码已更新)
+<body style="background:#070b14; color:white; padding:20px; font-family:sans-serif;">
+  <h1 style="color:#10b981;">V6版本加载成功！</h1>
+  <div id="login-box">
+    <p>账号: <input id="acc" value="admin"></p>
+    <p>密码: <input id="pwd" type="password" value="123456"></p>
+    <button onclick="doLogin()" style="padding:10px 20px; background:#3b82f6; color:white; border:none;">点击登录</button>
   </div>
-
-  <div id="app" style="margin-top:20px;">
-    <section id="login-view" class="auth">
-      <div class="auth__panel">
-        <header class="brand"><div class="brand__mark"><img src="logo.png"></div><div class="brand__text"><h1>LYNLI</h1><p>控制台</p></div></header>
-        <div class="auth__card">
-          <form id="login-form">
-            <label class="field"><span class="field__label">账号</span><input class="field__input" type="text" name="account" value="admin"></label>
-            <label class="field"><span class="field__label">密码</span><input class="field__input" type="password" name="password" value="123456"></label>
-            <button class="btn btn--primary" type="submit">登录</button>
-          </form>
-        </div>
-      </div>
-    </section>
-
-    <section id="app-view" class="app" hidden>
-      <aside class="sidebar" id="sidebar">
-        <div class="sidebar__brand"><div class="brand__mark brand__mark--sm"><img src="logo.png"></div><strong>LYNLI</strong></div>
-        <nav class="sidebar__nav">
-          <button class="nav-item active" data-route="dashboard">数据看板</button>
-          <button class="nav-item" data-route="orders">全部订单</button>
-          <button class="nav-item" data-route="products">商品库</button>
-        </nav>
-        <div class="sidebar__foot"><div class="user-chip__meta"><strong>系统管理员</strong></div></div>
-      </aside>
-      <div class="app__main">
-        <header class="topbar"><h1 id="page-title">数据看板</h1></header>
-        <main class="content" id="content"></main>
-      </div>
-    </section>
+  
+  <div id="app-box" style="display:none;">
+    <h2>欢迎进入大厂后台，系统管理员</h2>
+    <p>如果你看到了这句话，说明登录接口彻底打通了。</p>
   </div>
 
   <script>
-    // 真实登录
-    document.getElementById('login-form').onsubmit = async (e) => {
-      e.preventDefault();
-      try {
-        const res = await fetch('https://spider.lynli.me/api/auth/login', {
-          method: 'POST', headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({ account: e.target.account.value, password: e.target.password.value })
-        });
-        const data = await res.json();
-        if(data.code === 200) {
-          document.getElementById('login-view').style.display = 'none';
-          document.getElementById('app-view').hidden = false;
-          loadRoute('dashboard'); // 登录成功自动进看板
-        } else { alert(data.message); }
-      } catch(e) { alert('请求失败，请检查网络'); }
-    };
-
-    // 页面切换逻辑
-    window.loadRoute = async (route) => {
-      const content = document.getElementById('content');
-      content.innerHTML = '<div class="card"><h2>加载数据中...</h2></div>';
-      document.querySelectorAll('.nav-item').forEach(el => el.classList.toggle('active', el.dataset.route === route));
-      document.getElementById('page-title').textContent = route === 'dashboard' ? '数据看板' : route === 'orders' ? '全部订单' : '商品库';
-
-      try {
-        if(route === 'dashboard') {
-          const res = await fetch('https://spider.lynli.me/api/dashboard');
-          const { data } = await res.json();
-          content.innerHTML = `<div class="card"><h2>今日营收: ¥${data.revenue}</h2><p>今日订单: ${data.orders_today} | 待发货: ${data.pending_ship}</p></div>`;
-        } else if(route === 'orders') {
-          const res = await fetch('https://spider.lynli.me/api/orders');
-          const { data } = await res.json();
-          content.innerHTML = `<div class="card"><table class="table"><thead><tr><th>订单号</th><th>买家</th><th>金额</th><th>状态</th></tr></thead><tbody>${data.map(o => `<tr><td>${o.id}</td><td>${o.buyer}</td><td>¥${o.amount}</td><td>${o.status}</td></tr>`).join('')}</tbody></table></div>`;
-        } else {
-          content.innerHTML = `<div class="card">商品模块已接通数据库，正在绘制 UI...</div>`;
-        }
-      } catch(err) { content.innerHTML = '<div class="card">加载失败</div>'; }
-    };
-
-    // 绑定左侧菜单点击事件
-    document.querySelectorAll('.nav-item').forEach(btn => {
-      btn.onclick = () => loadRoute(btn.dataset.route);
-    });
+    async function doLogin() {
+      const res = await fetch('https://spider.lynli.me/api/auth/login', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({account: document.getElementById('acc').value, password: document.getElementById('pwd').value})
+      });
+      const data = await res.json();
+      if (data.code === 200) {
+        document.getElementById('login-box').style.display = 'none';
+        document.getElementById('app-box').style.display = 'block';
+      } else {
+        alert('登录失败');
+      }
+    }
   </script>
 </body>
 </html>
