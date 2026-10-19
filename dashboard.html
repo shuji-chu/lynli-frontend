@@ -9,23 +9,15 @@
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
 </head>
 <body class="flex h-screen overflow-hidden bg-slate-50 font-sans text-sm relative">
-
-    <!-- 全局 Toast 容器 -->
     <div id="toast-container" class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 flex flex-col gap-2"></div>
-
-    <!-- 移动端遮罩 -->
     <div id="sidebar-overlay" class="fixed inset-0 bg-slate-900/50 z-40 hidden md:hidden" onclick="toggleSidebar()"></div>
 
-    <!-- 侧边栏 -->
     <aside id="sidebar" class="w-64 bg-[#0f172a] text-slate-300 flex flex-col z-50 absolute md:relative h-full transform -translate-x-full md:translate-x-0 transition-transform duration-300">
-        <div class="h-16 flex items-center justify-between px-5 border-b border-slate-800/50">
+        <div class="h-16 flex items-center justify-between px-5 border-b border-slate-800/50 shrink-0">
             <span class="text-lg font-black text-white tracking-wide">LYNLI CONSOLE</span>
             <button onclick="toggleSidebar()" class="md:hidden text-slate-400"><i class="fa-solid fa-xmark"></i></button>
         </div>
-        <nav class="flex-1 px-3 py-4 overflow-y-auto space-y-1" id="nav-menu">
-            <!-- 路由动态注入 -->
-        </nav>
-        <!-- 底部用户卡片 -->
+        <nav class="flex-1 px-3 py-4 overflow-y-auto space-y-1" id="nav-menu"></nav>
         <div class="p-4 border-t border-slate-800/50 bg-[#0b1120] cursor-pointer hover:bg-slate-800 transition" onclick="window.location.hash='#settings'">
             <div class="flex items-center gap-3">
                 <img id="nav-avatar" src="" class="w-8 h-8 rounded-full bg-slate-700 object-cover">
@@ -38,7 +30,6 @@
         </div>
     </aside>
 
-    <!-- 主内容 -->
     <main class="flex-1 flex flex-col w-full h-full min-w-0">
         <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 shrink-0 shadow-sm z-10">
             <div class="flex items-center">
@@ -55,19 +46,16 @@
             document.getElementById('sidebar').classList.toggle('-translate-x-full');
             document.getElementById('sidebar-overlay').classList.toggle('hidden');
         }
-        // 全局大厂级 Toast
         function toast(msg, type='success') {
-            const colors = { success: 'bg-emerald-500', error: 'bg-red-500', info: 'bg-blue-500' };
+            const colors = { success: 'bg-emerald-500', error: 'bg-red-500' };
             const el = document.createElement('div');
-            el.className = `${colors[type]} text-white px-6 py-3 rounded-xl shadow-lg font-medium text-sm transition-all duration-300 opacity-0 transform -translate-y-4 flex items-center gap-2`;
-            el.innerHTML = `<i class="fa-solid ${type==='success'?'fa-check-circle':(type==='error'?'fa-circle-xmark':'fa-circle-info')}"></i> ${msg}`;
+            el.className = `${colors[type]} text-white px-5 py-3 rounded-xl shadow-lg text-sm transition-all duration-300 opacity-0 flex items-center gap-2`;
+            el.innerHTML = `<i class="fa-solid ${type==='success'?'fa-check-circle':'fa-circle-xmark'}"></i> ${msg}`;
             document.getElementById('toast-container').appendChild(el);
-            setTimeout(() => el.classList.remove('opacity-0', '-translate-y-4'), 10);
-            setTimeout(() => { el.classList.add('opacity-0', '-translate-y-4'); setTimeout(() => el.remove(), 300); }, 3000);
+            setTimeout(() => el.classList.remove('opacity-0'), 10);
+            setTimeout(() => { el.classList.add('opacity-0'); setTimeout(() => el.remove(), 300); }, 3000);
         }
-        function logout() {
-            localStorage.removeItem('token'); localStorage.removeItem('user_info'); window.location.href = '/';
-        }
+        function logout() { localStorage.clear(); window.location.href = '/'; }
     </script>
     <script type="module" src="./js/router.js"></script>
 </body>
