@@ -3,248 +3,244 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Lynli 管理后台</title>
+<title>Lynli Console</title>
 <style>
   :root { --bg: #f5f7fa; --white: #ffffff; --text: #1e293b; --text-sub: #64748b; --blue: #2563eb; --blue-light: #eff6ff; --border: #e2e8f0; --danger: #ef4444; }
   *{box-sizing:border-box;margin:0;padding:0}
-  body { background: var(--bg); color: var(--text); font: 14px/1.6 -apple-system, sans-serif; -webkit-font-smoothing: antialiased; }
+  body { background: var(--bg); color: var(--text); font: 14px/1.6 -apple-system, sans-serif; height: 100vh; display: flex; overflow: hidden; }
 
-  /* ============ 完美复刻的登录页 ============ */
-  #login-page { display: flex; align-items: center; justify-content: center; height: 100vh; background: var(--white); }
-  .login-card { width: 100%; max-width: 420px; padding: 40px; background: var(--white); border: 1px solid var(--border); border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.02); }
-  
-  /* Logo 与标题 */
-  .login-header { margin-bottom: 30px; }
-  .login-icon { width: 48px; height: 48px; border-radius: 12px; background: #0f172a; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; }
-  .login-icon img { width: 32px; height: 32px; object-fit: contain; }
-  .login-header h1 { font-size: 24px; font-weight: 600; color: #0f172a; margin-bottom: 4px; }
-  .login-header p { color: var(--text-sub); font-size: 14px; }
-
-  /* 表单 */
+  /* 登录页 */
+  #login-page { display: flex; align-items: center; justify-content: center; height: 100vh; width: 100vw; background: var(--white); position: fixed; z-index: 999; }
+  .login-card { width: 100%; max-width: 400px; padding: 40px; background: var(--white); border: 1px solid var(--border); border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.02); }
+  .login-header h1 { font-size: 24px; font-weight: 600; margin-bottom: 4px; }
+  .login-header p { color: var(--text-sub); font-size: 14px; margin-bottom: 20px; }
   .form-group { margin-bottom: 20px; }
-  .form-group label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 8px; color: #334155; }
-  .form-group input { width: 100%; padding: 12px 16px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; outline: none; transition: 0.2s; background: var(--white); }
-  .form-group input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-light); }
+  .form-group label { display: block; margin-bottom: 8px; font-weight: 500; }
+  .form-group input, .form-group select { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; outline: none; }
+  .btn-black { width: 100%; padding: 14px; background: #000; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; }
 
-  /* 验证码行 */
-  .captcha-row { display: flex; gap: 10px; }
-  .captcha-row input { flex: 1; }
-  .captcha-img { width: 100px; background: var(--bg); border: 1px dashed var(--border); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; letter-spacing: 4px; color: var(--blue); cursor: pointer; user-select: none; font-family: monospace;}
+  /* 侧边栏 */
+  .sidebar { width: 240px; background: var(--white); border-right: 1px solid var(--border); display: flex; flex-direction: column; }
+  .sidebar-logo { padding: 20px; font-weight: bold; font-size: 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px;}
+  .sidebar-logo img { width: 24px; height: 24px; }
+  .menu-list { padding: 20px 10px; flex: 1; }
+  .menu-item { padding: 12px 20px; color: var(--text-sub); cursor: pointer; border-radius: 8px; margin-bottom: 4px; transition: 0.2s; }
+  .menu-item:hover { background: var(--bg); }
+  .menu-item.active { background: var(--blue-light); color: var(--blue); font-weight: 600; }
+  .menu-item.admin-only { display: none; } /* 权限控制 */
 
-  /* 记住密码 */
-  .remember-row { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; font-size: 14px; color: var(--text-sub); cursor: pointer; }
-  .remember-row input { width: 16px; height: 16px; accent-color: var(--blue); }
+  /* 主内容 */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .topbar { height: 60px; background: var(--white); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; padding: 0 24px; }
+  .content-area { flex: 1; padding: 30px; overflow-y: auto; display: none; }
+  .content-area.active { display: block; }
+  .page-title { font-size: 20px; font-weight: 600; margin-bottom: 24px; }
 
-  /* 按钮 */
-  .btn-login { width: 100%; padding: 14px; background: #000; color: #fff; border: none; border-radius: 8px; font-size: 16px; font-weight: 500; cursor: pointer; transition: 0.2s; }
-  .btn-login:hover { background: #333; }
-  .copyright { text-align: center; color: #94a3b8; font-size: 12px; margin-top: 40px; }
+  /* 通用组件 */
+  .card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+  .btn { padding: 10px 20px; background: var(--blue); color: #fff; border: none; border-radius: 8px; cursor: pointer; }
+  .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+  .btn-danger { background: var(--danger); }
+  .form-row { display: flex; gap: 15px; margin-bottom: 15px; align-items: center; }
 
-  /* ============ 主面板 ============ */
-  #dashboard { display: none; flex-direction: column; min-height: 100vh; }
-  .sidebar { background: var(--white); border-bottom: 1px solid var(--border); display: flex; overflow-x: auto; white-space: nowrap; }
-  .sidebar-logo { padding: 15px 20px; font-weight: bold; font-size: 16px; display: none; }
-  .menu-item { padding: 15px 20px; color: var(--text-sub); cursor: pointer; border-bottom: 3px solid transparent; }
-  .menu-item.active { color: var(--blue); border-bottom-color: var(--blue); font-weight: 600; }
-  .main { flex: 1; display: flex; flex-direction: column; }
-  .topbar { display: none; }
-  .content { padding: 15px; width: 100%; }
-  .toolbar { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; background: var(--white); padding: 15px; border-radius: 12px; border: 1px solid var(--border); }
-  .toolbar input { width: 100%; padding: 12px 16px; border: 1px solid var(--border); border-radius: 8px; outline: none; font-size: 14px; }
-  .btn { width: 100%; padding: 12px 24px; background: var(--blue); color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 500; font-size: 15px;}
-  .grid { display: grid; grid-template-columns: 1fr; gap: 15px; }
-  .card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
-  .card img { width: 100%; height: 220px; object-fit: cover; }
-  .card-body { padding: 15px; }
-  .title { font-size: 14px; font-weight: 600; margin-bottom: 12px; height: 40px; overflow: hidden; line-height: 1.4;}
-  .price-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-  .price-input { width: 70px; border: 1px solid var(--border); border-radius: 4px; padding: 4px 8px; color: var(--blue); font-weight: bold; font-size: 14px;}
-  .actions { display: flex; gap: 10px; }
-  .actions button { flex: 1; padding: 10px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: bold;}
-  .btn-up { background: var(--blue-light); color: var(--blue); }
-  .btn-del { background: #fef2f2; color: var(--danger); }
-  #loading { display: none; color: var(--blue); margin-bottom: 15px; text-align: center; font-weight: bold;}
-
-  @media (min-width: 768px) {
-    #dashboard { flex-direction: row; height: 100vh; overflow: hidden; }
-    .sidebar { width: 240px; border-right: 1px solid var(--border); border-bottom: none; flex-direction: column; padding: 20px 0; }
-    .sidebar-logo { display: block; border-bottom: 1px solid var(--border); margin-bottom: 10px; font-size: 18px; }
-    .menu-item { border-bottom: none; border-right: 3px solid transparent; padding: 12px 20px; }
-    .menu-item.active { border-right-color: var(--blue); border-bottom: none; background: var(--blue-light); }
-    .topbar { display: flex; height: 60px; background: var(--white); border-bottom: 1px solid var(--border); justify-content: flex-end; align-items: center; padding: 0 24px; }
-    .content { padding: 30px; max-width: 1200px; margin: 0 auto; overflow-y: auto;}
-    .toolbar { flex-direction: row; padding: 20px; }
-    .btn { width: auto; }
-    .grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
-  }
+  /* 选品网格 */
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
+  .product-card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .product-card img { width: 100%; height: 180px; object-fit: cover; }
+  .product-info { padding: 15px; }
 </style>
 </head>
 <body>
 
-<!-- 登录页 -->
+<!-- 登录页面 -->
 <div id="login-page">
   <div class="login-card">
     <div class="login-header">
-      <div class="login-icon">
-        <!-- 使用你仓库里现成的 logo.png -->
-        <img src="./logo.png" alt="Lynli">
-      </div>
-      <h1>Lynli 管理后台</h1>
-      <p>Admin Console</p>
+      <h1>Lynli Console</h1>
+      <p>多权限管理后台演示</p>
     </div>
-
     <div class="form-group">
-      <label>管理员邮箱 / 账号</label>
-      <input type="text" id="username" placeholder="请输入账号" onkeypress="if(event.key==='Enter') checkLogin()">
+      <label>登录角色</label>
+      <select id="login-role">
+        <option value="super">超级管理员 (Super Admin)</option>
+        <option value="operator">运营人员 (Operator)</option>
+      </select>
     </div>
-    
-    <div class="form-group">
-      <label>密码</label>
-      <input type="password" id="password" placeholder="请输入密码" onkeypress="if(event.key==='Enter') checkLogin()">
-    </div>
-
-    <div class="form-group">
-      <label>验证码</label>
-      <div class="captcha-row">
-        <input type="text" id="captcha-input" placeholder="输入右侧4位数字" onkeypress="if(event.key==='Enter') checkLogin()">
-        <div class="captcha-img" id="captcha-box" onclick="refreshCaptcha()" title="点击刷新">0000</div>
-      </div>
-    </div>
-
-    <label class="remember-row">
-      <input type="checkbox" id="remember">
-      记住密码
-    </label>
-
-    <button class="btn-login" onclick="checkLogin()">登录</button>
-    <div class="copyright">© 2026 Lynli. All rights reserved.</div>
+    <button class="btn-black" onclick="doLogin()">进入系统</button>
   </div>
 </div>
 
-<!-- 主面板 -->
-<div id="dashboard">
+<!-- 主应用 -->
+<div id="app" style="display:none; width:100vw; height:100vh;">
+  
+  <!-- 侧边栏 -->
   <div class="sidebar">
-    <div class="sidebar-logo">Lynli Panel</div>
-    <div class="menu-item">数据看板</div>
-    <div class="menu-item active">AI 选品中心</div>
-    <div class="menu-item">商品管理</div>
+    <div class="sidebar-logo">
+      <img src="./logo.png" alt="Logo"> Lynli Panel
+    </div>
+    <div class="menu-list">
+      <div class="menu-item active" onclick="switchPage('dashboard', this)">数据看板</div>
+      <div class="menu-item" onclick="switchPage('spider', this)">AI 选品中心</div>
+      <div class="menu-item" onclick="switchPage('products', this)">商品管理</div>
+      <div class="menu-item admin-only" onclick="switchPage('gateway', this)">网关配置</div>
+      <div class="menu-item" onclick="switchPage('profile', this)">个人设置</div>
+    </div>
   </div>
+
+  <!-- 右侧主内容 -->
   <div class="main">
-    <div class="topbar"><span style="font-weight: 500;">超级管理员</span></div>
-    <div class="content">
-      <div class="toolbar">
-        <input type="text" id="keyword" placeholder="输入商品关键词，例如：私密护理仪" onkeypress="if(event.key==='Enter') startSpider()">
+    <div class="topbar">
+      <div id="current-role-display">超级管理员</div>
+      <button class="btn btn-outline" onclick="logout()">退出登录</button>
+    </div>
+
+    <!-- 页面 1：数据看板 -->
+    <div id="page-dashboard" class="content-area active">
+      <div class="page-title">数据概览</div>
+      <div class="grid" style="grid-template-columns: repeat(3, 1fr);">
+        <div class="card"><h3>总商品数</h3><p style="font-size:32px; font-weight:bold;">1,248</p></div>
+        <div class="card"><h3>今日抓取</h3><p style="font-size:32px; font-weight:bold;">356</p></div>
+        <div class="card"><h3>待审核</h3><p style="font-size:32px; font-weight:bold; color:var(--danger)">12</p></div>
+      </div>
+    </div>
+
+    <!-- 页面 2：AI 选品 (对接真实接口) -->
+    <div id="page-spider" class="content-area">
+      <div class="page-title">AI 选品中心</div>
+      <div class="card" style="display:flex; gap:10px;">
+        <input type="text" id="keyword" placeholder="输入商品关键词" style="flex:1; padding:10px; border:1px solid var(--border); border-radius:8px;">
         <button class="btn" onclick="startSpider()">开始抓取</button>
       </div>
-      <div id="loading">⏳ 正在调度爬虫抓取并上传至 OSS...</div>
-      <div class="grid" id="list"></div>
+      <div id="loading" style="display:none; color:var(--blue); margin-bottom:15px;">正在抓取中...</div>
+      <div class="grid" id="spider-list"></div>
     </div>
+
+    <!-- 页面 3：商品管理 -->
+    <div id="page-products" class="content-area">
+      <div class="page-title">商品管理</div>
+      <div class="card">
+        <button class="btn" onclick="alert('调用上传接口...')">手动上传新商品</button>
+        <table style="width:100%; margin-top:20px; text-align:left; border-collapse:collapse;">
+          <tr style="border-bottom:1px solid var(--border);"><th>ID</th><th>商品名称</th><th>价格</th><th>操作</th></tr>
+          <tr><td>1001</td><td>私密护理仪 Pro</td><td>¥299</td><td><button class="btn btn-danger" onclick="alert('删除商品')">删除</button></td></tr>
+          <tr><td>1002</td><td>智能互动设备</td><td>¥199</td><td><button class="btn btn-danger" onclick="alert('删除商品')">删除</button></td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- 页面 4：网关配置 (仅管理员可见) -->
+    <div id="page-gateway" class="content-area">
+      <div class="page-title">网关与 API 配置</div>
+      <div class="card">
+        <div class="form-row"><label style="width:150px;">OSS 存储桶：</label><input type="text" value="lynli-oss-bucket" style="flex:1; padding:8px; border:1px solid var(--border);"></div>
+        <div class="form-row"><label style="width:150px;">爬虫 API 域名：</label><input type="text" value="https://spider.lynli.me" style="flex:1; padding:8px; border:1px solid var(--border);"></div>
+        <button class="btn" onclick="alert('配置已保存')">保存配置</button>
+      </div>
+    </div>
+
+    <!-- 页面 5：个人设置 -->
+    <div id="page-profile" class="content-area">
+      <div class="page-title">个人设置</div>
+      <div class="card">
+        <div class="form-row"><label style="width:100px;">昵称：</label><input type="text" value="Super Admin" style="flex:1; padding:8px; border:1px solid var(--border);"></div>
+        <div class="form-row"><label style="width:100px;">新密码：</label><input type="password" placeholder="留空则不修改" style="flex:1; padding:8px; border:1px solid var(--border);"></div>
+        <button class="btn" onclick="alert('个人信息已更新')">保存修改</button>
+      </div>
+    </div>
+
   </div>
 </div>
 
 <script>
 const API = 'https://spider.lynli.me';
-let currentCaptcha = '';
 
-// 生成验证码
-function refreshCaptcha() {
-  currentCaptcha = Math.floor(1000 + Math.random() * 9000).toString();
-  document.getElementById('captcha-box').innerText = currentCaptcha;
-}
-refreshCaptcha();
-
-// 页面加载：检查是否记住密码
-window.onload = function() {
-  const savedUser = localStorage.getItem('lynli_user');
-  const savedPass = localStorage.getItem('lynli_pass');
-  if (savedUser && savedPass) {
-    document.getElementById('username').value = savedUser;
-    document.getElementById('password').value = savedPass;
-    document.getElementById('remember').checked = true;
-  }
-}
-
-// 登录校验
-function checkLogin() {
-  const user = document.getElementById('username').value.trim();
-  const pass = document.getElementById('password').value.trim();
-  const captchaInput = document.getElementById('captcha-input').value.trim();
-  const remember = document.getElementById('remember').checked;
-
-  if (!user || !pass) return alert('请输入账号和密码');
-  if (captchaInput !== currentCaptcha) {
-    alert('验证码错误！');
-    refreshCaptcha();
-    document.getElementById('captcha-input').value = '';
-    return;
-  }
-
-  // 这里改成真实的账号密码（admin/123456）
-  if (user === 'admin' && pass === '123456') {
-    if (remember) {
-      localStorage.setItem('lynli_user', user);
-      localStorage.setItem('lynli_pass', pass);
-    } else {
-      localStorage.removeItem('lynli_user');
-      localStorage.removeItem('lynli_pass');
-    }
-    
-    document.getElementById('login-page').style.display = 'none';
-    document.getElementById('dashboard').style.display = 'flex';
-    loadDrafts();
+// 1. 登录与权限控制
+function doLogin() {
+  const role = document.getElementById('login-role').value;
+  
+  document.getElementById('login-page').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  
+  if (role === 'super') {
+    document.getElementById('current-role-display').innerText = '超级管理员';
+    document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'block');
   } else {
-    alert('账号或密码错误');
-    refreshCaptcha();
+    document.getElementById('current-role-display').innerText = '运营人员';
+    document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
+    // 如果运营人员当前在管理员页面，踢回看板
+    document.getElementById('page-gateway').classList.remove('active');
+    document.getElementById('page-dashboard').classList.add('active');
   }
 }
 
-// 下方的选品逻辑保持不变
+function logout() {
+  location.reload();
+}
+
+// 2. 单页面路由切换
+function switchPage(pageId, element) {
+  // 隐藏所有页面
+  document.querySelectorAll('.content-area').forEach(el => el.classList.remove('active'));
+  // 取消菜单高亮
+  document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
+  
+  // 显示目标页面
+  document.getElementById('page-' + pageId).classList.add('active');
+  if(element) element.classList.add('active');
+}
+
+// 3. AI 选品功能 (对接你的 7002 端口真实接口)
 async function startSpider() {
   const kw = document.getElementById('keyword').value;
   if (!kw) return alert('请输入关键词');
-  const loading = document.getElementById('loading');
-  const list = document.getElementById('list');
-  loading.style.display = 'block';
-  list.innerHTML = '';
+  
+  document.getElementById('loading').style.display = 'block';
+  document.getElementById('spider-list').innerHTML = '';
+  
   try {
     await fetch(`${API}/api/v1/admin/spider/start`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ keyword: kw })
     });
     setTimeout(loadDrafts, 3000);
-  } catch (err) { alert('请求失败'); loading.style.display = 'none'; }
+  } catch (err) { 
+    alert('请求失败'); 
+    document.getElementById('loading').style.display = 'none'; 
+  }
 }
 
 async function loadDrafts() {
-  const loading = document.getElementById('loading');
-  const list = document.getElementById('list');
   try {
     const res = await fetch(`${API}/api/v1/admin/spider/list`);
     const data = await res.json();
-    loading.style.display = 'none';
+    document.getElementById('loading').style.display = 'none';
+    
     if (data.code !== 1) throw new Error(data.msg);
-    if (data.data.length === 0) { list.innerHTML = '<div style="color:#64748b; text-align:center; padding:20px;">暂无草稿数据，请抓取。</div>'; return; }
-    list.innerHTML = data.data.map(item => `
-      <div class="card" id="card-${item.id}">
+    
+    document.getElementById('spider-list').innerHTML = data.data.map(item => `
+      <div class="product-card" id="card-${item.id}">
         <img src="${item.image_url.replace('http://', 'https://')}">
-        <div class="card-body">
-          <div class="title">${item.title}</div>
-          <div class="price-row">
+        <div class="product-info">
+          <div style="font-weight:600; margin-bottom:8px;">${item.title}</div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
             <span style="color:#64748b; font-size:12px;">进价: ¥${item.price}</span>
-            <span style="font-size:12px;">售价: ¥<input type="number" class="price-input" id="price-${item.id}" value="${Math.floor(item.price * 3)}"></span>
+            <span style="font-size:12px;">售价: ¥<input type="number" class="price-input" id="price-${item.id}" value="${Math.floor(item.price * 3)}" style="width:60px;"></span>
           </div>
-          <div class="actions">
-            <button class="btn-up" onclick="publish(${item.id})">上架</button>
-            <button class="btn-del" onclick="discard(${item.id})">丢弃</button>
+          <div style="display:flex; gap:10px;">
+            <button class="btn" style="flex:1; background:var(--blue-light); color:var(--blue);" onclick="publish(${item.id})">上架</button>
+            <button class="btn" style="flex:1; background:#fef2f2; color:var(--danger);" onclick="discard(${item.id})">丢弃</button>
           </div>
         </div>
       </div>
     `).join('');
-  } catch (err) { loading.style.display = 'none'; list.innerHTML = '<div style="color:red; text-align:center; padding:20px;">拉取失败</div>'; }
+  } catch (err) { 
+    document.getElementById('loading').style.display = 'none'; 
+    document.getElementById('spider-list').innerHTML = '<div style="color:red;">拉取失败</div>';
+  }
 }
 
 async function publish(id) {
   const price = document.getElementById(`price-${id}`).value;
-  const btn = event.target; btn.innerText = '处理中'; btn.disabled = true;
+  const btn = event.target; btn.innerText = '...'; btn.disabled = true;
   try {
     const res = await fetch(`${API}/api/v1/admin/spider/publish`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, price })
@@ -256,7 +252,7 @@ async function publish(id) {
 
 async function discard(id) {
   if (!confirm('确定丢弃吗？')) return;
-  const btn = event.target; btn.innerText = '删除中'; btn.disabled = true;
+  const btn = event.target; btn.innerText = '...'; btn.disabled = true;
   try {
     const res = await fetch(`${API}/api/v1/admin/spider/discard`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id })
