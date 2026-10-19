@@ -1,30 +1,28 @@
+import { api } from './api.js';
 document.addEventListener('DOMContentLoaded', () => {
-    // 密码显示/隐藏切换
-    const togglePassword = document.getElementById('togglePassword');
-    const passwordInput = document.getElementById('password');
-    
-    if (togglePassword && passwordInput) {
-        togglePassword.addEventListener('click', () => {
-            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-            passwordInput.setAttribute('type', type);
-            togglePassword.innerHTML = type === 'password' 
-                ? '<i class="fa-regular fa-eye-slash text-lg"></i>' 
-                : '<i class="fa-regular fa-eye text-lg"></i>';
-        });
-    }
-
-    // 表单提交拦截
     const loginForm = document.getElementById('loginForm');
     if (loginForm) {
-        loginForm.addEventListener('submit', (e) => {
+        loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            
-            console.log('准备请求后端:', username);
-            
-            // TODO: 接入你的 API 
-            // const response = await fetch('https://spider.lynli.me/api/login', { ... })
+            const submitBtn = loginForm.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 登录中...';
+            try {
+                const data = await api.login(
+                    document.getElementById('username').value,
+                    document.getElementById('password').value
+                );
+                if (data.code === 200) {
+                    localStorage.setItem('lynli_token', data.token);
+                    window.location.href = '/dashboard.html'; 
+                } else {
+                    alert(data.msg || '登录失败');
+                    submitBtn.innerHTML = originalText;
+                }
+            } catch (err) {
+                alert('网络错误，请检查后端是否启动');
+                submitBtn.innerHTML = originalText;
+            }
         });
     }
 });

@@ -1,21 +1,48 @@
-const BASE = 'https://spider.lynli.me';
-
-async function request(path, options = {}) {
-    try {
-        const res = await fetch(`${BASE}${path}`, {
-            ...options,
-            mode: 'cors', // 强制跨域
-            headers: { 'Content-Type': 'application/json', ...options.headers }
-        });
-        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-        return await res.json();
-    } catch (err) {
-        console.error(`接口请求失败 [${path}]:`, err);
-        throw err;
-    }
-}
+const BASE_URL = 'https://spider.lynli.me';
+const getHeaders = () => {
+    const token = localStorage.getItem('lynli_token');
+    return {
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+    };
+};
 
 export const api = {
-    get: (path) => request(path),
-    post: (path, body) => request(path, { method: 'POST', body: JSON.stringify(body) })
+    login: async (username, password) => {
+        const res = await fetch(`${BASE_URL}/api/login`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        });
+        return await res.json();
+    },
+    startSpider: async (keyword) => {
+        const res = await fetch(`${BASE_URL}/api/spider/start`, {
+            method: 'POST', headers: getHeaders(), body: JSON.stringify({ keyword })
+        });
+        return await res.json();
+    },
+    getSpiderList: async () => {
+        const res = await fetch(`${BASE_URL}/api/spider/list`, { headers: getHeaders() });
+        return await res.json();
+    },
+    publishProduct: async (id) => {
+        const res = await fetch(`${BASE_URL}/api/shop/publish`, {
+            method: 'POST', headers: getHeaders(), body: JSON.stringify({ id })
+        });
+        return await res.json();
+    },
+    getProducts: async () => {
+        const res = await fetch(`${BASE_URL}/api/shop/products`, { headers: getHeaders() });
+        return await res.json();
+    },
+    getOrders: async () => {
+        const res = await fetch(`${BASE_URL}/api/shop/orders`, { headers: getHeaders() });
+        return await res.json();
+    },
+    shipOrder: async (orderId, trackingNo) => {
+        const res = await fetch(`${BASE_URL}/api/shop/ship`, {
+            method: 'POST', headers: getHeaders(), body: JSON.stringify({ order_id: orderId, tracking_no: trackingNo })
+        });
+        return await res.json();
+    }
 };

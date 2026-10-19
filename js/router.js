@@ -1,43 +1,36 @@
-import * as dashboard from './views/dashboard.js';
-import * as orders from './views/orders.js';
-import * as products from './views/products.js';
-import * as users from './views/users.js';
-import * as spider from './views/spider.js';
-
-export async function switchPage(pageId) {
-    document.querySelectorAll('.nav-item').forEach(el => {
-        if (el.dataset.target === pageId) el.classList.add('active');
-        else el.classList.remove('active');
+import { renderDashboard } from './views/dashboard.js';
+import { renderProducts } from './views/products.js';
+import { renderOrders } from './views/orders.js';
+import { renderSpider } from './views/spider.js';
+const appView = document.getElementById('app-view');
+const pageTitle = document.getElementById('page-title');
+const navLinks = document.querySelectorAll('.nav-link');
+if (!localStorage.getItem('lynli_token')) { window.location.href = '/'; }
+const routes = {
+    '#dashboard': { title: '数据看板', render: renderDashboard },
+    '#products': { title: '商品库', render: renderProducts },
+    '#orders': { title: '订单管理', render: renderOrders },
+    '#spider': { title: 'AI 选品中心', render: renderSpider }
+};
+async function router() {
+    const hash = window.location.hash || '#dashboard';
+    const route = routes[hash] || routes['#dashboard'];
+    navLinks.forEach(link => {
+        if (link.getAttribute('href') === hash) {
+            link.classList.add('bg-blue-600', 'text-white', 'shadow-lg', 'shadow-blue-600/30');
+            link.classList.remove('text-slate-300');
+        } else {
+            link.classList.remove('bg-blue-600', 'text-white', 'shadow-lg', 'shadow-blue-600/30');
+            link.classList.add('text-slate-300');
+        }
     });
-    if(window.innerWidth < 768) {
-        document.getElementById('sidebar').classList.remove('open');
-        document.getElementById('overlay').classList.remove('open');
-    }
-    document.getElementById('breadcrumb').innerText = {
-        dashboard: '数据大盘', orders: '订单与物流', products: '商品库', spider: 'AI 智能选品', users: '会员列表'
-    }[pageId] || pageId;
-
-    const content = document.getElementById('page-content');
-    
-    // 骨架屏
-    content.innerHTML = `
-        <div style="display:flex; gap:16px; flex-direction:column;">
-            <div class="skeleton" style="height:120px; width:100%;"></div>
-            <div style="display:flex; gap:16px;">
-                <div class="skeleton" style="height:80px; width:50%;"></div>
-                <div class="skeleton" style="height:80px; width:50%;"></div>
-            </div>
-            <div class="skeleton" style="height:200px; width:100%;"></div>
-        </div>
-    `;
-
-    try {
-        if (pageId === 'dashboard') content.innerHTML = await dashboard.render();
-        if (pageId === 'orders') content.innerHTML = await orders.render();
-        if (pageId === 'products') content.innerHTML = await products.render();
-        if (pageId === 'users') content.innerHTML = await users.render();
-        if (pageId === 'spider') content.innerHTML = await spider.render();
-    } catch (err) {
-        content.innerHTML = `<div style="text-align:center; padding:40px; color:#ef4444;">加载失败: ${err.message}</div>`;
-    }
+    pageTitle.innerText = route.title;
+    appView.innerHTML = '<div class="animate-pulse space-y-4"><div class="h-32 bg-slate-200 rounded-2xl w-full"></div><div class="h-64 bg-slate-200 rounded-2xl w-full"></div></div>';
+    await route.render(appView);
 }
+window.addEventListener('hashchange', router);
+window.addEventListener('DOMContentLoaded', router);
+document.getElementById('logout-btn')?.addEventListener('click', () => {
+    localStorage.removeItem('lynli_token');
+    window.location.href = '/';
+});
