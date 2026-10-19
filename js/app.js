@@ -5,28 +5,28 @@ import { renderLayout } from "./views/layout.js";
 import { showModal, toast } from "./ui.js";
 import { initAICopilot } from "./views/ai-copilot.js";
 import { renderLogin } from "./views/login.js";
+import { openProfileModal } from "./views/profile.js";
 
 import * as Dashboard from "./views/dashboard.js";
 import * as Orders from "./views/orders.js";
 import * as Aftersales from "./views/aftersales.js";
 import * as Products from "./views/products.js";
 import * as Spider from "./views/spider.js";
-import * as Proxy from "./views/proxy.js"; // 新
+import * as Proxy from "./views/proxy.js";
 import * as Purchases from "./views/purchases.js";
 import * as Suppliers from "./views/suppliers.js";
 import * as Marketing from "./views/marketing.js";
-import * as CRM from "./views/crm.js"; // 已重写
-import * as Finance from "./views/finance.js"; // 已重写
-import * as Logistics from "./views/logistics.js"; // 新
+import * as CRM from "./views/crm.js";
+import * as Finance from "./views/finance.js";
+import * as Logistics from "./views/logistics.js";
 import * as Organization from "./views/organization.js";
-import * as Roles from "./views/roles.js"; // 新
-import * as System from "./views/system.js"; // 已重写
+import * as Roles from "./views/roles.js";
+import * as System from "./views/system.js";
 
 const app = document.getElementById("app");
 let openTabs = ["dashboard"];
 let currentPage = "dashboard";
 
-document.body.classList.add('light-mode'); 
 document.addEventListener('click', () => { document.getElementById('dropdown-menu')?.classList.remove('show'); });
 
 Object.assign(routes.dashboard, { render: Dashboard.render });
@@ -103,15 +103,10 @@ function renderApp() {
     else document.exitFullscreen();
   };
 
-  document.getElementById('theme-btn').onclick = () => {
-    document.body.classList.toggle('light-mode');
-    if(currentPage === 'dashboard') switchPage('dashboard'); 
-  };
-
   document.getElementById('notice-btn').onclick = () => {
     showModal({
       title: "系统通知",
-      contentHTML: `<div class="notice-list"><div class="notice-item"><b>系统升级完成</b><p>V3.0 版本已上线，新增代理池与提现审核模块。</p></div></div>`,
+      contentHTML: `<div class="notice-list"><div class="notice-item"><b>系统升级完成</b><p>V3.0 架构深度拆分，背景与主题全面重构。</p></div></div>`,
       onConfirm: (mask, close) => close()
     });
   };
@@ -120,49 +115,15 @@ function renderApp() {
   document.getElementById('logout-btn').onclick = () => renderLogin(renderApp);
 
   document.getElementById('profile-btn').onclick = () => {
-    const userInfo = JSON.parse(localStorage.getItem("lynli_user") || '{"name":"系统管理员","avatar":"管"}');
-    const hasImg = userInfo.avatar.startsWith('data:image');
-    showModal({
-      title: "个人中心设置",
-      contentHTML: `
-        <div style="text-align:center; margin-bottom:20px;">
-          <label class="upload-avatar-wrap" for="avatar-upload">
-            <img id="avatar-img-preview" src="${hasImg ? userInfo.avatar : ''}" style="display:${hasImg ? 'block' : 'none'};">
-            <span id="avatar-text" style="display:${hasImg ? 'none' : 'block'};">点击上传<br>头像</span>
-          </label>
-          <input type="file" id="avatar-upload" accept="image/*" style="display:none;">
-        </div>
-        <div class="field"><label>修改昵称</label><input type="text" id="m-nickname" value="${userInfo.name}" style="width:100%;"></div>
-      `,
-      onConfirm: (mask, close) => {
-        const newName = mask.querySelector('#m-nickname').value;
-        const imgPreview = mask.querySelector('#avatar-img-preview');
-        let newAvatar = userInfo.avatar;
-        if (imgPreview.src && imgPreview.src.startsWith('data:image')) newAvatar = imgPreview.src;
-        if (!newName) return toast("昵称不能为空", "error");
-        localStorage.setItem("lynli_user", JSON.stringify({ name: newName, avatar: newAvatar }));
-        close(); renderApp(); switchPage("dashboard"); toast("更新成功");
-      }
+    openProfileModal(() => {
+      renderApp(); 
+      switchPage("dashboard"); 
     });
-    setTimeout(() => {
-      document.getElementById('avatar-upload').onchange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-          const reader = new FileReader();
-          reader.onload = (re) => {
-            const img = document.getElementById('avatar-img-preview');
-            img.src = re.target.result;
-            img.style.display = 'block';
-            document.getElementById('avatar-text').style.display = 'none';
-          };
-          reader.readAsDataURL(file);
-        }
-      };
-    }, 100);
   };
 
   document.querySelectorAll('.nav-item').forEach(el => { el.onclick = () => switchPage(el.dataset.page); });
   switchPage("dashboard");
 }
 
+// 启动
 renderLogin(renderApp);
