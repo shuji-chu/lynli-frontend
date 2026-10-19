@@ -5,7 +5,6 @@ import { renderLayout } from "./components/layout.js";
 import { initAuth } from "./views/auth.js";
 import { $ } from "./utils/dom.js";
 
-// 核心页面注册
 registerRoute("dashboard", () => import("./views/dashboard.js"));
 registerRoute("orders-all", () => import("./views/orders.js"));
 registerRoute("products-list", () => import("./views/products.js"));
@@ -13,12 +12,10 @@ registerRoute("finance", () => import("./views/finance.js"));
 registerRoute("users", () => import("./views/users.js"));
 registerRoute("settings", () => import("./views/settings.js"));
 registerRoute("spider", () => import("./views/spider.js"));
-
-// 客服模块注册
 registerRoute("cs-chat", () => import("./views/customer-service.js"));
 registerRoute("cs-tickets", () => import("./views/customer-tickets.js"));
+registerRoute("logistics", () => import("./views/logistics.js")); // 物流地图挂载
 
-// 占位页面
 const PlaceholderView = { render: async (mount) => { mount.innerHTML = '<div class="view-empty"><h2>模块建设中</h2></div>'; } };
 ["data-center","orders-delivery","orders-refund","products-category","marketing-coupon"].forEach(k => registerRoute(k, () => Promise.resolve(PlaceholderView)));
 
