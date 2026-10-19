@@ -1,10 +1,13 @@
-import { $ } from "../utils/dom.js"; import { showToast } from "../components/toast.js"; import { storage } from "../utils/storage.js"; import { renderLayout } from "../components/layout.js";
+import { $ } from "../core/utils.js";
+import { renderLayout } from "../components/ui/layout.js";
+import { ROUTES } from "../router/routes.js";
+import { store } from "../store/data.js";
+import { nav } from "../router/index.js";
 export function initAuth() {
   $("#login-form").onsubmit = (e) => {
-    e.preventDefault(); const acc = e.target.account.value; const pwd = e.target.password.value;
-    if (acc === "admin" && pwd === "123456") {
-      showToast("欢迎回来"); storage.setToken("mock"); storage.setUser({ email: "admin@lynli.me", nickname: "超管" });
-      $("#login-view").hidden = true; $("#app-view").hidden = false; renderLayout(); location.hash = "#/dashboard";
-    } else { showToast("账号或密码错误", "error"); }
+    e.preventDefault();
+    $("#login-view").hidden = true; $("#app-view").hidden = false;
+    renderLayout(ROUTES, { nickname: "管理员" });
+    location.hash = "#/dashboard";
   };
 }
