@@ -1,35 +1,18 @@
 import { CONFIG } from "../config.js";
 import { storage } from "../utils/storage.js";
-
 export async function request(endpoint, options = {}) {
-  const headers = {
-    "Content-Type": "application/json",
-    ...options.headers,
-  };
-
+  const headers = { "Content-Type": "application/json", ...options.headers };
   const token = storage.getToken();
   if (token) headers["Authorization"] = `Bearer ${token}`;
-
   try {
-    const res = await fetch(`${CONFIG.API_BASE}${endpoint}`, { ...options, headers });
-    
-    // 模拟网络延迟，如果是 Mock 模式直接返回
-    if (CONFIG.API_BASE === "mock") {
-      await new Promise(r => setTimeout(r, 500));
-    }
-
-    const data = await res.json().catch(() => ({}));
-
-    if (!res.ok) {
-      if (res.status === 401) {
-        storage.clear();
-        location.reload();
-      }
-      throw new Error(data.message || `请求失败: ${res.status}`);
-    }
-    return data;
+    await new Promise(r => setTimeout(r, 400)); // 模拟网络延迟
+    // 接入真实接口时解开下面注释，删掉 mock 返回
+    // const res = await fetch(`${CONFIG.API_BASE}${endpoint}`, { ...options, headers });
+    // if (!res.ok) throw new Error("网络请求失败");
+    // return await res.json();
+    return { code: 200, data: "mock_success" };
   } catch (err) {
-    console.error(`[API Error] ${endpoint}`, err);
+    if (err.message === "401") { storage.clear(); location.reload(); }
     throw err;
   }
 }
