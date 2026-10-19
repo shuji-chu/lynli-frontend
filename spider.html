@@ -71,7 +71,7 @@ async function loadDrafts() {
     if (data.data.length === 0) { document.getElementById('list').innerHTML = '<div style="color:#64748b">暂无数据。</div>'; return; }
     document.getElementById('list').innerHTML = data.data.map(item => `
       <div class="card" id="card-${item.id}">
-        <img src="${item.image_url}">
+        <img src="${item.image_url.replace('http://', 'https://')}">
         <div class="card-body">
           <div class="title">${item.title}</div>
           <div class="price-row">
@@ -97,7 +97,7 @@ async function publish(id) {
   } catch (err) { alert('失败'); btn.innerText = '上架'; btn.disabled = false; }
 }
 async function discard(id) {
-  if (!confirm('确定丢弃吗？会同时删除 OSS 图片！')) return;
+  if (!confirm('确定丢弃吗？')) return;
   const btn = event.target; btn.innerText = '删除中'; btn.disabled = true;
   try {
     const res = await fetch(`${API}/api/v1/admin/spider/discard`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
