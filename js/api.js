@@ -1,4 +1,6 @@
-const BASE_URL = "https://spider.lynli.me/api";
+// 如果以后你的服务器绑定了域名，把这里换成你的真实 API 地址
+// 比如: const BASE_URL = "https://api.lynli.me";
+const BASE_URL = "/api"; 
 
 export const api = {
   async get(endpoint) {
