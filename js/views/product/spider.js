@@ -2,11 +2,11 @@ import { toast } from "../../components/ui/toast.js";
 import { store } from "../../store/data.js";
 
 export async function render(m) {
-  const platforms = ['1688', '淘宝', '天猫', '拼多多', '京东', '抖音', '快手', '唯品会'];
+  const platforms = ['1688', '淘宝', '拼多多', '京东', '抖音'];
   
   m.innerHTML = `
     <div class="card">
-      <h2>全网多平台智能抓取</h2>
+      <h2>全网多平台智能抓取（真实接口）</h2>
       <div style="display:flex;gap:10px;margin:20px 0;flex-wrap:wrap;">
         ${platforms.map(p => `<label class="platform-tag"><input type="checkbox" checked value="${p}"> ${p}</label>`).join('')}
       </div>
@@ -15,8 +15,8 @@ export async function render(m) {
         <button class="btn btn-primary" id="start" style="width:120px;flex:none;">开始抓取</button>
       </div>
       <div id="progress" style="display:none;margin-top:20px;">
-        <div style="height:6px;background:var(--line);border-radius:4px;overflow:hidden;"><div id="bar" style="height:100%;width:0;background:var(--pri);transition:width 0.3s;"></div></div>
-        <p style="font-size:12px;color:var(--dim);margin-top:8px;">正在穿透平台风控，抓取真实数据...</p>
+        <div style="height:6px;background:var(--line);border-radius:4px;overflow:hidden;"><div id="bar" style="height:100%;width:50%;background:var(--pri);transition:width 0.3s;"></div></div>
+        <p style="font-size:12px;color:var(--dim);margin-top:8px;">已发送请求至服务器，正在穿透风控...</p>
       </div>
     </div>
 
@@ -29,42 +29,49 @@ export async function render(m) {
     </div>
   `;
 
-  m.querySelector("#start").onclick = () => {
+  m.querySelector("#start").onclick = async () => {
     const kw = m.querySelector("#kw").value;
     if(!kw) return toast("请输入关键词", "error");
     
     m.querySelector("#progress").style.display = "block";
-    let p = 0; const timer = setInterval(() => {
-      p += 20; m.querySelector("#bar").style.width = p + "%";
-      if(p >= 100) {
-        clearInterval(timer);
+    m.querySelector("#start").disabled = true;
+
+    try {
+      // 真实请求你的阿里云服务器
+      const res = await fetch("https://spider.lynli.me/api/spider/search", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ keyword: kw })
+      });
+      const resData = await res.json();
+
+      if (resData.code === 200) {
+        m.querySelector("#progress").style.display = "none";
         m.querySelector("#result").style.display = "block";
-        m.querySelector("#tb").innerHTML = `
-          <tr style="background:rgba(52,211,153,0.05);">
-            <td><strong style="color:#34d399;">1688</strong></td>
-            <td>${kw} - 源头厂家直供</td>
-            <td style="color:#34d399;font-weight:bold;">¥18.50</td>
-            <td>¥69.90</td>
-            <td>¥51.40</td>
-            <td><button class="btn btn-sm btn-primary" onclick="window.importProduct('${kw}', 18.5, 69.9)">一键上架</button></td>
+        m.querySelector("#start").disabled = false;
+
+        m.querySelector("#tb").innerHTML = resData.data.map(item => `
+          <tr>
+            <td><strong>${item.platform}</strong></td>
+            <td>${item.title}</td>
+            <td style="color:#34d399;font-weight:bold;">¥${item.cost}</td>
+            <td>¥${item.price}</td>
+            <td>¥${item.profit}</td>
+            <td><button class="btn btn-sm btn-primary" onclick="window.importProduct('${item.title}', ${item.cost}, ${item.price})">一键上架</button></td>
           </tr>
-        `;
-        toast("全网抓取完成", "success");
+        `).join('');
+        toast("服务器爬虫返回数据成功", "success");
       }
-    }, 200);
+    } catch (err) {
+      toast("请求服务器失败，请检查 7002 端口", "error");
+      m.querySelector("#start").disabled = false;
+    }
   };
 
   window.importProduct = (title, cost, price) => {
     const data = store.get();
-    data.products.push({
-      id: "P" + Date.now(),
-      title: title,
-      cost: cost,
-      price: price,
-      stock: 100,
-      img: "https://picsum.photos/200?random=" + Date.now()
-    });
+    data.products.push({ id: "P" + Date.now(), title, cost, price, stock: 100, img: "https://picsum.photos/200?random=" + Date.now() });
     store.set(data);
-    toast("商品已成功加入您的商品库！", "success");
+    toast("商品已成功入库！", "success");
   };
 }
