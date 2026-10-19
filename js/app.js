@@ -11,6 +11,7 @@ import * as Purchases from "./views/purchases.js";
 import * as Suppliers from "./views/suppliers.js";
 import * as Marketing from "./views/marketing.js";
 import * as CRM from "./views/crm.js";
+import * as Organization from "./views/organization.js";
 import * as Finance from "./views/finance.js";
 import * as System from "./views/system.js";
 
@@ -18,16 +19,7 @@ const app = document.getElementById("app");
 let openTabs = ["dashboard"];
 let currentPage = "dashboard";
 
-// 全局水印
-if (!document.querySelector('.watermark')) {
-  const wm = document.createElement('div');
-  wm.className = 'watermark';
-  document.body.appendChild(wm);
-}
-
-// 恢复主题
 if (localStorage.getItem('theme') === 'light') document.body.classList.add('light-mode');
-
 document.addEventListener('click', () => { document.getElementById('dropdown-menu')?.classList.remove('show'); });
 
 Object.assign(routes.dashboard, { render: Dashboard.render });
@@ -39,6 +31,7 @@ Object.assign(routes.purchases, { render: Purchases.render });
 Object.assign(routes.suppliers, { render: Suppliers.render });
 Object.assign(routes.marketing, { render: Marketing.render });
 Object.assign(routes.crm, { render: CRM.render });
+Object.assign(routes.organization, { render: Organization.render });
 Object.assign(routes.finance, { render: Finance.render });
 Object.assign(routes.system, { render: System.render });
 
@@ -50,14 +43,9 @@ function renderTabs() {
       ${page === 'dashboard' ? '' : `<span class="tab-close" data-close="${page}">×</span>`}
     </div>
   `).join('');
-
   tabsBar.querySelectorAll('.tab-item').forEach(tab => {
-    tab.onclick = (e) => {
-      if (e.target.classList.contains('tab-close')) return;
-      switchPage(tab.dataset.page);
-    };
+    tab.onclick = (e) => { if (e.target.classList.contains('tab-close')) return; switchPage(tab.dataset.page); };
   });
-
   tabsBar.querySelectorAll('.tab-close').forEach(btn => {
     btn.onclick = (e) => {
       e.stopPropagation();
@@ -79,15 +67,20 @@ function switchPage(page) {
     document.getElementById('sidebar').classList.remove('open');
     document.getElementById('overlay').classList.remove('show');
   }
-  if (routes[page].render) routes[page].render(document.getElementById('content'));
+  
+  const content = document.getElementById('content');
+  content.innerHTML = '<div class="skeleton sk-card"></div><div class="skeleton sk-card"></div>'; // 骨架屏
+  
+  setTimeout(() => {
+    if (routes[page].render) routes[page].render(content);
+  }, 200); // 模拟网络请求延迟
 }
 
 function renderLogin() {
   app.innerHTML = `
     <div class="login-view">
       <div class="login-box">
-        <h1>LYNLI</h1>
-        <p>企业级全链路管理系统</p>
+        <h1>LYNLI</h1><p>企业级全链路管理系统</p>
         <form id="login-form">
           <div class="field"><label>账号</label><input type="text" name="account" value="admin" required></div>
           <div class="field"><label>密码</label><input type="password" name="password" value="123456" required></div>
@@ -114,10 +107,10 @@ function renderApp() {
     else document.exitFullscreen();
   };
 
-  // 主题切换按钮
   document.getElementById('theme-btn').onclick = () => {
     document.body.classList.toggle('light-mode');
     localStorage.setItem('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
+    if(currentPage === 'dashboard') switchPage('dashboard'); // 重绘图表
   };
 
   document.getElementById('user-profile').onclick = (e) => { e.stopPropagation(); document.getElementById('dropdown-menu').classList.toggle('show'); };
@@ -130,7 +123,7 @@ function renderApp() {
       contentHTML: `
         <div style="display:flex; flex-direction:column; align-items:center; margin-bottom:20px;">
           <div id="modal-avatar-preview" style="width:80px; height:80px; background:linear-gradient(135deg,#3b82f6,#8b5cf6); border-radius:50%; display:grid; place-items:center; font-size:32px; color:#fff; font-weight:bold; margin-bottom:10px;">${userInfo.avatar}</div>
-          <button class="btn" id="change-avatar-btn" style="width:auto; padding:6px 12px; font-size:12px; background:rgba(255,255,255,0.1); border:1px solid var(--line);">随机生成新头像</button>
+          <button class="btn" id="change-avatar-btn" style="width:auto; padding:6px 12px; font-size:12px; background:rgba(255,255,255,0.1); border:1px solid var(--line);">随机换头像</button>
         </div>
         <div class="field"><label>修改昵称</label><input type="text" id="m-nickname" value="${userInfo.name}" style="width:100%;"></div>
       `,
@@ -139,25 +132,18 @@ function renderApp() {
         const newAvatar = mask.querySelector('#modal-avatar-preview').textContent.trim();
         if (!newName) return toast("昵称不能为空", "error");
         localStorage.setItem("lynli_user", JSON.stringify({ name: newName, avatar: newAvatar }));
-        close();
-        renderApp(); 
-        switchPage("dashboard");
-        toast("个人信息已更新");
+        close(); renderApp(); switchPage("dashboard"); toast("更新成功");
       }
     });
     setTimeout(() => {
-      const avatarBtn = document.querySelector('#change-avatar-btn');
-      if (avatarBtn) avatarBtn.onclick = () => {
+      document.querySelector('#change-avatar-btn').onclick = () => {
         const emojis = ['🐱', '🐶', '🦊', '🐻', '🐼', '🚀', '😎', '⚡'];
         document.querySelector('#modal-avatar-preview').textContent = emojis[Math.floor(Math.random() * emojis.length)];
       };
     }, 100);
   };
 
-  document.querySelectorAll('.nav-item').forEach(el => {
-    el.onclick = () => switchPage(el.dataset.page);
-  });
-
+  document.querySelectorAll('.nav-item').forEach(el => { el.onclick = () => switchPage(el.dataset.page); });
   switchPage("dashboard");
 }
 
