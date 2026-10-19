@@ -1,4 +1,4 @@
-const BASE_URL = 'https://spider.lynli.me';
+const BASE_URL = '';
 export const api = {
     login: async (u, p) => (await fetch(`${BASE_URL}/api/login`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({username: u, password: p}) })).json(),
     getProducts: async () => (await fetch(`${BASE_URL}/api/shop/products`)).json(),
