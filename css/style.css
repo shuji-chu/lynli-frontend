@@ -918,3 +918,38 @@ a { color: inherit; text-decoration: none; }
   color: var(--text);
 }
 .btn--outline:hover { background: rgba(255, 255, 255, 0.05); }
+
+/* 大厂弹窗 Modal */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+  z-index: 1000; display: flex; align-items: center; justify-content: center;
+  opacity: 0; transition: opacity 0.3s;
+}
+.modal-overlay.is-active { opacity: 1; }
+.modal-box {
+  width: 90%; max-width: 480px; background: var(--surface-solid);
+  border: 1px solid var(--line-strong); border-radius: var(--radius-lg);
+  box-shadow: 0 40px 80px -20px rgba(0,0,0,0.9); transform: translateY(20px); transition: transform 0.3s;
+  display: flex; flex-direction: column;
+}
+.modal-overlay.is-active .modal-box { transform: translateY(0); }
+.modal-header { padding: 20px 24px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; }
+.modal-header h3 { margin: 0; font-size: 18px; font-weight: 600; }
+.modal-close { background: transparent; border: 0; font-size: 24px; color: var(--text-dim); cursor: pointer; }
+.modal-body { padding: 24px; }
+.modal-footer { padding: 16px 24px; border-top: 1px solid var(--line); display: flex; justify-content: flex-end; gap: 12px; }
+
+/* 大厂 Tabs */
+.tabs-header { display: flex; gap: 24px; border-bottom: 1px solid var(--line); }
+.tab-item {
+  padding: 12px 0; font-size: 14px; color: var(--text-dim); cursor: pointer; position: relative; font-weight: 500;
+}
+.tab-item:hover { color: var(--text); }
+.tab-item.is-active { color: var(--primary); }
+.tab-item.is-active::after {
+  content: ""; position: absolute; bottom: -1px; left: 0; width: 100%; height: 2px;
+  background: var(--primary); border-radius: 2px;
+}
+.tab-pane { display: none; animation: fadeIn 0.3s; }
+.tab-pane.is-active { display: block; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }

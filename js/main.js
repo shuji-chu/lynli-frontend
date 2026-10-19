@@ -8,6 +8,19 @@ import { $ } from "./utils/dom.js";
 registerRoute("dashboard", () => import("./views/dashboard.js"));
 registerRoute("orders-all", () => import("./views/orders.js"));
 registerRoute("products-list", () => import("./views/products.js"));
+registerRoute("spider", () => import("./views/spider.js"));
+registerRoute("finance", () => import("./views/finance.js"));
+registerRoute("users", () => import("./views/users.js"));
+registerRoute("settings", () => import("./views/settings.js"));
+
+const PlaceholderView = { render: async (mount) => { mount.innerHTML = '<div class="view-empty"><h2>模块建设中</h2><p>敬请期待...</p></div>'; } };
+registerRoute("data-center", () => Promise.resolve(PlaceholderView));
+registerRoute("orders-delivery", () => Promise.resolve(PlaceholderView));
+registerRoute("orders-refund", () => Promise.resolve(PlaceholderView));
+registerRoute("products-category", () => Promise.resolve(PlaceholderView));
+registerRoute("products-inventory", () => Promise.resolve(PlaceholderView));
+registerRoute("marketing-coupon", () => Promise.resolve(PlaceholderView));
+registerRoute("marketing-promo", () => Promise.resolve(PlaceholderView));
 
 function boot() {
   if (!storage.getToken()) { initAuth(); return; }
