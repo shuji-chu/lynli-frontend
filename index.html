@@ -1,1 +1,155 @@
-<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>LYNLI 后台</title><style>body{background:#070b14;color:#fff;font-family:sans-serif;text-align:center;padding-top:80px}h1{color:#34d399;font-size:36px}</style></head><body><h1>大厂后台 V7 终极版</h1><p>如果你看到这行字，说明所有缓存和部署都成功了！</p></body></html>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LYNLI 管理控制台</title>
+  <style>
+    :root { --bg: #070b14; --sur: rgba(17, 24, 39, 0.7); --line: rgba(255,255,255,0.1); --text: #e8edf7; --dim: #8b97ad; --pri: #3b82f6; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, sans-serif; }
+    body { background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; }
+    
+    /* 登录页 */
+    #login-view { height: 100vh; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at top right, rgba(59,130,246,0.15), transparent 40%); }
+    .login-box { width: 90%; max-width: 400px; background: var(--sur); padding: 30px; border-radius: 20px; border: 1px solid var(--line); box-shadow: 0 30px 60px -20px rgba(0,0,0,0.8); backdrop-filter: blur(20px); }
+    .login-box h1 { font-size: 24px; letter-spacing: 2px; margin-bottom: 5px; }
+    .login-box p { color: var(--dim); font-size: 13px; margin-bottom: 24px; }
+    .field { margin-bottom: 16px; }
+    .field label { display: block; font-size: 12px; color: var(--dim); margin-bottom: 6px; }
+    .field input { width: 100%; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid var(--line); border-radius: 8px; color: #fff; outline: none; transition: 0.2s; }
+    .field input:focus { border-color: var(--pri); }
+    .btn { width: 100%; padding: 12px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); border: none; border-radius: 8px; color: #fff; font-weight: bold; cursor: pointer; margin-top: 10px; }
+    
+    /* 主界面 */
+    #app-view { display: none; height: 100vh; }
+    .layout { display: flex; height: 100%; }
+    .sidebar { width: 240px; background: rgba(9,13,22,0.9); border-right: 1px solid var(--line); padding: 20px 10px; display: flex; flex-direction: column; }
+    .sidebar h2 { font-size: 18px; padding: 0 10px 20px; border-bottom: 1px solid var(--line); margin-bottom: 15px; }
+    .nav-item { padding: 12px; border-radius: 8px; color: var(--dim); cursor: pointer; margin-bottom: 5px; font-size: 14px; transition: 0.2s; }
+    .nav-item:hover, .nav-item.active { background: rgba(59,130,246,0.15); color: var(--pri); }
+    .main { flex: 1; display: flex; flex-direction: column; }
+    .topbar { padding: 20px; border-bottom: 1px solid var(--line); font-size: 18px; font-weight: bold; display: flex; justify-content: space-between; }
+    .user-info { font-size: 13px; color: var(--dim); font-weight: normal; }
+    .content { padding: 20px; overflow-y: auto; flex: 1; }
+    
+    /* 卡片和表格 */
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 20px; }
+    .card { background: var(--sur); border: 1px solid var(--line); border-radius: 12px; padding: 20px; }
+    .kpi-label { font-size: 13px; color: var(--dim); } .kpi-val { font-size: 28px; font-weight: bold; margin-top: 8px; }
+    .table { width: 100%; border-collapse: collapse; }
+    .table th, .table td { padding: 12px; border-bottom: 1px solid var(--line); text-align: left; font-size: 14px; }
+    .table th { color: var(--dim); font-weight: normal; }
+  </style>
+</head>
+<body>
+  <!-- 登录界面 -->
+  <div id="login-view">
+    <div class="login-box">
+      <h1>LYNLI</h1>
+      <p>管理控制台</p>
+      <form id="login-form">
+        <div class="field"><label>账号</label><input type="text" name="account" value="admin" required></div>
+        <div class="field"><label>密码</label><input type="password" name="password" value="123456" required></div>
+        <button type="submit" class="btn" id="login-btn">进入控制台</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 管理界面 -->
+  <div id="app-view">
+    <div class="layout">
+      <div class="sidebar">
+        <h2>LYNLI</h2>
+        <div class="nav-item active" data-page="dashboard">数据看板</div>
+        <div class="nav-item" data-page="orders">全部订单</div>
+        <div class="nav-item" data-page="products">商品库</div>
+      </div>
+      <div class="main">
+        <div class="topbar">
+          <span id="page-title">数据看板</span>
+          <span class="user-info">系统管理员 | 退出</span>
+        </div>
+        <div class="content" id="content">
+          <!-- 数据动态加载区 -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 1. 登录逻辑
+    document.getElementById('login-form').onsubmit = async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('login-btn');
+      btn.textContent = "认证中...";
+      
+      try {
+        const res = await fetch("https://spider.lynli.me/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ account: e.target.account.value, password: e.target.password.value })
+        });
+        const data = await res.json();
+        
+        if (data.code === 200) {
+          document.getElementById('login-view').style.display = 'none';
+          document.getElementById('app-view').style.display = 'block';
+          loadPage('dashboard');
+        } else {
+          alert("登录失败: " + data.message);
+        }
+      } catch (err) {
+        alert("网络错误，请检查服务器");
+      } finally {
+        btn.textContent = "进入控制台";
+      }
+    };
+
+    // 2. 页面路由与渲染
+    window.loadPage = async (page) => {
+      document.querySelectorAll('.nav-item').forEach(el => el.classList.toggle('active', el.dataset.page === page));
+      const titles = { dashboard: '数据看板', orders: '全部订单', products: '商品库' };
+      document.getElementById('page-title').textContent = titles[page];
+      
+      const content = document.getElementById('content');
+      content.innerHTML = '<div class="card">数据加载中...</div>';
+
+      try {
+        if (page === 'dashboard') {
+          const res = await fetch("https://spider.lynli.me/api/dashboard");
+          const { data } = await res.json();
+          content.innerHTML = `
+            <div class="kpi-grid">
+              <div class="card"><div class="kpi-label">今日营收</div><div class="kpi-val" style="color:#3b82f6;">¥ ${data.revenue}</div></div>
+              <div class="card"><div class="kpi-label">今日订单</div><div class="kpi-val">${data.orders_today}</div></div>
+              <div class="card"><div class="kpi-label">待发货</div><div class="kpi-val" style="color:#f87171;">${data.pending_ship}</div></div>
+              <div class="card"><div class="kpi-label">在售商品</div><div class="kpi-val">${data.total_prod}</div></div>
+            </div>
+            <div class="card"><h3>欢迎回来，系统管理员！</h3><p style="color:var(--dim);margin-top:10px;">系统运行正常，数据库已连接。</p></div>
+          `;
+        } else if (page === 'orders') {
+          const res = await fetch("https://spider.lynli.me/api/orders");
+          const { data } = await res.json();
+          content.innerHTML = `
+            <div class="card">
+              <table class="table">
+                <thead><tr><th>订单号</th><th>买家</th><th>金额</th><th>状态</th></tr></thead>
+                <tbody>${data.map(o => `<tr><td>${o.id}</td><td>${o.buyer}</td><td>¥${o.amount}</td><td>${o.status}</td></tr>`).join('')}</tbody>
+              </table>
+            </div>
+          `;
+        } else {
+          content.innerHTML = '<div class="card">商品库模块建设中...</div>';
+        }
+      } catch (e) {
+        content.innerHTML = '<div class="card" style="color:#f87171;">数据获取失败</div>';
+      }
+    };
+
+    // 3. 侧边栏点击绑定
+    document.querySelectorAll('.nav-item').forEach(el => {
+      el.onclick = () => loadPage(el.dataset.page);
+    });
+  </script>
+</body>
+</html>
