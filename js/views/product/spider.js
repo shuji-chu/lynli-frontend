@@ -1,4 +1,5 @@
 import { toast } from "../../components/ui/toast.js";
+import { store } from "../../store/data.js";
 
 export async function render(m) {
   const platforms = ['1688', '淘宝', '天猫', '拼多多', '京东', '抖音', '快手', '唯品会'];
@@ -39,12 +40,31 @@ export async function render(m) {
         clearInterval(timer);
         m.querySelector("#result").style.display = "block";
         m.querySelector("#tb").innerHTML = `
-          <tr style="background:rgba(52,211,153,0.05);"><td><strong style="color:#34d399;">1688</strong></td><td>${kw} - 源头厂家直供</td><td style="color:#34d399;font-weight:bold;">¥18.50</td><td>¥69.90</td><td>¥51.40</td><td><button class="btn btn-sm btn-primary" onclick="alert('已同步至商品库')">一键上架</button></td></tr>
-          <tr><td>淘宝</td><td>${kw} - 网红爆款</td><td>¥25.00</td><td>¥69.90</td><td>¥44.90</td><td><button class="btn btn-sm" style="border:1px solid var(--line);background:none;color:var(--dim);" disabled>利润低</button></td></tr>
-          <tr><td>拼多多</td><td>${kw} - 百亿补贴</td><td>¥19.90</td><td>¥69.90</td><td>¥50.00</td><td><button class="btn btn-sm" style="border:1px solid var(--line);background:none;color:var(--dim);" disabled>利润低</button></td></tr>
+          <tr style="background:rgba(52,211,153,0.05);">
+            <td><strong style="color:#34d399;">1688</strong></td>
+            <td>${kw} - 源头厂家直供</td>
+            <td style="color:#34d399;font-weight:bold;">¥18.50</td>
+            <td>¥69.90</td>
+            <td>¥51.40</td>
+            <td><button class="btn btn-sm btn-primary" onclick="window.importProduct('${kw}', 18.5, 69.9)">一键上架</button></td>
+          </tr>
         `;
         toast("全网抓取完成", "success");
       }
     }, 200);
+  };
+
+  window.importProduct = (title, cost, price) => {
+    const data = store.get();
+    data.products.push({
+      id: "P" + Date.now(),
+      title: title,
+      cost: cost,
+      price: price,
+      stock: 100,
+      img: "https://picsum.photos/200?random=" + Date.now()
+    });
+    store.set(data);
+    toast("商品已成功加入您的商品库！", "success");
   };
 }
