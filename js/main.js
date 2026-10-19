@@ -1,55 +1,35 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const loginForm = document.getElementById("login-form");
-  
-  if (!loginForm) {
-    alert("严重错误：找不到登录表单！");
-    return;
+import { $ } from "./core/utils.js";
+import { register, nav } from "./router/index.js";
+import { findMeta } from "./router/routes.js";
+import { initAuth } from "./views/auth.js";
+import { bus } from "./store/eventBus.js";
+
+// 注册所有模块页面
+register("dashboard", () => import("./views/dashboard.js"));
+register("trade-orders", () => import("./views/trade/orders.js"));
+register("trade-purchase", () => import("./views/trade/purchase.js"));
+register("product-list", () => import("./views/product/list.js"));
+register("product-spider", () => import("./views/product/spider.js"));
+register("marketing-coupon", () => import("./views/marketing/coupon.js"));
+register("finance-report", () => import("./views/finance/report.js"));
+register("system-users", () => import("./views/system/members.js"));
+register("system-email", () => import("./views/system/email.js"));
+
+window.addEventListener("hashchange", () => {
+  const key = location.hash.replace(/^#\/?/, "") || "dashboard";
+  const meta = findMeta(key);
+  if(meta) { 
+    $("#page-title").textContent = meta.label; 
+    document.querySelectorAll(".nav-item").forEach(el => el.classList.toggle("active", el.dataset.route === key)); 
   }
-
-  loginForm.onsubmit = async (e) => {
-    e.preventDefault(); // 阻止页面刷新
-    
-    const account = loginForm.querySelector('input[name="account"]').value;
-    const password = loginForm.querySelector('input[name="password"]').value;
-    const btn = loginForm.querySelector('button');
-
-    btn.textContent = "登录中...";
-    btn.disabled = true;
-
-    try {
-      const res = await fetch("https://spider.lynli.me/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ account, password })
-      });
-      
-      const data = await res.json();
-      
-      if (data.code === 200) {
-        alert("登录成功！准备进入后台...");
-        document.getElementById("login-view").style.display = "none";
-        document.getElementById("app-view").hidden = false;
-        
-        // 临时写死一个后台界面，证明登录通了
-        document.getElementById("nav").innerHTML = `
-          <button class="nav-item active">数据看板</button>
-          <button class="nav-item">订单管理</button>
-          <button class="nav-item">商品库</button>
-        `;
-        document.getElementById("content").innerHTML = `
-          <div class="card" style="margin-top:20px;">
-            <h2>欢迎回来，最高指挥官！</h2>
-            <p style="color:var(--text-dim); margin-top:10px;">系统已成功连接阿里云后端数据库。</p>
-          </div>
-        `;
-      } else {
-        alert("登录失败：" + (data.message || "账号或密码错误"));
-      }
-    } catch (err) {
-      alert("网络请求失败，请检查服务器：" + err.message);
-    } finally {
-      btn.textContent = "进入控制台";
-      btn.disabled = false;
-    }
-  };
+  nav(key);
 });
+
+bus.on("dataChanged", () => { 
+  if(location.hash === "#/dashboard" || !location.hash) nav("dashboard"); 
+});
+
+initAuth(); 
+
+if(!location.hash) location.hash = "#/dashboard"; 
+else nav(location.hash.replace(/^#\/?/, ""));

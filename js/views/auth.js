@@ -9,47 +9,44 @@ export function initAuth() {
   if (!form) return;
 
   form.onsubmit = async (e) => {
-    e.preventDefault(); // 阻止表单默认刷新
-    
-    const accountInput = form.querySelector('input[name="account"]').value;
-    const passwordInput = form.querySelector('input[name="password"]').value;
-    const submitBtn = form.querySelector('button[type="submit"]');
-    const btnLabel = submitBtn.querySelector('.btn__label');
+    e.preventDefault();
+    const account = form.querySelector('input[name="account"]').value;
+    const password = form.querySelector('input[name="password"]').value;
+    const btn = form.querySelector('button[type="submit"]');
 
-    // 视觉反馈：变成登录中
-    submitBtn.disabled = true;
-    btnLabel.textContent = "登录中...";
+    btn.disabled = true;
+    btn.textContent = "正在认证...";
 
     try {
       const res = await fetch("https://spider.lynli.me/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ account: accountInput, password: passwordInput })
+        body: JSON.stringify({ account, password })
       });
-      
       const data = await res.json();
 
       if (data.code === 200) {
         localStorage.setItem("lynli_token", data.token);
-        $("#login-view").hidden = true; 
+        
+        // 隐藏登录页，显示主界面
+        $("#login-view").style.display = "none"; 
         $("#app-view").hidden = false;
         
-        // 渲染侧边栏
+        // 渲染左侧菜单（使用的是正规名字）
         renderLayout(ROUTES, data.user);
         
-        // 跳转到看板
+        // 跳转并渲染看板
         location.hash = "#/dashboard";
         nav("dashboard");
-        toast("登录成功", "success");
+        toast("欢迎回来，系统管理员", "success");
       } else {
-        alert("登录失败：" + (data.message || "账号或密码错误"));
+        alert("登录失败：" + data.message);
       }
     } catch (err) {
-      alert("网络异常：请检查后端服务器是否存活。\n" + err.message);
+      alert("网络异常：" + err.message);
     } finally {
-      // 恢复按钮状态
-      submitBtn.disabled = false;
-      btnLabel.textContent = "进入控制台";
+      btn.disabled = false;
+      btn.textContent = "进入控制台";
     }
   };
 }
