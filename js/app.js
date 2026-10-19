@@ -1,6 +1,8 @@
 import { api } from "./api.js";
 import { routes } from "./router.js";
 import { renderLayout } from "./views/layout.js";
+import { showModal, toast } from "./ui.js"; // 引入刚才写的组件
+
 import * as Dashboard from "./views/dashboard.js";
 import * as Orders from "./views/orders.js";
 import * as Aftersales from "./views/aftersales.js";
@@ -62,9 +64,59 @@ function renderApp() {
   
   document.getElementById('menu-btn').onclick = () => { sidebar.classList.add('open'); overlay.classList.add('show'); };
   overlay.onclick = () => { sidebar.classList.remove('open'); overlay.classList.remove('show'); };
+  
+  // 全屏逻辑
+  document.getElementById('fullscreen-btn').onclick = () => {
+    if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+    else document.exitFullscreen();
+  };
+
+  // 下拉菜单
   document.getElementById('user-profile').onclick = (e) => { e.stopPropagation(); document.getElementById('dropdown-menu').classList.toggle('show'); };
   document.getElementById('logout-btn').onclick = renderLogin;
 
+  // 💡 个人中心弹窗逻辑
+  document.getElementById('profile-btn').onclick = () => {
+    const userInfo = JSON.parse(localStorage.getItem("lynli_user") || '{"name":"系统管理员","avatar":"管"}');
+    showModal({
+      title: "个人中心设置",
+      contentHTML: `
+        <div style="display:flex; flex-direction:column; align-items:center; margin-bottom:20px;">
+          <div id="modal-avatar-preview" style="width:80px; height:80px; background:linear-gradient(135deg,#3b82f6,#8b5cf6); border-radius:50%; display:grid; place-items:center; font-size:32px; color:#fff; font-weight:bold; margin-bottom:10px;">
+            ${userInfo.avatar}
+          </div>
+          <button class="btn" id="change-avatar-btn" style="width:auto; padding:6px 12px; font-size:12px; background:rgba(255,255,255,0.1); border:1px solid var(--line);">随机生成新头像</button>
+        </div>
+        <div class="field"><label>修改昵称</label><input type="text" id="m-nickname" value="${userInfo.name}" style="width:100%;"></div>
+        <div class="field"><label>登录账号</label><input type="text" value="admin" disabled style="width:100%; color:var(--dim); cursor:not-allowed;"></div>
+      `,
+      onConfirm: (mask, close) => {
+        const newName = mask.querySelector('#m-nickname').value;
+        const newAvatar = mask.querySelector('#modal-avatar-preview').textContent.trim();
+        
+        if (!newName) return toast("昵称不能为空", "error");
+        
+        // 保存到本地并重新渲染
+        localStorage.setItem("lynli_user", JSON.stringify({ name: newName, avatar: newAvatar }));
+        close();
+        renderApp(); // 重新渲染整个主界面以更新右上角
+        toast("个人信息已更新");
+      }
+    });
+
+    // 随机换头像逻辑
+    mask = document.getElementById('app'); // 防止变量冲突
+    const avatarBtn = document.querySelector('#change-avatar-btn');
+    if (avatarBtn) {
+      avatarBtn.onclick = () => {
+        const emojis = ['🐱', '🐶', '🦊', '🐻', '🐼', '🚀', '😎', '⚡'];
+        const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+        document.querySelector('#modal-avatar-preview').textContent = randomEmoji;
+      };
+    }
+  };
+
+  // 路由跳转逻辑
   document.querySelectorAll('.nav-item').forEach(el => {
     el.onclick = () => {
       document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
