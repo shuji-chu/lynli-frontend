@@ -29,7 +29,7 @@ export async function render(container) {
           </select>
         </div>
         <div style="grid-column: span 2;">
-          <label style="display:block; font-size:12px; margin-bottom:5px;">节点地址或链接 (IP:端口 或 完整链接)</label>
+          <label style="display:block; font-size:12px; margin-bottom:5px;">节点地址或链接</label>
           <input type="text" id="node-address" placeholder="1.2.3.4:443 或 vmess://..." style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px;">
         </div>
       </div>
@@ -58,16 +58,14 @@ export async function render(container) {
     setActive(btnNodes, true);
     setActive(btnAccounts, false);
     btnAddNode.style.display = 'block';
-    contentArea.innerHTML = `<div class="card">加载节点数据中...</div>`;
+    contentArea.innerHTML = `<div class="card">正在从服务器加载节点数据...</div>`;
 
     try {
-      const nodes = [
-        { id: 1, name: '香港 01', protocol: 'VMess', address: 'hk1.lynli.com:443', latency: '120ms', status: '存活' },
-        { id: 2, name: '日本 02', protocol: 'VLESS', address: 'jp2.lynli.com:443', latency: '80ms', status: '存活' },
-        { id: 3, name: '德国 01', protocol: 'Hysteria2', address: 'de1.lynli.com:8443', latency: '200ms', status: '存活' },
-        { id: 4, name: '美国 03', protocol: 'Trojan', address: 'us3.lynli.com:443', latency: '-', status: '已失效' }
-      ];
-
+      // 真实请求后端接口
+      const res = await api.get('/v1/admin/nodes');
+      // 适配后端返回格式，通常后端返回 {code: 1, data: [...] }
+      const nodes = res.data || res || [];
+      
       contentArea.innerHTML = `
         <div class="kpi-grid" style="display:flex; gap:20px; margin-bottom:20px;">
           <div class="card" style="flex:1; padding:20px; background:#fff; border-radius:8px;">
@@ -75,22 +73,22 @@ export async function render(container) {
             <div class="kpi-val" style="font-size:24px; font-weight:bold;">${nodes.length}</div>
           </div>
           <div class="card" style="flex:1; padding:20px; background:#fff; border-radius:8px;">
-            <div class="kpi-label" style="color:#666; font-size:14px;">多协议覆盖</div>
-            <div class="kpi-val" style="font-size:24px; font-weight:bold; color:#3b82f6;">4 种</div>
+            <div class="kpi-label" style="color:#666; font-size:14px;">运行状态</div>
+            <div class="kpi-val" style="font-size:24px; font-weight:bold; color:#10b981;">正常</div>
           </div>
         </div>
         <div class="table-container" style="overflow-x:auto; background:#fff; border-radius:8px; padding:15px;">
           <table class="table" style="width:100%; text-align:left; border-collapse:collapse;">
-            <thead><tr style="border-bottom:1px solid #eee; color:#666; font-size:13px;"><th style="padding:10px;">节点名称</th><th style="padding:10px;">协议</th><th style="padding:10px;">地址</th><th style="padding:10px;">延迟</th><th style="padding:10px;">状态</th><th style="padding:10px;">操作</th></tr></thead>
+            <thead><tr style="border-bottom:1px solid #eee; color:#666; font-size:13px;"><th style="padding:10px;">节点名称</th><th style="padding:10px;">协议/IP</th><th style="padding:10px;">地区</th><th style="padding:10px;">状态</th><th style="padding:10px;">操作</th></tr></thead>
             <tbody>
+              ${nodes.length === 0 ? '<tr><td colspan="5" style="text-align:center; padding:20px; color:#999;">暂无节点数据</td></tr>' : ''}
               ${nodes.map(n => `
                 <tr style="border-bottom:1px solid #f9f9f9; font-size:14px;">
-                  <td style="padding:10px;">${n.name}</td>
-                  <td style="padding:10px;"><span style="background:#e0f2fe; color:#0284c7; padding:2px 8px; border-radius:12px; font-size:12px;">${n.protocol}</span></td>
-                  <td style="padding:10px; color:#666;">${n.address}</td>
-                  <td style="padding:10px;">${n.latency}</td>
-                  <td style="padding:10px;"><span style="color:${n.status === '存活' ? '#10b981' : '#ef4444'};">${n.status}</span></td>
-                  <td style="padding:10px;"><a href="javascript:;" style="color:#f87171; text-decoration:none;">删除</a></td>
+                  <td style="padding:10px;">${n.name || '未命名'}</td>
+                  <td style="padding:10px; color:#666;">${n.host || n.ip || '-'}</td>
+                  <td style="padding:10px;">${n.region_name || n.region || '默认'}</td>
+                  <td style="padding:10px;"><span style="color:${n.enabled ? '#10b981' : '#ef4444'};">${n.enabled ? '启用' : '禁用'}</span></td>
+                  <td style="padding:10px;"><a href="javascript:;" style="color:#3b82f6; text-decoration:none; margin-right:10px;">编辑</a><a href="javascript:;" style="color:#f87171; text-decoration:none;">删除</a></td>
                 </tr>
               `).join('')}
             </tbody>
@@ -98,7 +96,7 @@ export async function render(container) {
         </div>
       `;
     } catch (e) {
-      contentArea.innerHTML = `<div class="card" style="color:red;">加载失败: ${e.message}</div>`;
+      contentArea.innerHTML = `<div class="card" style="color:red; padding:20px;">加载节点失败，请检查是否登录或后端接口异常。(${e.message})</div>`;
     }
   }
 
@@ -107,28 +105,7 @@ export async function render(container) {
     setActive(btnNodes, false);
     btnAddNode.style.display = 'none';
     addForm.style.display = 'none';
-    contentArea.innerHTML = `<div class="card">加载账号库存中...</div>`;
-
-    const accounts = [
-      { id: 'A001', type: 'Google 老号', region: '美国', price: '¥15.00', stock: 120, status: '在售' },
-      { id: 'A002', type: 'Twitter 白号', region: '香港', price: '¥8.50', stock: 45, status: '在售' }
-    ];
-
-    contentArea.innerHTML = `
-      <div class="table-container" style="overflow-x:auto; background:#fff; border-radius:8px; padding:15px;">
-        <table class="table" style="width:100%; text-align:left; border-collapse:collapse;">
-          <thead><tr style="border-bottom:1px solid #eee; color:#666; font-size:13px;"><th style="padding:10px;">ID</th><th style="padding:10px;">类型</th><th style="padding:10px;">地区</th><th style="padding:10px;">单价</th><th style="padding:10px;">库存</th><th style="padding:10px;">操作</th></tr></thead>
-          <tbody>
-            ${accounts.map(a => `
-              <tr style="border-bottom:1px solid #f9f9f9; font-size:14px;">
-                <td style="padding:10px;">${a.id}</td><td style="padding:10px;">${a.type}</td><td style="padding:10px;">${a.region}</td><td style="padding:10px;">${a.price}</td><td style="padding:10px;">${a.stock}</td>
-                <td style="padding:10px;"><a href="javascript:;" style="color:#3b82f6; text-decoration:none; margin-right:10px;">编辑</a><a href="javascript:;" style="color:#f87171; text-decoration:none;">删除</a></td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-      </div>
-    `;
+    contentArea.innerHTML = `<div class="card" style="padding:20px;">账号库存功能开发中...</div>`;
   }
 
   btnNodes.addEventListener('click', renderNodes);
