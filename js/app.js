@@ -125,3 +125,8 @@ function renderApp() {
 }
 
 renderLogin(renderApp);
+
+// 动态挂载 tgx 模块
+import { render as renderTgx } from './views/tgx.js';
+import { routes } from './router.js';
+if (routes['tgx']) routes['tgx'].render = renderTgx;
