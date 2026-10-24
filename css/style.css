@@ -132,3 +132,53 @@ body {
 }
 .toast.show { opacity: 1; transform: translate(-50%, 0); }
 .toast.is-error { background: var(--danger); }
+
+/* ============ 节点地图 ============ */
+.map-card { padding: 0; overflow: hidden; border-radius: var(--radius-lg); }
+#node-map { width: 100%; height: calc(100vh - 220px); min-height: 480px; background: #0f172a; z-index: 1; }
+.map-legend {
+  display: flex; align-items: center; gap: 22px;
+  padding: 12px 18px; border-top: 1px solid var(--border-light);
+  font-size: 13px; color: var(--text-muted);
+}
+.legend-item { display: inline-flex; align-items: center; gap: 7px; }
+.dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.dot-live { background: #22c55e; box-shadow: 0 0 8px #22c55e; }
+.dot-off { background: #94a3b8; }
+.legend-note { margin-left: auto; opacity: .75; }
+
+/* 发光节点 Marker */
+.node-marker { position: relative; width: 22px; height: 22px; }
+.node-marker .core {
+  position: absolute; inset: 5px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #7dd3fc, #2563eb);
+  border: 2px solid #fff; box-shadow: 0 0 12px rgba(56, 189, 248, .9);
+}
+.node-marker .pulse {
+  position: absolute; inset: 0; border-radius: 50%;
+  border: 2px solid rgba(56, 189, 248, .8);
+  animation: markerPulse 1.8s ease-out infinite;
+}
+.node-marker.offline .core { background: radial-gradient(circle at 35% 35%, #cbd5e1, #64748b); box-shadow: none; }
+.node-marker.offline .pulse { display: none; }
+@keyframes markerPulse {
+  0% { transform: scale(.5); opacity: 1; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+.leaflet-popup-content-wrapper { border-radius: 12px; box-shadow: 0 10px 32px rgba(15,23,42,.25); }
+.leaflet-popup-content { margin: 14px 16px; font-size: 13.5px; line-height: 1.7; }
+.node-popup b { font-size: 15px; }
+.node-popup .row { display: flex; justify-content: space-between; gap: 20px; color: #64748b; }
+.node-popup .row span:last-child { color: #0f172a; font-weight: 600; }
+.badge-live { color: #16a34a; font-weight: 700; }
+
+/* 页面切换丝滑过渡 */
+.sub-page { display: none; animation: pageIn .38s cubic-bezier(.22,1,.36,1); }
+.sub-page.active { display: block; }
+@keyframes pageIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+/* 数据卡片加载动画 */
+.stat-card { animation: cardIn .5s ease backwards; }
+.stat-card:nth-child(2) { animation-delay: .08s; }
+.stat-card:nth-child(3) { animation-delay: .16s; }
+@keyframes cardIn { from { opacity: 0; transform: translateY(18px) scale(.98); } to { opacity: 1; transform: none; } }
