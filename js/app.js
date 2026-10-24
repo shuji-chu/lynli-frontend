@@ -1,5 +1,11 @@
 // ========== 全局配置 ==========
 const API_BASE = "https://api.lynli.me/api/v1";
+// 👇 你的真实接口路径请在这里修改 👇
+const ENDPOINTS = {
+    dashboard: '/admin/dashboard',
+    accountList: '/admin/accounts',   // 对应 api_account.py 列表接口
+    accountExtract: '/admin/accounts/extract' // 对应 api_account.py 提取接口
+};
 
 // 无 emoji 的高级 Toast
 function showToast(msg, type = 'success') {
@@ -23,7 +29,7 @@ async function fetchDashboardData() {
 
     try {
         const token = localStorage.getItem('lynli_admin_token') || '';
-        const res = await fetch(`${API_BASE}/admin/dashboard`, {
+        const res = await fetch(`${API_BASE}${ENDPOINTS.dashboard}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         const json = await res.json();
@@ -49,7 +55,7 @@ async function loadAccounts() {
     try {
         const token = localStorage.getItem('lynli_admin_token') || '';
         // 注意：如果你的接口路径不是 /admin/accounts，请修改这里
-        const res = await fetch(`${API_BASE}/admin/accounts`, { 
+        const res = await fetch(`${API_BASE}${ENDPOINTS.accountList}`, { 
             headers: { 'Authorization': `Bearer ${token}` } 
         });
         const json = await res.json();
@@ -60,6 +66,7 @@ async function loadAccounts() {
             mockAccounts();
         }
     } catch(e) {
+        console.error("拉取真实账号失败，原因是:", e);
         mockAccounts();
     }
 }
@@ -102,7 +109,7 @@ async function extractAccount(id) {
     try {
         const token = localStorage.getItem('lynli_admin_token') || '';
         // 注意：提取接口如果是 /admin/accounts/extract，请自行替换
-        const res = await fetch(`${API_BASE}/admin/accounts/extract`, {
+        const res = await fetch(`${API_BASE}${ENDPOINTS.accountExtract}`, {
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json',
