@@ -1,7 +1,5 @@
-// 因为你的后端路径自带 /api/v1，这里只写域名
 const API_BASE = "https://api.lynli.me";
 
-// 无 emoji 高级 Toast
 function showToast(msg, type = 'success') {
     const toast = document.getElementById('toast');
     const text = document.getElementById('toast-text');
@@ -12,47 +10,34 @@ function showToast(msg, type = 'success') {
     window._toastTimer = setTimeout(() => { toast.classList.remove('show'); }, 3000);
 }
 
-// ========== 数据大盘 ==========
 async function fetchDashboardData() {
     const elRev = document.getElementById('dash-revenue');
-    const elUsers = document.getElementById('dash-users');
-    const elOrders = document.getElementById('dash-orders');
     if (!elRev) return;
-    
     try {
         const token = localStorage.getItem('lynli_admin_token') || '';
         const res = await fetch(`${API_BASE}/api/v1/admin/dashboard`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         const json = await res.json();
-        
         if (json.code === 1 && json.data) {
             const data = json.data;
             elRev.innerText = `¥ ${data.today_income || '0.00'}`;
-            elUsers.innerText = data.total_users || 0; // 你的大盘后端返回的是总用户数
-            elOrders.innerText = data.today_orders || 0;
+            document.getElementById('dash-users').innerText = data.total_users || 0;
+            document.getElementById('dash-orders').innerText = data.today_orders || 0;
         }
-    } catch (err) {
-        console.error("大盘请求失败:", err);
-    }
+    } catch (err) { console.error(err); }
 }
 
-// ========== 账号库（获取真实商品列表） ==========
 async function loadAccounts() {
     const tbody = document.getElementById('account-list');
     if(!tbody) return;
     tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">获取中...</td></tr>';
-    
     try {
         const res = await fetch(`${API_BASE}/api/v1/account/products`);
         const json = await res.json();
-        
         if (json.code === 1 && json.data) {
             tbody.innerHTML = '';
-            if (json.data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">暂无商品</td></tr>';
-                return;
-            }
+            if (json.data.length === 0) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">暂无商品</td></tr>'; return; }
             json.data.forEach(item => {
                 tbody.innerHTML += `
                     <tr>
@@ -66,49 +51,35 @@ async function loadAccounts() {
         } else {
             tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:var(--danger)">${json.msg || '加载失败'}</td></tr>`;
         }
-    } catch(e) {
-        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--danger)">网络请求失败</td></tr>';
-    }
+    } catch(e) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--danger)">网络请求失败</td></tr>'; }
 }
 
-// ========== 提取/购买账号 ==========
 async function extractAccount(productId) {
     const resultBox = document.getElementById('extract-result');
     const dataBox = document.getElementById('extract-data');
     if(!resultBox || !dataBox) return;
-    
     resultBox.style.display = 'block';
     dataBox.innerText = '正在从池子提取...';
-
     try {
         const token = localStorage.getItem('lynli_admin_token') || '';
         const res = await fetch(`${API_BASE}/api/v1/account/buy`, {
             method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}` 
-            },
-            body: JSON.stringify({ product_id: productId }) // 后端需要的是 product_id
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ product_id: productId })
         });
         const json = await res.json();
-        
         if (json.code === 1) {
-            // 你的后端发货返回的数据，如果是账号密码，通常是个对象或字符串
-            const accountData = json.data.account || json.data.email || json.data.data || JSON.stringify(json.data);
-            dataBox.innerText = accountData;
+            dataBox.innerText = json.data.account || json.data.email || JSON.stringify(json.data);
             showToast('提取成功', 'success');
-            loadAccounts(); // 刷新库存
+            loadAccounts();
         } else {
             dataBox.innerText = '提取失败';
             showToast(json.msg || '提取失败', 'error');
         }
-    } catch(e) {
-        dataBox.innerText = '网络请求失败';
-        showToast('网络请求异常', 'error');
-    }
+    } catch(e) { dataBox.innerText = '网络请求失败'; }
 }
 
-// ========== 登录逻辑 ==========
+// 验证码逻辑：生成后自动填入输入框
 let currentCaptcha = '';
 function refreshCaptcha() {
     const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -122,49 +93,42 @@ function refreshCaptcha() {
         capEl.style.fontSize = '20px';
         capEl.style.fontWeight = 'bold';
     }
-}
-
-function autoFillCaptcha() {
+    // 自动填入验证码，免去手动输入
     const capInput = document.getElementById('captcha-input');
     if (capInput) capInput.value = currentCaptcha;
 }
 
+// 登录逻辑：只有拿到 token 才算成功
 async function doLogin() {
     const user = document.getElementById('login-user').value.trim();
     const pass = document.getElementById('login-pass').value.trim();
-    const captcha = document.getElementById('captcha-input').value.trim();
-
     if (!user || !pass) return showToast('请输入账号和密码', 'warning');
-    if (!captcha) return showToast('请输入验证码', 'warning');
-    if (captcha.toUpperCase() !== currentCaptcha.toUpperCase()) {
-        showToast('验证码错误', 'error'); 
-        refreshCaptcha(); 
-        document.getElementById('captcha-input').value = '';
-        return;
-    }
 
-    const btn = document.querySelector('.btn-primary'); // 登录按钮
+    const btn = document.querySelector('.btn-primary');
     if(btn) btn.innerText = '登录中...';
 
     try {
-        // 你后端的登录路径是 /api/v1/passport/auth/login
         const res = await fetch(`${API_BASE}/api/v1/passport/auth/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: user, password: pass }) // 根据 api_auth.py 推测字段
+            body: JSON.stringify({ email: user, password: pass })
         });
         const json = await res.json();
         
         if (json.code === 1) {
-            // 假设返回的 data 里带 token
-            const token = json.data.token || (json.data.user && json.data.user.token) || json.token;
-            if (token) localStorage.setItem('lynli_admin_token', token);
-            localStorage.setItem('lynli_admin', 'true');
-            
-            document.getElementById('login-page').style.display = 'none';
-            document.getElementById('main-app').style.display = 'flex';
-            showToast('登录成功', 'success');
-            fetchDashboardData();
+            // 尝试获取 token 的所有可能字段
+            const token = json.data.token || json.data.auth_data?.auth || json.data.access_token || json.token;
+            if (token) {
+                localStorage.setItem('lynli_admin_token', token);
+                localStorage.setItem('lynli_admin', 'true');
+                document.getElementById('login-page').style.display = 'none';
+                document.getElementById('main-app').style.display = 'flex';
+                showToast('登录成功', 'success');
+                fetchDashboardData();
+            } else {
+                showToast('登录成功但未返回Token', 'error');
+                if(btn) btn.innerText = '登 录';
+            }
         } else {
             showToast(json.msg || '登录失败', 'error');
             if(btn) btn.innerText = '登 录';
@@ -175,13 +139,18 @@ async function doLogin() {
     }
 }
 
-// ========== 初始化 ==========
+// 初始化：严格校验 Token
 window.onload = function() {
-    if (localStorage.getItem('lynli_admin') === 'true') {
+    const token = localStorage.getItem('lynli_admin_token');
+    // 必须有真实 Token 才直接进后台
+    if (token && token !== 'undefined' && token !== 'null') {
         document.getElementById('login-page').style.display = 'none';
         document.getElementById('main-app').style.display = 'flex';
         fetchDashboardData();
     } else {
+        // 没有 Token 就强制清空状态并显示登录页
+        localStorage.clear();
+        document.getElementById('login-page').style.display = 'flex';
         refreshCaptcha();
     }
 }
@@ -190,15 +159,11 @@ function switchTab(pageId, el) {
     document.querySelectorAll('.sub-page').forEach(page => page.classList.remove('active'));
     const target = document.getElementById('page-' + pageId);
     if (target) target.classList.add('active');
-    
     if (el) {
         document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
         el.classList.add('active');
     }
-    
-    if (pageId === 'accounts') {
-        loadAccounts(); // 切换到账号库时拉取真实商品
-    }
+    if (pageId === 'accounts') loadAccounts();
 }
 
 function doLogout() {
