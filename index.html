@@ -1,149 +1,123 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SOCKS5 管理中枢</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='25' fill='%236366f1'/><text x='50' y='68' font-size='45' font-weight='bold' text-anchor='middle' fill='white' font-family='sans-serif'>S5</text></svg>">
-    <link rel="stylesheet" href="./css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Lynli 管理面板</title>
+  <link rel="stylesheet" href="css/style.css">
   <script src="js/toast.js"></script>
   <script src="js/api.js"></script>
 </head>
 <body>
 
-    <!-- 高级光晕背景 -->
-    <div class="glow-1"></div>
-    <div class="glow-2"></div>
+  <!-- ================= 登录页 ================= -->
+  <div id="page-login" class="page-container">
+    <div class="login-box card">
+      <div class="login-header">
+        <div class="brand-mark" style="width: 32px; height: 32px; margin-bottom: 12px;"></div>
+        <h2>Lynli 控制台</h2>
+        <p>欢迎回来，请登录您的账号</p>
+      </div>
+      
+      <div class="field">
+        <label class="field-label">账号</label>
+        <div class="input-with-icon">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6"/></svg>
+          <input type="text" id="login-user" class="input" placeholder="请输入账号">
+        </div>
+      </div>
 
-    <!-- 高级 Toast -->
-    <div id="toast">
-        <span class="toast-icon">ℹ️</span>
-        <span id="toast-text">提示信息</span>
+      <div class="field">
+        <label class="field-label">密码</label>
+        <div class="input-with-icon">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <input type="password" id="login-pass" class="input" placeholder="请输入密码">
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="field-label">验证码</label>
+        <div class="input-group">
+          <input type="text" id="login-code" class="input" placeholder="请输入验证码">
+          <div id="captcha-box" class="captcha-box" title="点击自动填充">XY8A</div>
+        </div>
+      </div>
+
+      <div class="login-options">
+        <label class="checkbox-label">
+          <input type="checkbox" id="remember-me">
+          <span>记住密码</span>
+        </label>
+        <a href="#" class="link">忘记密码？</a>
+      </div>
+
+      <button class="btn btn-primary btn-block" id="btn-login">登 录</button>
+      
+      <div class="login-footer">
+        登录即代表同意 <a href="#" class="link" id="show-privacy">《隐私协议》</a>
+      </div>
     </div>
+  </div>
 
-    <!-- 登录页 -->
-    <div id="login-page">
-        <div class="login-card">
-            <div class="login-logo">S5</div>
-            <h2>SOCKS5 管理中枢</h2>
-            <p>请验证管理员身份</p>
-            
-            <div class="input-group"><input type="email" id="email" placeholder="邮箱账号"></div>
-            <div class="input-group"><input type="password" id="password" placeholder="登录密码"></div>
-            
-            <div class="input-group captcha-group">
-                <input type="text" id="captcha-input" placeholder="验证码 (点击右侧自动填)">
-                <div class="captcha-img" id="captcha-img" onclick="autoFillCaptcha()"></div>
+  <!-- ================= 后台主界面 ================= -->
+  <div id="page-admin" class="admin-shell" style="display: none;">
+    
+    <!-- 侧边栏 / 底部Tab -->
+    <aside class="admin-sidebar">
+      <div class="sidebar-brand">
+        <span class="brand-mark"></span>
+        <span class="brand-text">Lynli</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a class="nav-item is-active" href="#dashboard" data-page="dashboard">
+          <span class="nav-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></span>
+          <span class="nav-label">数据大盘</span>
+        </a>
+        <a class="nav-item" href="#accounts" data-page="accounts">
+          <span class="nav-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/><path d="M7 14h4"/></svg></span>
+          <span class="nav-label">账号库</span>
+        </a>
+        <a class="nav-item" href="#monitor" data-page="monitor">
+          <span class="nav-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12h4l2-7 4 14 2-7h6"/></svg></span>
+          <span class="nav-label">接口监控</span>
+        </a>
+        <a class="nav-item" href="#profile" data-page="profile">
+          <span class="nav-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6"/></svg></span>
+          <span class="nav-label">个人中心</span>
+        </a>
+      </nav>
+    </aside>
+
+    <main class="admin-main">
+      <!-- 内容区 -->
+      <div class="page-content is-active" id="content-dashboard">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">本月账号售出</div>
+              <div class="card-subtitle">实时同步 V1 API</div>
             </div>
-
-            <div style="display:flex; justify-content:space-between; margin-bottom:20px; font-size:13px; color:var(--text-sub);">
-                <label><input type="checkbox" id="remember-me" style="vertical-align: middle; margin-right: 5px;"> 记住密码</label>
-                <a href="javascript:;" onclick="showToast('请联系超级管理员重置', '🔒')" style="color:var(--primary); text-decoration:none;">忘记密码？</a>
-            </div>
-
-            <button class="login-btn" onclick="doLogin()">解锁控制台</button>
+          </div>
+          <div class="metric-value" id="metric-accounts">—</div>
+          <div class="metric-delta">较上月 +12.4%</div>
         </div>
-    </div>
-
-    <!-- 主面板 -->
-    <div id="main-app">
-        <!-- 数据大盘 -->
-        <div class="sub-page active" id="page-dashboard">
-            <div class="header-area">
-                <div class="title-group"><h1>早上好，Boss</h1><p>今日核心数据已就绪</p></div>
-                <div class="avatar"></div>
-            </div>
-            <div class="stats-scroll">
-                <div class="stat-card">
-                    <div class="stat-label">今日总营收 (CNY)</div>
-                    <div class="stat-value" style="color: var(--primary);">¥ 3,250.50</div>
-                    <div class="stat-trend">↑ 12.5% 较昨日</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">今日新增用户</div>
-                    <div class="stat-value">128</div>
-                    <div class="stat-trend">↑ 5.2% 较昨日</div>
-                </div>
-            </div>
-            <div class="content-area">
-                <div class="section-title">快捷管理</div>
-                <div class="grid-menu">
-                    <div class="grid-item" onclick="switchTab('account', document.querySelectorAll('.tab-item')[1])">
-                        <div class="grid-icon">👤</div><div class="grid-text">发卡库存</div>
-                    </div>
-                    <div class="grid-item">
-                        <div class="grid-icon">🛒</div><div class="grid-text">商品上架</div>
-                    </div>
-                </div>
-                <div class="section-title">待办任务 <a href="javascript:;">全部</a></div>
-                <div class="task-list">
-                    <div class="task-item">
-                        <div class="task-info"><h4>TGX 账号库存告急</h4><p>Google Voice 实体号仅剩 2 个</p></div>
-                        <div class="task-status status-warning">需补货</div>
-                    </div>
-                    <div class="task-item">
-                        <div class="task-info"><h4>数据库自动备份</h4><p>今日 03:00 已成功上传 OSS</p></div>
-                        <div class="task-status status-success">已完成</div>
-                    </div>
-                </div>
-            </div>
+      </div>
+      
+      <div class="page-content" id="content-accounts">
+        <div class="card"><div class="empty"><div class="empty-title">账号库开发中</div></div></div>
+      </div>
+      <div class="page-content" id="content-monitor">
+        <div class="card"><div class="empty"><div class="empty-title">接口监控开发中</div></div></div>
+      </div>
+      <div class="page-content" id="content-profile">
+        <div class="card">
+          <button class="btn btn-danger btn-block" id="btn-logout">退出登录</button>
         </div>
+      </div>
+    </main>
+  </div>
 
-        <!-- 账号库 -->
-        <div class="sub-page" id="page-account">
-            <div class="sub-header">TGX 账号库</div>
-            <div class="content-area">
-                <div class="glass-card">
-                    <h3 style="font-size:16px; margin-bottom:10px;">Telegram 美区 1年白号</h3>
-                    <p style="color:var(--text-sub); font-size:14px;">售价: ¥3.80 | 库存: 45</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- 接口与节点 -->
-        <div class="sub-page" id="page-api">
-            <div class="sub-header">API & 节点</div>
-            <div class="content-area">
-                <div class="glass-card">
-                    <h3 style="font-size:16px; margin-bottom:15px;">节点状态</h3>
-                    <p style="color:#10b981;">美国 洛杉矶 01 (在线 12ms)</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- 个人中心 -->
-        <div class="sub-page" id="page-profile">
-            <div class="sub-header">个人中心</div>
-            <div class="content-area">
-                <div class="glass-card" style="display:flex; align-items:center; gap:15px;">
-                    <div class="avatar" style="width:60px; height:60px;"></div>
-                    <div><h2 style="font-size:20px; margin-bottom:5px; color:#fff;">Boss</h2><p style="color:var(--text-sub); font-size:13px;">超级管理员</p></div>
-                </div>
-                <div class="task-list" style="margin-top:20px;">
-                    <div class="task-item" onclick="doLogout()">
-                        <div class="task-info"><h4 style="color:#ef4444;">退出登录</h4></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 底部 Tab -->
-        <div class="bottom-tab">
-            <div class="tab-item active" onclick="switchTab('dashboard', this)">
-                <div class="tab-icon">📊</div><div class="tab-text">大盘</div>
-            </div>
-            <div class="tab-item" onclick="switchTab('account', this)">
-                <div class="tab-icon">👤</div><div class="tab-text">账号库</div>
-            </div>
-            <div class="tab-item" onclick="switchTab('api', this)">
-                <div class="tab-icon">⚙️</div><div class="tab-text">接口</div>
-            </div>
-            <div class="tab-item" onclick="switchTab('profile', this)">
-                <div class="tab-icon">👤</div><div class="tab-text">我的</div>
-            </div>
-        </div>
-    </div>
-
-    <script src="./js/app.js"></script>
+  <script src="js/app.js"></script>
 </body>
 </html>

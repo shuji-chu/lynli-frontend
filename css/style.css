@@ -180,3 +180,93 @@ body { background: var(--bg-gradient); color: var(--text-main); height: 100vh; o
 .toast.is-leaving{animation:toast-out .16s ease-in forwards}
 @keyframes toast-in{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
 @keyframes toast-out{to{opacity:0;transform:translateY(-6px)}}
+
+/* ===== 滑动优化 ===== */
+body {
+  overflow: hidden; /* 防止整个页面滚动 */
+}
+.admin-main {
+  height: calc(100vh - var(--tab-height));
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch; /* iOS 顺滑滚动 */
+  overscroll-behavior-y: contain; /* 防止滚动穿透 */
+}
+@media (min-width: 769px) {
+  .admin-main { height: 100vh; }
+}
+
+/* ===== 登录页样式 ===== */
+#page-login {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: var(--bg-page);
+}
+.login-box {
+  width: 100%;
+  max-width: 360px;
+  padding: 30px 24px;
+}
+.login-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+.login-header h2 {
+  margin: 0 0 4px; font-size: 20px; color: var(--text-primary); letter-spacing: -0.02em;
+}
+.login-header p {
+  margin: 0; font-size: 13px; color: var(--text-secondary);
+}
+.input-with-icon {
+  position: relative;
+}
+.input-with-icon svg {
+  position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+  color: var(--text-tertiary);
+}
+.input-with-icon .input {
+  padding-left: 36px;
+}
+.input-group {
+  display: flex; gap: 10px;
+}
+.captcha-box {
+  width: 90px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--blue-soft); color: var(--blue-primary);
+  font-weight: 700; font-size: 16px; letter-spacing: 2px;
+  border-radius: var(--radius-sm); cursor: pointer;
+  user-select: none; transition: background .15s;
+}
+.captcha-box:active { background: var(--blue-hover); }
+.login-options {
+  display: flex; justify-content: space-between; align-items: center;
+  margin: 16px 0 24px; font-size: 13px;
+}
+.checkbox-label {
+  display: flex; align-items: center; gap: 6px; color: var(--text-secondary); cursor: pointer;
+}
+.checkbox-label input {
+  accent-color: var(--blue-primary); width: 16px; height: 16px;
+}
+.link {
+  color: var(--blue-primary); text-decoration: none;
+}
+.login-footer {
+  margin-top: 20px; text-align: center; font-size: 12px; color: var(--text-tertiary);
+}
+
+/* ===== 页面切换过渡 ===== */
+.page-content {
+  display: none;
+  animation: fade-in .2s ease-out;
+}
+.page-content.is-active {
+  display: block;
+}
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
