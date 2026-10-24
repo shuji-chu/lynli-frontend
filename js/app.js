@@ -130,3 +130,8 @@ renderLogin(renderApp);
 import { render as renderTgx } from './views/tgx.js';
 import { routes } from './router.js';
 if (routes['tgx']) routes['tgx'].render = renderTgx;
+
+import { render as renderDashboard } from "./views/dashboard.js";
+import { routes } from "./router.js";
+if (routes["dashboard"]) routes["dashboard"].render = renderDashboard;
+
