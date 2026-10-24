@@ -5,13 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SOCKS5 管理中枢</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='25' fill='%233b82f6'/><text x='50' y='68' font-size='45' font-weight='bold' text-anchor='middle' fill='white' font-family='sans-serif'>S5</text></svg>">
-    <!-- 引入拆分后的 CSS 和 JS -->
     <link rel="stylesheet" href="./css/style.css">
 </head>
 <body>
 
     <div class="glow-spot-1"></div>
     <div class="glow-spot-2"></div>
+
+    <!-- 高级 Toast 提示容器 -->
+    <div id="toast">
+        <span class="toast-icon">ℹ️</span>
+        <span id="toast-text">提示信息</span>
+    </div>
 
     <!-- 登录页 -->
     <div id="login-page">
@@ -22,14 +27,16 @@
             
             <div class="input-group"><input type="email" id="email" placeholder="邮箱账号"></div>
             <div class="input-group"><input type="password" id="password" placeholder="登录密码"></div>
+            
             <div class="input-group captcha-group">
-                <input type="text" id="captcha-input" placeholder="验证码">
-                <div class="captcha-img" id="captcha-img" onclick="refreshCaptcha()"></div>
+                <input type="text" id="captcha-input" placeholder="验证码 (点击右侧可自动填)">
+                <!-- 点击右侧验证码，自动填入 -->
+                <div class="captcha-img" id="captcha-img" onclick="autoFillCaptcha()"></div>
             </div>
 
             <div style="display:flex; justify-content:space-between; margin-bottom:20px; font-size:13px; color:var(--text-sub);">
                 <label><input type="checkbox" id="remember-me" style="vertical-align: middle; margin-right: 5px;"> 记住密码</label>
-                <a href="javascript:;" style="color:var(--primary); text-decoration:none;">忘记密码？</a>
+                <a href="javascript:;" onclick="showToast('请联系超级管理员重置', '🔒')" style="color:var(--primary); text-decoration:none;">忘记密码？</a>
             </div>
 
             <button class="login-btn" onclick="doLogin()">解锁控制台</button>
@@ -135,7 +142,6 @@
         </div>
     </div>
 
-    <!-- 引入 JS -->
     <script src="./js/app.js"></script>
 </body>
 </html>

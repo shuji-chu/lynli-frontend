@@ -81,3 +81,30 @@ body { background-color: var(--bg-base); color: var(--text-main); height: 100vh;
 .sub-page.active { display: flex; }
 .sub-header { padding: 40px 20px 20px; font-size: 24px; font-weight: bold; }
 .glass-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 15px; margin-bottom: 15px; }
+
+/* ================= 高级 Toast 提示 ================= */
+#toast {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-150px);
+    background: rgba(15, 23, 42, 0.9);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 30px;
+    font-size: 14px;
+    z-index: 100000;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    opacity: 0;
+    pointer-events: none;
+}
+#toast.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+}
