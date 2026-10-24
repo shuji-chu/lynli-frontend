@@ -998,7 +998,7 @@ async function loadProfile() {
         const ll = document.getElementById('profile-lastlogin');
         if (ll) ll.innerText = (u.lastLoginAt ?? u.last_login_at) ? fmtTime(u.lastLoginAt ?? u.last_login_at) : '--';
         const sid = document.getElementById('profile-shortid');
-        if (sid) sid.innerText = (u.shortId ?? u.short_id) ? '#' + (u.shortId ?? u.short_id) : '--';
+        if (sid) sid.innerText = (u.shortId ?? u.short_id) ? '#' + (u.shortId ?? u.short_id) : '未设置';
         const bal = document.getElementById('profile-balance');
         if (bal) bal.innerText = '¥' + Number(u.balance || 0).toFixed(2);
     } catch (e) {
