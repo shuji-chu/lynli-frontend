@@ -369,8 +369,8 @@ function switchTab(tab, el) {
     // 顶栏标题
     const tp = document.getElementById('topbar-page');
     if (tp) tp.innerText = PAGE_TITLES[tab] || tab;
-    // 小屏：选完自动收起抽屉
-    if (window.innerWidth <= 768) toggleDrawer(false);
+    // 选中后自动收起抽屉（避免遮挡内容区操作，如地图图层切换器）
+    toggleDrawer(false);
     // 懒加载各业务页真实数据
     if (tab === 'map') {
         setTimeout(() => { if (typeof initNodeMap === 'function') initNodeMap(); }, 80);
