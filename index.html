@@ -4,17 +4,18 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>SOCKS5 控制台</title>
-  <link rel="stylesheet" href="./css/style.css?v=12.0
+  <!-- 使用相对路径，解决 GitHub Pages 白屏 -->
+  <link rel="stylesheet" href="./css/style.css">
 </head>
 <body>
 
-  <!-- ================= 登录页 ================= -->
+  <!-- 登录页 -->
   <div id="login-page" class="page-container">
     <div class="login-box card">
       <div class="login-header">
-        <!-- 全局复用 logo.png -->
         <div class="brand-logo">
-          <img src="./logo.png" alt="SOCKS5" style="width: 100%; height: 100%; object-fit: contain; border-radius: 14px;">
+          <!-- 直接用你仓库里的 logo -->
+          <img src="./logo.png" alt="SOCKS5" style="width: 100%; height: 100%; object-fit: cover; border-radius: 14px;">
         </div>
         <h2>SOCKS5 控制台</h2>
         <p>欢迎回来，请登录您的账号</p>
@@ -55,13 +56,12 @@
     </div>
   </div>
 
-  <!-- ================= 后台主界面 ================= -->
+  <!-- 后台主界面 -->
   <div id="main-app" class="admin-shell" style="display: none;">
     <aside class="admin-sidebar">
       <div class="sidebar-brand">
-        <!-- 全局复用 logo.png -->
         <img src="./logo.png" class="brand-mark" alt="logo" style="object-fit: cover;">
-        <span class="brand-text">SOCKS5 Pro</span>
+        <span class="brand-text">SOCKS5</span>
       </div>
       <nav class="sidebar-nav">
         <a class="nav-item active" href="javascript:void(0)" onclick="switchTab('dashboard', this)">
@@ -71,10 +71,6 @@
         <a class="nav-item" href="javascript:void(0)" onclick="switchTab('accounts', this)">
           <span class="nav-icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/><path d="M7 14h4"/></svg></span>
           <span class="nav-label">账号库</span>
-        </a>
-        <a class="nav-item" href="javascript:void(0)" onclick="switchTab('monitor', this)">
-          <span class="nav-icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12h4l2-7 4 14 2-7h6"/></svg></span>
-          <span class="nav-label">接口监控</span>
         </a>
         <a class="nav-item" href="javascript:void(0)" onclick="switchTab('profile', this)">
           <span class="nav-icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6"/></svg></span>
@@ -89,20 +85,20 @@
         <div class="dashboard-grid">
           <div class="card stat-card">
             <div class="stat-title">今日营收</div>
-            <div class="stat-value text-primary" id="dash-revenue">加载中...</div>
+            <div class="stat-value text-primary" id="dash-revenue">...</div>
           </div>
           <div class="card stat-card">
-            <div class="stat-title">今日新增用户</div>
-            <div class="stat-value" id="dash-users">加载中...</div>
+            <div class="stat-title">总用户</div>
+            <div class="stat-value" id="dash-users">...</div>
           </div>
           <div class="card stat-card">
-            <div class="stat-title">今日订单数</div>
-            <div class="stat-value" id="dash-orders">加载中...</div>
+            <div class="stat-title">今日订单</div>
+            <div class="stat-value" id="dash-orders">...</div>
           </div>
         </div>
       </div>
       
-      
+      <!-- 账号库 -->
       <div class="sub-page" id="page-accounts">
         <div class="page-header">
           <h2 class="page-title">账号库</h2>
@@ -111,46 +107,9 @@
         <div class="card">
           <div class="table-wrap">
             <table class="table">
-              <thead>
-                <tr><th>商品名称</th><th>价格</th><th>库存</th><th>操作</th></tr>
-              </thead>
+              <thead><tr><th>商品名称</th><th>价格</th><th>库存</th><th>操作</th></tr></thead>
               <tbody id="account-list">
-                <tr><td colspan="4" style="text-align:center;color:var(--text-tertiary)">加载中...</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-        
-        <div id="extract-result" class="card" style="display:none; margin-top: 16px; border: 1px solid var(--blue-primary); box-shadow: 0 4px 12px rgba(37,99,235,0.15);">
-          <div class="card-title" style="color: var(--blue-primary); margin-bottom: 8px;">已提取的账号</div>
-          <div id="extract-data" style="font-family: monospace; background: #f8fafc; padding: 12px; border-radius: 8px; word-break: break-all; user-select: all; font-size: 14px; border: 1px solid var(--border-subtle);"></div>
-          <div style="font-size: 12px; color: var(--text-tertiary); margin-top: 8px;">长按上方内容可复制</div>
-        </div>
-      </div>
-
-      <!-- 接口监控架构 -->
-      <div class="sub-page" id="page-monitor">
-        <div class="page-header">
-          <h2 class="page-title">接口监控</h2>
-        </div>
-        <div class="dashboard-grid" style="grid-template-columns: 1fr 1fr; margin-bottom: 16px;">
-          <div class="card stat-card">
-            <div class="stat-title">平均响应</div>
-            <div class="stat-value" style="font-size: 24px;">45 ms</div>
-          </div>
-          <div class="card stat-card">
-            <div class="stat-title">成功率</div>
-            <div class="stat-value text-primary" style="font-size: 24px;">99.9%</div>
-          </div>
-        </div>
-        <div class="card">
-          <div class="card-title" style="margin-bottom: 12px;">最近请求</div>
-          <div class="table-wrap">
-            <table class="table">
-              <thead><tr><th>接口</th><th>状态</th><th>耗时</th></tr></thead>
-              <tbody>
-                <tr><td>/api/v1/admin/dashboard</td><td><span class="badge badge-success">200 OK</span></td><td>32ms</td></tr>
-                <tr><td>/api/v1/user/order/pay</td><td><span class="badge badge-success">200 OK</span></td><td>58ms</td></tr>
+                <tr><td colspan="4" style="text-align:center;">加载中...</td></tr>
               </tbody>
             </table>
           </div>
@@ -159,11 +118,8 @@
       
       <!-- 个人中心 -->
       <div class="sub-page" id="page-profile">
-        <div class="card profile-card" style="text-align: center; padding: 40px 20px;">
-          <div style="width: 80px; height: 80px; margin: 0 auto 16px; background: var(--blue-soft); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-            <img src="./logo.png" alt="avatar" style="width: 50px; height: 50px; object-fit: contain;">
-          </div>
-          <h2 style="margin: 0 0 8px; font-size: 20px;">管理员账号</h2>
+        <div class="card" style="text-align: center; padding: 40px 20px;">
+          <h2 style="margin: 0 0 8px; font-size: 20px;">管理员</h2>
           <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 24px;">admin@lynli.me</p>
           <button class="btn btn-danger btn-block" onclick="doLogout()">退出登录</button>
         </div>
@@ -171,10 +127,7 @@
     </main>
   </div>
 
-  <div id="toast" class="toast">
-    <div class="toast-text" id="toast-text"></div>
-  </div>
-
-  <script src="./js/app.js?v=12.0
+  <div id="toast" class="toast"><div class="toast-text" id="toast-text"></div></div>
+  <script src="./js/app.js"></script>
 </body>
 </html>
