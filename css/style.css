@@ -147,3 +147,20 @@ body {
 }
 .toast.is-error::before { background: #ef4444; }
 .toast.is-warning::before { background: #f59e0b; }
+
+/* ===== 补充内部架构样式 ===== */
+.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.page-title { font-size: 18px; font-weight: 700; margin: 0; color: var(--text-primary); letter-spacing: -0.02em; }
+.btn-sm { height: 32px; padding: 0 14px; font-size: 13px; border-radius: 8px; }
+.btn-ghost { background: transparent; color: var(--blue-primary); border: 1px solid var(--border-subtle); }
+.btn-ghost:active { background: var(--blue-soft); }
+
+.table-wrap { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 100%; }
+.table th { text-align: left; font-weight: 500; font-size: 12px; color: var(--text-tertiary); padding: 10px 8px; border-bottom: 1px solid var(--border-subtle); white-space: nowrap; }
+.table td { padding: 12px 8px; color: var(--text-primary); border-bottom: 1px solid var(--border-subtle); }
+.table tbody tr:last-child td { border-bottom: none; }
+
+.badge { display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 999px; font-size: 11px; font-weight: 500; }
+.badge-success { background: #f0fdf4; color: #16a34a; }
+.badge-warning { background: #fffbeb; color: #d97706; }
