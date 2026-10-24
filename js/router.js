@@ -8,13 +8,14 @@ export const routes = {
   proxy: { title: "节点与代理", render: null },
   users: { title: "客户与会员", render: null },
   finance: { title: "财务与提现", render: null },
+  catalog: { title: "API 市场", render: null }, // 新加的
   docs: { title: "开发者文档", render: null },
   system: { title: "系统设置", render: null }
 };
 
 export const navGroups = [
   { group: "工作台", items: ["dashboard", "chat"] },
-  { group: "核心业务", items: ["orders", "account", "products", "proxy"] },
+  { group: "核心业务", items: ["orders", "account", "products", "proxy", "catalog"] }, // 放入核心业务
   { group: "客户与财务", items: ["users", "aftersales", "finance"] },
   { group: "开发与系统", items: ["docs", "system"] }
 ];
