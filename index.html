@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>SOCKS5 管理中枢</title>
   <!-- S5 品牌图标 -->
-  <link rel="icon" type="image/png" href="./favicon.png?v=20261024f">
-  <link rel="apple-touch-icon" href="./apple-touch-icon.png?v=20261024f">
+  <link rel="icon" type="image/png" href="./favicon.png?v=20261024g">
+  <link rel="apple-touch-icon" href="./apple-touch-icon.png?v=20261024g">
   <!-- 使用相对路径，解决 GitHub Pages 白屏 -->
-  <link rel="stylesheet" href="./css/style.css?v=20261024f">
+  <link rel="stylesheet" href="./css/style.css?v=20261024g">
   <!-- Leaflet 地图库（卫星地图，jsdelivr 主源 + cdnjs 容灾） -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" onerror="this.onerror=null;this.href='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css'">
   <!-- Anime.js 丝滑动画 -->
@@ -16,18 +16,17 @@
 </head>
 <body>
 
-  <!-- 登录页 -->
+  <!-- ======================= 登录页 ======================= -->
   <div id="login-page" class="page-container">
     <div class="login-box card">
       <div class="login-header">
         <div class="brand-logo">
-          <!-- 直接用你仓库里的 logo -->
           <div style="width: 64px; height: 64px; background: linear-gradient(135deg, #3b82f6, #2563eb); color: #fff; font-weight: bold; font-size: 32px; display: flex; align-items: center; justify-content: center; border-radius: 12px; margin: 0 auto 20px; box-shadow: 0 4px 12px rgba(59,130,246,0.3);">S5</div>
         </div>
         <h2>SOCKS5 管理中枢</h2>
         <p>欢迎回来，请登录您的账号</p>
       </div>
-      
+
       <div class="field">
         <label class="field-label">账号</label>
         <div class="input-with-icon">
@@ -63,43 +62,53 @@
     </div>
   </div>
 
-  <!-- 后台主界面 -->
-  <div id="main-app" class="admin-shell" style="display: none;">
-    <aside class="admin-sidebar">
-      <div class="sidebar-brand">
-        <img src="./logo.png?v=20261024f" class="brand-mark" alt="logo" style="object-fit: cover;">
-        <span class="brand-text">SOCKS5</span>
+  <!-- ======================= 中台主界面 ======================= -->
+  <div id="main-app" class="console-shell" style="display: none;">
+
+    <!-- 顶部栏：左上角抽屉触发器 -->
+    <header class="topbar">
+      <button class="hamburger" id="btn-drawer" onclick="toggleDrawer()" aria-label="打开导航菜单">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+      <div class="topbar-brand">
+        <span class="topbar-logo">S5</span>
+        <span class="topbar-title">SOCKS5 管理中枢</span>
       </div>
-      <nav class="sidebar-nav">
-        <div class="nav-group">概览</div>
-        <a class="nav-item active" href="javascript:void(0)" onclick="switchTab('dashboard', this)">
-          <span class="nav-icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></span>
-          <span class="nav-label">数据大盘</span>
-        </a>
-        <div class="nav-group">资源</div>
-        <a class="nav-item" href="javascript:void(0)" onclick="switchTab('accounts', this)">
-          <span class="nav-icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/><path d="M7 14h4"/></svg></span>
-          <span class="nav-label">账号库</span>
-        </a>
-        <a class="nav-item" href="javascript:void(0)" onclick="switchTab('map', this)">
-          <span class="nav-icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.8 2.6 4 5.6 4 9s-1.2 6.4-4 9c-2.8-2.6-4-5.6-4-9s1.2-6.4 4-9z"/></svg></span>
-          <span class="nav-label">节点地图</span>
-        </a>
-        <div class="nav-group">账户</div>
-        <a class="nav-item" href="javascript:void(0)" onclick="switchTab('profile', this)">
-          <span class="nav-icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6"/></svg></span>
-          <span class="nav-label">个人中心</span>
-        </a>
-      </nav>
-      <div class="sidebar-foot">
+      <div class="topbar-right">
+        <span class="topbar-page" id="topbar-page">数据大盘</span>
+        <span class="topbar-user" id="topbar-user">--</span>
+        <span class="role-badge" id="topbar-role">--</span>
+      </div>
+    </header>
+
+    <!-- 抽屉导航遮罩 -->
+    <div class="drawer-mask" id="drawer-mask" onclick="toggleDrawer(false)"></div>
+
+    <!-- 抽屉式导航 + 应用中心 -->
+    <aside class="drawer" id="drawer">
+      <div class="drawer-head">
+        <div class="drawer-logo">S5</div>
+        <div class="drawer-user">
+          <div class="drawer-email" id="drawer-email">--</div>
+          <span class="role-badge" id="drawer-role">--</span>
+        </div>
+        <button class="drawer-close" onclick="toggleDrawer(false)" aria-label="关闭菜单">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+      </div>
+      <nav class="drawer-nav" id="drawer-nav"><!-- 应用中心菜单由 JS 按角色渲染 --></nav>
+      <div class="drawer-foot">
         <span class="foot-dot"></span>
         <span class="foot-text">服务运行正常</span>
+        <span class="drawer-version">v2.0</span>
       </div>
     </aside>
 
-    <main class="admin-main">
-      <!-- 数据大盘 -->
-      <div class="sub-page active" id="page-dashboard">
+    <!-- 内容区 -->
+    <main class="console-main">
+
+      <!-- ========== 📊 工作台 · 数据大盘 ========== -->
+      <section class="sub-page active" id="page-dashboard">
         <div class="page-header">
           <div>
             <h2 class="page-title">数据大盘</h2>
@@ -109,24 +118,48 @@
         </div>
         <div class="dashboard-grid">
           <div class="card stat-card" style="--d:0">
-            <div class="stat-icon icon-blue"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.8 2.6 4 5.6 4 9s-1.2 6.4-4 9c-2.8-2.6-4-5.6-4-9s1.2-6.4 4-9z"/></svg></div>
-            <div class="stat-title">全球节点</div>
-            <div class="stat-value text-primary" id="dash-nodes">...</div>
-            <div class="stat-foot" id="dash-nodes-foot">在线节点</div>
+            <div class="stat-icon icon-blue"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6"/></svg></div>
+            <div class="stat-title">总用户数</div>
+            <div class="stat-value text-primary" id="dash-users">...</div>
+            <div class="stat-foot" id="dash-users-foot">今日新增 --</div>
           </div>
           <div class="card stat-card" style="--d:1">
+            <div class="stat-icon icon-green"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l2.4 7.2H22l-6 4.4 2.3 7.4-6.3-4.6-6.3 4.6L8 13.6 2 9.2h7.6z"/></svg></div>
+            <div class="stat-title">付费用户</div>
+            <div class="stat-value" id="dash-paid">...</div>
+            <div class="stat-foot" id="dash-paid-foot">付费转化率 --</div>
+          </div>
+          <div class="card stat-card" style="--d:2">
+            <div class="stat-icon icon-violet"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/><path d="M7 14h4"/></svg></div>
+            <div class="stat-title">总订单</div>
+            <div class="stat-value" id="dash-orders">...</div>
+            <div class="stat-foot" id="dash-orders-foot">今日 -- 单</div>
+          </div>
+          <div class="card stat-card" style="--d:3">
+            <div class="stat-icon icon-amber"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M9 9h6M9 12h6M12 7v10"/><path d="M9.5 15.5L12 18l2.5-2.5"/></svg></div>
+            <div class="stat-title">今日营收</div>
+            <div class="stat-value" id="dash-income">...</div>
+            <div class="stat-foot" id="dash-income-foot">累计 ¥--</div>
+          </div>
+          <div class="card stat-card" style="--d:4">
+            <div class="stat-icon icon-blue"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.8 2.6 4 5.6 4 9s-1.2 6.4-4 9c-2.8-2.6-4-5.6-4-9s1.2-6.4 4-9z"/></svg></div>
+            <div class="stat-title">全球节点</div>
+            <div class="stat-value" id="dash-nodes">...</div>
+            <div class="stat-foot" id="dash-nodes-foot">在线节点</div>
+          </div>
+          <div class="card stat-card" style="--d:5">
             <div class="stat-icon icon-green"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/><path d="M7 14h4"/></svg></div>
             <div class="stat-title">在售商品</div>
             <div class="stat-value" id="dash-products">...</div>
-            <div class="stat-foot">账号库实时库存</div>
+            <div class="stat-foot" id="dash-products-foot">账号库实时库存</div>
           </div>
-          <div class="card stat-card" style="--d:2">
+          <div class="card stat-card" style="--d:6">
             <div class="stat-icon icon-amber"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l2.4 7.2H22l-6 4.4 2.3 7.4-6.3-4.6-6.3 4.6L8 13.6 2 9.2h7.6z"/></svg></div>
             <div class="stat-title">套餐档位</div>
             <div class="stat-value" id="dash-plans">...</div>
             <div class="stat-foot">在售套餐数量</div>
           </div>
-          <div class="card stat-card" style="--d:3">
+          <div class="card stat-card" style="--d:7">
             <div class="stat-icon icon-violet"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09a1.65 1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33h.09a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51h.09a1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82v.09a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></div>
             <div class="stat-title">我的剩余流量</div>
             <div class="stat-value" id="dash-traffic">...</div>
@@ -134,30 +167,41 @@
           </div>
         </div>
 
-        <!-- 图表区 -->
+        <!-- 图表区：真实趋势数据 -->
         <div class="chart-grid">
-          <div class="card chart-card" style="--d:4">
+          <div class="card chart-card" style="--d:8">
             <div class="chart-head">
-              <h3 class="chart-title">套餐流量额度分布</h3>
+              <h3 class="chart-title">近 7 日营收趋势</h3>
               <span class="chart-badge" id="chart-trend-badge">实时</span>
             </div>
             <div id="chart-trend" class="chart-box"></div>
           </div>
-          <div class="card chart-card" style="--d:5">
+          <div class="card chart-card" style="--d:9">
             <div class="chart-head">
-              <h3 class="chart-title">商品库存分布</h3>
+              <h3 class="chart-title">近 7 日新增用户</h3>
               <span class="chart-badge" id="chart-bar-badge">实时</span>
             </div>
             <div id="chart-bar" class="chart-box"></div>
           </div>
         </div>
-      </div>
-      
-      <!-- 账号库（卡片式列表） -->
-      <div class="sub-page" id="page-accounts">
+      </section>
+
+      <!-- ========== 📊 工作台 · 运行日志 ========== -->
+      <section class="sub-page" id="page-logs">
+        <div class="page-header"><div><h2 class="page-title">运行日志</h2><p class="page-sub">系统操作审计与运行记录</p></div></div>
+        <div class="card placeholder-card">
+          <div class="placeholder-icon">📜</div>
+          <h3>运行日志</h3>
+          <p>该模块正在紧张开发中，将提供登录审计、操作记录、异常告警等能力。</p>
+          <button class="btn btn-primary btn-sm" onclick="switchTab('dashboard')">返回工作台</button>
+        </div>
+      </section>
+
+      <!-- ========== 🛒 电商系统 · 商品管理 ========== -->
+      <section class="sub-page" id="page-products">
         <div class="page-header">
           <div>
-            <h2 class="page-title">账号库</h2>
+            <h2 class="page-title">商品管理</h2>
             <p class="page-sub">在售账号商品 · 实时库存状态</p>
           </div>
           <button class="btn btn-primary btn-sm" onclick="loadAccounts()">刷新列表</button>
@@ -165,13 +209,57 @@
         <div class="product-grid" id="account-list">
           <div class="empty-tip">加载中...</div>
         </div>
-      </div>
-      
-      <!-- 节点地图 -->
-      <div class="sub-page" id="page-map">
+      </section>
+
+      <!-- ========== 🛒 电商系统 · 订单管理 ========== -->
+      <section class="sub-page" id="page-orders">
+        <div class="page-header"><div><h2 class="page-title">订单管理</h2><p class="page-sub">全渠道订单 · 支付与退款</p></div></div>
+        <div class="card placeholder-card">
+          <div class="placeholder-icon">🧾</div>
+          <h3>订单管理</h3>
+          <p>该模块正在紧张开发中，将支持订单查询、对账、退款处理与导出。</p>
+          <button class="btn btn-primary btn-sm" onclick="switchTab('dashboard')">返回工作台</button>
+        </div>
+      </section>
+
+      <!-- ========== 🛒 电商系统 · 物流跟踪 ========== -->
+      <section class="sub-page" id="page-logistics">
+        <div class="page-header"><div><h2 class="page-title">物流跟踪</h2><p class="page-sub">发货轨迹 · 异常预警</p></div></div>
+        <div class="card placeholder-card">
+          <div class="placeholder-icon">🚚</div>
+          <h3>物流跟踪</h3>
+          <p>该模块正在紧张开发中，将接入物流轨迹查询与异常件预警。</p>
+          <button class="btn btn-primary btn-sm" onclick="switchTab('dashboard')">返回工作台</button>
+        </div>
+      </section>
+
+      <!-- ========== 📦 发卡系统 · TGX 号池 ========== -->
+      <section class="sub-page" id="page-tgx">
+        <div class="page-header"><div><h2 class="page-title">TGX 号池</h2><p class="page-sub">账号库存 · 自动发卡</p></div></div>
+        <div class="card placeholder-card">
+          <div class="placeholder-icon">🗂️</div>
+          <h3>TGX 号池</h3>
+          <p>该模块正在紧张开发中，将支持号池入库、分配、冻结与自动发卡。</p>
+          <button class="btn btn-primary btn-sm" onclick="switchTab('dashboard')">返回工作台</button>
+        </div>
+      </section>
+
+      <!-- ========== 📦 发卡系统 · 接码 ========== -->
+      <section class="sub-page" id="page-sms">
+        <div class="page-header"><div><h2 class="page-title">接码平台</h2><p class="page-sub">验证码接收 · 通道管理</p></div></div>
+        <div class="card placeholder-card">
+          <div class="placeholder-icon">📩</div>
+          <h3>接码平台</h3>
+          <p>该模块正在紧张开发中，将支持接码通道切换、号码分配与收益结算。</p>
+          <button class="btn btn-primary btn-sm" onclick="switchTab('dashboard')">返回工作台</button>
+        </div>
+      </section>
+
+      <!-- ========== 🌐 网络基建 · 节点管理 ========== -->
+      <section class="sub-page" id="page-nodes">
         <div class="page-header">
           <div>
-            <h2 class="page-title">节点地图</h2>
+            <h2 class="page-title">节点管理</h2>
             <p class="page-sub">卫星影像 · 实时节点分布</p>
           </div>
           <div class="map-header-actions">
@@ -182,7 +270,6 @@
         </div>
         <div class="card map-card">
           <div id="node-map"></div>
-          <!-- 自定义玻璃拟态缩放控件 -->
           <div class="map-zoom-ctrl">
             <button class="zoom-btn" onclick="mapZoomIn()" title="放大" aria-label="放大">
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg>
@@ -199,31 +286,166 @@
             <span class="legend-note">卫星影像 · 实时节点分布</span>
           </div>
         </div>
-      </div>
+      </section>
 
-      <!-- 个人中心 -->
-      <div class="sub-page" id="page-profile">
+      <!-- ========== 🌐 网络基建 · 服务器探针 ========== -->
+      <section class="sub-page" id="page-probe">
+        <div class="page-header"><div><h2 class="page-title">服务器探针</h2><p class="page-sub">延迟监控 · 负载与带宽</p></div></div>
+        <div class="card placeholder-card">
+          <div class="placeholder-icon">📡</div>
+          <h3>服务器探针</h3>
+          <p>该模块正在紧张开发中，将提供节点延迟探测、负载监控与掉线告警。</p>
+          <button class="btn btn-primary btn-sm" onclick="switchTab('dashboard')">返回工作台</button>
+        </div>
+      </section>
+
+      <!-- ========== 🌐 网络基建 · 域名解析 ========== -->
+      <section class="sub-page" id="page-dns">
+        <div class="page-header"><div><h2 class="page-title">域名解析</h2><p class="page-sub">DNS 记录 · CDN 与证书</p></div></div>
+        <div class="card placeholder-card">
+          <div class="placeholder-icon">🌍</div>
+          <h3>域名解析</h3>
+          <p>该模块正在紧张开发中，将支持解析记录管理、CDN 状态与 SSL 证书监控。</p>
+          <button class="btn btn-primary btn-sm" onclick="switchTab('dashboard')">返回工作台</button>
+        </div>
+      </section>
+
+      <!-- ========== 🤖 客服与营销 · AI 对话 ========== -->
+      <section class="sub-page" id="page-ai">
+        <div class="page-header"><div><h2 class="page-title">AI 对话</h2><p class="page-sub">智能客服 · 运营助手</p></div></div>
+        <div class="card placeholder-card">
+          <div class="placeholder-icon">🤖</div>
+          <h3>AI 智能客服</h3>
+          <p>AI 对话已升级为全局悬浮窗，点击右下角呼吸气泡即可随时唤起，在任何页面都能对话。</p>
+          <button class="btn btn-primary btn-sm" onclick="openAiChat()">立即唤起 AI 客服</button>
+        </div>
+      </section>
+
+      <!-- ========== 🤖 客服与营销 · 工单系统 ========== -->
+      <section class="sub-page" id="page-tickets">
+        <div class="page-header"><div><h2 class="page-title">工单系统</h2><p class="page-sub">客户问题 · 流转与跟进</p></div></div>
+        <div class="card placeholder-card">
+          <div class="placeholder-icon">🎫</div>
+          <h3>工单系统</h3>
+          <p>该模块正在紧张开发中，将支持工单分级、流转、SLA 统计与满意度评价。</p>
+          <button class="btn btn-primary btn-sm" onclick="switchTab('dashboard')">返回工作台</button>
+        </div>
+      </section>
+
+      <!-- ========== 🤖 客服与营销 · 机器人控制 ========== -->
+      <section class="sub-page" id="page-bots">
+        <div class="page-header"><div><h2 class="page-title">机器人控制</h2><p class="page-sub">TG 机器人 · 群发与自动回复</p></div></div>
+        <div class="card placeholder-card">
+          <div class="placeholder-icon">⚙️</div>
+          <h3>机器人控制</h3>
+          <p>该模块正在紧张开发中，将支持机器人开关、群发任务与自动回复规则配置。</p>
+          <button class="btn btn-primary btn-sm" onclick="switchTab('dashboard')">返回工作台</button>
+        </div>
+      </section>
+
+      <!-- ========== ⚙️ 系统与权限 · 个人中心 ========== -->
+      <section class="sub-page" id="page-profile">
         <div class="page-header">
-          <h2 class="page-title">个人中心</h2>
+          <div>
+            <h2 class="page-title">个人中心</h2>
+            <p class="page-sub">账户信息 · 实时拉取</p>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="loadProfile()">刷新资料</button>
         </div>
         <div class="card profile-card">
           <div class="profile-avatar">S5</div>
           <h2 class="profile-name" id="profile-name">管理员</h2>
-          <p class="profile-email" id="profile-email">admin@lynli.me</p>
+          <p class="profile-email" id="profile-email">--</p>
+          <div class="profile-role" id="profile-role"></div>
           <div class="profile-meta">
-            <div class="meta-item"><span class="meta-label">登录方式</span><span class="meta-value">邮箱密码</span></div>
-            <div class="meta-item"><span class="meta-label">账户状态</span><span class="meta-value" style="color:#16a34a;">● 正常</span></div>
+            <div class="meta-item"><span class="meta-label">剩余流量</span><span class="meta-value" id="profile-traffic">--</span></div>
+            <div class="meta-item"><span class="meta-label">到期时间</span><span class="meta-value" id="profile-expire">--</span></div>
+          </div>
+          <div class="profile-meta">
+            <div class="meta-item"><span class="meta-label">注册时间</span><span class="meta-value" id="profile-created">--</span></div>
+            <div class="meta-item"><span class="meta-label">最近登录</span><span class="meta-value" id="profile-lastlogin">--</span></div>
           </div>
           <button class="btn btn-danger btn-block" onclick="doLogout()">退出登录</button>
         </div>
-      </div>
+      </section>
+
+      <!-- ========== ⚙️ 系统与权限 · 员工账号 ========== -->
+      <section class="sub-page" id="page-staff">
+        <div class="page-header"><div><h2 class="page-title">员工账号</h2><p class="page-sub">后台成员 · 登录授权</p></div></div>
+        <div class="card placeholder-card">
+          <div class="placeholder-icon">👥</div>
+          <h3>员工账号</h3>
+          <p>该模块正在紧张开发中，将支持员工新增、禁用、登录授权与操作审计。</p>
+          <button class="btn btn-primary btn-sm" onclick="switchTab('dashboard')">返回工作台</button>
+        </div>
+      </section>
+
+      <!-- ========== ⚙️ 系统与权限 · 角色分配 ========== -->
+      <section class="sub-page" id="page-roles">
+        <div class="page-header"><div><h2 class="page-title">角色分配</h2><p class="page-sub">RBAC 权限 · 菜单与接口</p></div></div>
+        <div class="card placeholder-card">
+          <div class="placeholder-icon">🛡️</div>
+          <h3>角色分配</h3>
+          <p>该模块正在紧张开发中，将支持角色定义、菜单权限与接口级授权配置。</p>
+          <button class="btn btn-primary btn-sm" onclick="switchTab('dashboard')">返回工作台</button>
+        </div>
+      </section>
+
+      <!-- ========== ⚙️ 系统与权限 · 系统设置 ========== -->
+      <section class="sub-page" id="page-settings">
+        <div class="page-header"><div><h2 class="page-title">系统设置</h2><p class="page-sub">支付配置 · 公告与开关</p></div></div>
+        <div class="card placeholder-card">
+          <div class="placeholder-icon">🔧</div>
+          <h3>系统设置</h3>
+          <p>该模块正在紧张开发中，将支持支付通道、站点公告、邮件模板等全局配置。</p>
+          <button class="btn btn-primary btn-sm" onclick="switchTab('dashboard')">返回工作台</button>
+        </div>
+      </section>
+
     </main>
   </div>
 
+  <!-- ======================= 全局 AI 客服悬浮窗 ======================= -->
+  <div class="ai-fab" id="ai-fab" onclick="toggleAiChat()" role="button" aria-label="AI 客服" title="AI 客服">
+    <span class="ai-fab-ring"></span>
+    <span class="ai-fab-ring ai-fab-ring2"></span>
+    <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="4" y="7" width="16" height="12" rx="3"/>
+      <path d="M12 7V4M9 4h6"/>
+      <circle cx="9" cy="13" r="1.2" fill="currentColor" stroke="none"/>
+      <circle cx="15" cy="13" r="1.2" fill="currentColor" stroke="none"/>
+      <path d="M9.5 16.5c.8.6 1.6.9 2.5.9s1.7-.3 2.5-.9"/>
+    </svg>
+    <span class="ai-fab-label">AI 客服</span>
+  </div>
+
+  <div class="ai-window" id="ai-window">
+    <div class="ai-head">
+      <div class="ai-head-avatar">AI</div>
+      <div class="ai-head-info">
+        <div class="ai-head-title">AI 智能客服</div>
+        <div class="ai-head-status"><i></i>在线 · 智谱 GLM</div>
+      </div>
+      <button class="ai-head-close" onclick="toggleAiChat(false)" aria-label="关闭">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <div class="ai-messages" id="ai-messages"></div>
+    <div class="ai-quick" id="ai-quick"></div>
+    <div class="ai-input-row">
+      <input type="text" id="ai-input" class="ai-input" placeholder="请输入消息，回车发送..." maxlength="500" onkeydown="if(event.key==='Enter')sendAiMessage()">
+      <button class="ai-send" id="ai-send" onclick="sendAiMessage()" aria-label="发送">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+      </button>
+    </div>
+  </div>
+
   <div id="toast" class="toast"><div class="toast-icon"></div><div class="toast-text" id="toast-text"></div></div>
+
   <!-- Leaflet JS（jsdelivr 主源 + cdnjs 容灾） -->
   <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js" onerror="document.write('<script src=\"https:\/\/cdnjs.cloudflare.com\/ajax\/libs\/leaflet\/1.9.4\/leaflet.min.js\"><\/script>')"></script>
-  <script src="./js/app.js?v=20261024f"></script>
-  <script src="./js/map-page.js?v=20261024f"></script>
+  <script src="./js/app.js?v=20261024g"></script>
+  <script src="./js/map-page.js?v=20261024g"></script>
+  <script src="./js/ai-widget.js?v=20261024g"></script>
 </body>
 </html>
