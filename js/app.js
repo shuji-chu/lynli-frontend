@@ -155,6 +155,7 @@ async function doLogin() {
 
         if (json.data && json.data.token) {
             localStorage.setItem('lynli_admin_token', json.data.token);
+            localStorage.setItem('lynli_admin_email', account);
             if (document.getElementById('remember-me')?.checked) {
                 localStorage.setItem('lynli_admin', 'true');
             }
@@ -192,6 +193,10 @@ function enterMainApp() {
         mainApp.style.display = 'flex';
         mainApp.classList.add('page-entering');
         setTimeout(() => mainApp.classList.remove('page-entering'), 450);
+        // 填充个人中心邮箱
+        const email = localStorage.getItem('lynli_admin_email') || '';
+        const pe = document.getElementById('profile-email');
+        if (pe) pe.innerText = email || 'admin@lynli.me';
         if (typeof fetchDashboardData === 'function') fetchDashboardData();
     }, 420);
 }
@@ -202,49 +207,246 @@ function switchTab(tab, el) {
     if (el) el.classList.add('active');
     document.querySelectorAll('.sub-page').forEach(p => p.classList.remove('active'));
     const page = document.getElementById('page-' + tab);
-    if (page) page.classList.add('active');
+    if (page) {
+        page.classList.add('active');
+        // 为直接子元素设置错峰延迟变量
+        Array.from(page.children).forEach((child, i) => {
+            child.style.setProperty('--d', i);
+        });
+    }
     // 地图页懒加载：容器可见后再初始化，Leaflet 才能正确计算尺寸
     if (tab === 'map') {
         setTimeout(() => { if (typeof initNodeMap === 'function') initNodeMap(); }, 80);
     }
     if (tab === 'accounts' && typeof loadAccounts === 'function') loadAccounts();
+    if (tab === 'dashboard' && typeof fetchDashboardData === 'function') fetchDashboardData();
 }
 
-// ---------- 账号库商品列表（真实数据：account_products 表，只读展示） ----------
+// ---------- 按钮涟漪微动效（事件委托） ----------
+document.addEventListener('click', (e) => {
+    const btn = e.target.closest('.btn');
+    if (!btn || btn.disabled || btn.classList.contains('is-loading')) return;
+    const rect = btn.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height);
+    const ripple = document.createElement('span');
+    ripple.className = 'ripple';
+    ripple.style.width = ripple.style.height = size + 'px';
+    ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
+    ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
+    btn.appendChild(ripple);
+    setTimeout(() => ripple.remove(), 600);
+});
+
+// ---------- 工具 ----------
+function fmtBytes(bytes) {
+    if (!bytes || bytes <= 0) return '0 B';
+    const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+    let i = 0, n = Number(bytes);
+    while (n >= 1024 && i < units.length - 1) { n /= 1024; i++; }
+    return (i === 0 ? n.toFixed(0) : n.toFixed(1)) + ' ' + units[i];
+}
+
+// KPI 数字滚动动画
+function countUp(el, target, duration = 900) {
+    if (!el) return;
+    const to = Number(target) || 0;
+    const t0 = performance.now();
+    function frame(t) {
+        const p = Math.min((t - t0) / duration, 1);
+        const eased = 1 - Math.pow(1 - p, 3);
+        el.innerText = Math.round(to * eased).toLocaleString();
+        if (p < 1) requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+}
+
+// ---------- ECharts 动态加载 ----------
+let _echartsLoading = null;
+function loadECharts() {
+    if (window.echarts) return Promise.resolve();
+    if (_echartsLoading) return _echartsLoading;
+    _echartsLoading = new Promise((resolve) => {
+        const s = document.createElement('script');
+        s.src = 'https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js';
+        s.onload = () => resolve();
+        s.onerror = () => resolve(); // 失败也 resolve，业务层降级
+        document.head.appendChild(s);
+    });
+    return _echartsLoading;
+}
+
+// ---------- 数据大盘（真实数据：节点 / 商品 / 套餐 / 账户流量） ----------
+async function fetchDashboardData() {
+    const [nodesR, productsR, plansR, infoR] = await Promise.allSettled([
+        fetch(`${API_BASE}/public/nodes`).then(r => r.json()).catch(() => null),
+        fetch(`${API_BASE}/account/products`).then(r => r.json()).catch(() => null),
+        fetch(`${API_BASE}/plans`).then(r => r.json()).catch(() => null),
+        (async () => {
+            const tok = localStorage.getItem('lynli_admin_token');
+            if (!tok) return null;
+            const r = await fetch(`${API_BASE}/user/info`, { headers: { 'Authorization': 'Bearer ' + tok } });
+            return r.json().catch(() => null);
+        })(),
+    ]);
+
+    const nodes = (nodesR.value && nodesR.value.code === 1) ? (nodesR.value.data || []) : [];
+    const products = (productsR.value && productsR.value.code === 1) ? (productsR.value.data || []) : [];
+    const plans = (plansR.value && plansR.value.code === 1) ? (plansR.value.data || []) : [];
+    const info = (infoR.value && infoR.value.data) ? infoR.value.data : {};
+
+    const online = nodes.filter(n => n.status === 'online' || n.enabled === 1).length;
+
+    // KPI（真实数据 + 滚动动画）
+    countUp(document.getElementById('dash-nodes'), nodes.length);
+    document.getElementById('dash-nodes-foot').innerText = `${online} 个在线`;
+    countUp(document.getElementById('dash-products'), products.length);
+    countUp(document.getElementById('dash-plans'), plans.length);
+    const traffic = document.getElementById('dash-traffic');
+    if (traffic) traffic.innerText = fmtBytes(info.transferEnable);
+
+    // 图表（ECharts 失败时静默降级，不影响 KPI）
+    try {
+        await loadECharts();
+        if (!window.echarts) return;
+        renderTrendChart(plans);
+        renderBarChart(products);
+    } catch (e) { /* 图表降级 */ }
+}
+
+// ---------- 折线图：套餐流量额度分布（真实数据） ----------
+function renderTrendChart(plans) {
+    const box = document.getElementById('chart-trend');
+    if (!box || !window.echarts) return;
+    let chart = echarts.getInstanceByDom(box);
+    if (!chart) chart = echarts.init(box);
+
+    const names = plans.map(p => p.name || '套餐');
+    const data = plans.map(p => {
+        const b = Number(p.transfer_enable || p.traffic || 0);
+        return b > 1e9 ? +(b / 1073741824).toFixed(0) : +(b / 1048576).toFixed(0); // GB
+    });
+
+    chart.setOption({
+        grid: { left: 46, right: 18, top: 26, bottom: 36 },
+        tooltip: {
+            trigger: 'axis',
+            backgroundColor: 'rgba(17,24,39,.92)', borderWidth: 0,
+            textStyle: { color: '#fff', fontSize: 12 },
+            valueFormatter: v => v + ' GB'
+        },
+        xAxis: {
+            type: 'category', data: names, boundaryGap: false,
+            axisLine: { lineStyle: { color: '#e5e7eb' } },
+            axisTick: { show: false },
+            axisLabel: { color: '#6b7280', fontSize: 11, interval: 0, rotate: names.length > 5 ? 30 : 0 }
+        },
+        yAxis: {
+            type: 'value', name: 'GB',
+            nameTextStyle: { color: '#9ca3af', fontSize: 11 },
+            splitLine: { lineStyle: { color: '#f1f5f9' } },
+            axisLabel: { color: '#9ca3af', fontSize: 11 }
+        },
+        series: [{
+            name: '流量额度', type: 'line', data, smooth: true,
+            symbol: 'circle', symbolSize: 8,
+            lineStyle: { width: 3, color: '#2563eb' },
+            itemStyle: { color: '#2563eb', borderColor: '#fff', borderWidth: 2 },
+            areaStyle: {
+                color: {
+                    type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
+                    colorStops: [{ offset: 0, color: 'rgba(37,99,235,.28)' }, { offset: 1, color: 'rgba(37,99,235,.02)' }]
+                }
+            },
+            animationDuration: 900, animationEasing: 'cubicOut'
+        }]
+    }, true);
+    setTimeout(() => chart.resize(), 60);
+}
+
+// ---------- 柱状图：商品库存分布（真实数据） ----------
+function renderBarChart(products) {
+    const box = document.getElementById('chart-bar');
+    if (!box || !window.echarts) return;
+    let chart = echarts.getInstanceByDom(box);
+    if (!chart) chart = echarts.init(box);
+
+    const names = products.map(p => (p.title || '商品').slice(0, 6));
+    const data = products.map(p => Number(p.stock || 0));
+
+    chart.setOption({
+        grid: { left: 40, right: 14, top: 26, bottom: 36 },
+        tooltip: {
+            trigger: 'axis', axisPointer: { type: 'shadow' },
+            backgroundColor: 'rgba(17,24,39,.92)', borderWidth: 0,
+            textStyle: { color: '#fff', fontSize: 12 }
+        },
+        xAxis: {
+            type: 'category', data: names,
+            axisLine: { lineStyle: { color: '#e5e7eb' } },
+            axisTick: { show: false },
+            axisLabel: { color: '#6b7280', fontSize: 10, interval: 0, rotate: names.length > 4 ? 28 : 0 }
+        },
+        yAxis: {
+            type: 'value',
+            splitLine: { lineStyle: { color: '#f1f5f9' } },
+            axisLabel: { color: '#9ca3af', fontSize: 11 }
+        },
+        series: [{
+            name: '库存', type: 'bar', data, barMaxWidth: 26,
+            itemStyle: {
+                borderRadius: [6, 6, 0, 0],
+                color: { type: 'linear', x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: '#3b82f6' }, { offset: 1, color: '#93c5fd' }] }
+            },
+            emphasis: { itemStyle: { color: '#2563eb' } },
+            animationDelay: idx => idx * 90,
+            animationDuration: 700
+        }]
+    }, true);
+    setTimeout(() => chart.resize(), 60);
+}
+
+// ---------- 账号库：卡片式列表 + 状态指示灯 ----------
 async function loadAccounts() {
-    const tbody = document.getElementById('account-list');
-    if (!tbody) return;
-    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">加载中...</td></tr>';
+    const grid = document.getElementById('account-list');
+    if (!grid) return;
+    grid.innerHTML = '<div class="empty-tip">加载中...</div>';
     try {
         const res = await fetch(`${API_BASE}/account/products`);
         const json = await res.json();
         const list = (json.code === 1 && json.data) ? json.data : [];
         if (!list.length) {
-            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#94a3b8;">暂无商品</td></tr>';
+            grid.innerHTML = '<div class="empty-tip">暂无在售商品</div>';
             return;
         }
-        tbody.innerHTML = list.map(p => `
-            <tr>
-                <td>${escapeHtml(p.title || '-')}</td>
-                <td style="color:#2563eb; font-weight:700;">¥${Number(p.price || 0).toFixed(2)}</td>
-                <td>${p.stock > 0 ? p.stock : '<span style="color:#ef4444;">售罄</span>'}</td>
-                <td style="color:#94a3b8;">—</td>
-            </tr>`).join('');
+        grid.innerHTML = list.map((p, i) => {
+            const inStock = Number(p.stock) > 0;
+            return `
+            <div class="product-card" style="--d:${i}">
+              <div class="pc-head">
+                <div class="pc-title">${escapeHtml(p.title || '未命名商品')}</div>
+              </div>
+              <p class="pc-desc">${escapeHtml((p.desc || '暂无描述').slice(0, 60))}</p>
+              <div class="pc-foot">
+                <span class="pc-price">¥${Number(p.price || 0).toFixed(2)}<small> /件</small></span>
+                <span class="stock-light ${inStock ? 'live' : 'out'}"><i></i>${inStock ? '有货 ' + p.stock : '已售罄'}</span>
+              </div>
+            </div>`;
+        }).join('');
     } catch (e) {
-        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#ef4444;">加载失败，请重试</td></tr>';
+        grid.innerHTML = '<div class="empty-tip">加载失败，请重试</div>';
         showToast('商品列表加载失败', '❌');
     }
 }
 
-// ---------- 数据大盘 ----------
-async function fetchDashboardData() {
-    console.log("准备请求大盘数据...");
+function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }
 
 // ---------- 退出 ----------
 function doLogout() {
     localStorage.removeItem('lynli_admin');
     localStorage.removeItem('lynli_admin_token');
+    localStorage.removeItem('lynli_admin_email');
     location.reload();
 }
 
@@ -263,6 +465,9 @@ window.onload = function () {
     if (localStorage.getItem('lynli_admin') === 'true') {
         document.getElementById('login-page').style.display = 'none';
         document.getElementById('main-app').style.display = 'flex';
+        const email = localStorage.getItem('lynli_admin_email') || '';
+        const pe = document.getElementById('profile-email');
+        if (pe) pe.innerText = email || 'admin@lynli.me';
         fetchDashboardData();
     }
 };
