@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>SOCKS5 控制台</title>
+  <title>SOCKS5 管理中枢</title>
   <!-- 使用相对路径，解决 GitHub Pages 白屏 -->
   <link rel="stylesheet" href="./css/style.css">
 </head>
@@ -17,7 +17,7 @@
           <!-- 直接用你仓库里的 logo -->
           <div style="width: 64px; height: 64px; background: linear-gradient(135deg, #3b82f6, #2563eb); color: #fff; font-weight: bold; font-size: 32px; display: flex; align-items: center; justify-content: center; border-radius: 12px; margin: 0 auto 20px; box-shadow: 0 4px 12px rgba(59,130,246,0.3);">S5</div>
         </div>
-        <h2>SOCKS5 控制台</h2>
+        <h2>SOCKS5 管理中枢</h2>
         <p>欢迎回来，请登录您的账号</p>
       </div>
       
@@ -38,10 +38,10 @@
       </div>
 
       <div class="field">
-        <label class="field-label">验证码</label>
+        <label class="field-label">验证码 <span id="captcha-hint" style="font-size:12px; color:var(--text-secondary); font-weight:400;"></span></label>
         <div class="input-group">
-          <input type="text" id="captcha-input" class="input" placeholder="请输入验证码" style="flex:1;">
-          <div id="captcha-img" class="captcha-box" title="点击自动填充" onclick="autoFillCaptcha()"></div>
+          <input type="text" id="captcha-input" class="input" placeholder="请输入验证码" style="flex:1;" readonly>
+          <img id="captcha-img" class="captcha-box" title="点击图片中的目标字母完成验证" alt="验证码" style="cursor:pointer;" onclick="onCaptchaClick(event)">
         </div>
       </div>
 
