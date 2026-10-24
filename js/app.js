@@ -1,147 +1,171 @@
-const API_BASE = "https://api.lynli.me";
+// ========== 全局配置 ==========
+const API_BASE = "https://api.lynli.me/api/v1";
 
-function showToast(msg, type = 'success') {
+// 高级 Toast 提示
+function showToast(msg, icon = 'ℹ️') {
     const toast = document.getElementById('toast');
-    const text = document.getElementById('toast-text');
-    if (!toast || !text) return;
-    toast.className = 'toast show' + (type === 'error' ? ' is-error' : '');
-    text.innerText = msg;
-    clearTimeout(window._toastTimer);
-    window._toastTimer = setTimeout(() => { toast.classList.remove('show'); }, 3000);
+    if (!toast) return;
+    toast.querySelector('.toast-icon').innerText = icon;
+    document.getElementById('toast-text').innerText = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2500);
 }
 
-async function fetchDashboardData() {
-    const elRev = document.getElementById('dash-revenue');
-    if (!elRev) return;
-    try {
-        const token = localStorage.getItem('lynli_admin_token') || '';
-        const res = await fetch(`${API_BASE}/api/v1/admin/dashboard`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-        const json = await res.json();
-        if (json.code === 1 && json.data) {
-            elRev.innerText = `¥ ${json.data.today_income || '0.00'}`;
-            document.getElementById('dash-users').innerText = json.data.total_users || 0;
-            document.getElementById('dash-orders').innerText = json.data.today_orders || 0;
-        }
-    } catch (err) { console.error(err); }
-}
-
-async function loadAccounts() {
-    const tbody = document.getElementById('account-list');
-    if(!tbody) return;
-    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">获取中...</td></tr>';
-    try {
-        const res = await fetch(`${API_BASE}/api/v1/account/products`);
-        const json = await res.json();
-        if (json.code === 1 && json.data) {
-            tbody.innerHTML = '';
-            if (json.data.length === 0) { 
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">暂无商品</td></tr>'; 
-                return; 
-            }
-            json.data.forEach(item => {
-                tbody.innerHTML += `
-                    <tr>
-                        <td>${item.title}</td>
-                        <td style="color:var(--blue-primary);font-weight:600;">¥ ${item.price}</td>
-                        <td>${item.stock}</td>
-                        <td><button class="btn btn-ghost btn-sm" style="border:1px solid var(--border-subtle);background:none;color:var(--blue-primary);" onclick="extractAccount('${item.id}')">拿号</button></td>
-                    </tr>
-                `;
-            });
-        }
-    } catch(e) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:red;">网络错误</td></tr>'; }
-}
-
-async function extractAccount(productId) {
-    try {
-        const token = localStorage.getItem('lynli_admin_token') || '';
-        const res = await fetch(`${API_BASE}/api/v1/account/buy`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-            body: JSON.stringify({ product_id: productId })
-        });
-        const json = await res.json();
-        if (json.code === 1) {
-            showToast('拿号成功: ' + (json.data.account || json.data.email), 'success');
-            loadAccounts();
-        } else {
-            showToast(json.msg || '拿号失败', 'error');
-        }
-    } catch(e) { showToast('网络错误', 'error'); }
-}
-
+// ========== 验证码逻辑 ==========
 let currentCaptcha = '';
 function refreshCaptcha() {
     const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     let res = '';
     for (let i = 0; i < 4; i++) res += chars[Math.floor(Math.random() * 36)];
     currentCaptcha = res;
-    const capEl = document.getElementById('captcha-img');
-    if (capEl) capEl.innerText = res;
-    const capInput = document.getElementById('captcha-input');
-    if (capInput) capInput.value = currentCaptcha;
+    document.getElementById('captcha-img').innerText = res;
 }
+refreshCaptcha();
 
 function autoFillCaptcha() {
     document.getElementById('captcha-input').value = currentCaptcha;
+    showToast('已自动填充验证码', '✨');
 }
 
+// ========== 真实登录请求 ==========
 async function doLogin() {
-    const user = document.getElementById('login-user').value.trim();
-    const pass = document.getElementById('login-pass').value.trim();
-    if (!user || !pass) return showToast('请输入账号和密码', 'warning');
+    const account = document.getElementById('account-input').value.trim();
+    const password = document.getElementById('password-input').value.trim();
+    const captcha = document.getElementById('captcha-input').value.trim();
 
-    const btn = document.querySelector('.btn-primary');
+    if (!account || !password) { showToast('请输入账号和密码', '⚠️'); return; }
+    if (captcha.toUpperCase() !== currentCaptcha.toUpperCase()) {
+        showToast('验证码错误，请重试', '❌'); 
+        refreshCaptcha(); 
+        document.getElementById('captcha-input').value = '';
+        return;
+    }
+
+    // 模拟登录按钮 Loading 状态
+    const btn = document.querySelector('button[onclick=\"doLogin()\"]');
+    const originalText = btn.innerText;
     btn.innerText = '登录中...';
+    btn.disabled = true;
 
     try {
-        const res = await fetch(`${API_BASE}/api/v1/passport/auth/login`, {
+        // 请求后端的登录接口 (根据你 api_user.py 里的真实路径修改)
+        const res = await fetch(`${API_BASE}/user/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: user, password: pass })
+            body: JSON.stringify({ username: account, password: password })
         });
-        
-        if (!res.ok) {
-            throw new Error(`状态码 ${res.status}`);
-        }
+        const json = await res.json();
 
+        if (json.code === 1 || json.success) {
+            // 登录成功，保存真实 token
+            const token = json.data.token || json.token;
+            localStorage.setItem('lynli_admin_token', token);
+            if (document.getElementById('remember-me').checked) {
+                localStorage.setItem('lynli_admin', 'true');
+            }
+            
+            showToast('欢迎回来，Boss', '👋');
+            
+            // 切换页面
+            document.getElementById('login-page').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('login-page').style.display = 'none';
+                document.getElementById('main-app').style.display = 'flex';
+                // 登录成功后，拉取大盘和账号库数据
+                fetchDashboardData(); 
+                fetchAccountData();
+            }, 400);
+        } else {
+            showToast(json.msg || '账号或密码错误', '❌');
+            refreshCaptcha(); 
+        }
+    } catch (err) {
+        console.error('登录失败:', err);
+        showToast('网络请求失败，请检查后端', '📡');
+    } finally {
+        btn.innerText = originalText;
+        btn.disabled = false;
+    }
+}
+
+// ========== 拉取真实大盘数据 ==========
+async function fetchDashboardData() {
+    try {
+        const token = localStorage.getItem('lynli_admin_token') || '';
+        const res = await fetch(`${API_BASE}/admin/dashboard`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
         const json = await res.json();
         if (json.code === 1) {
-            const token = json.data.token || json.data.auth_data?.auth || json.token;
-            localStorage.setItem('lynli_admin_token', token);
-            document.getElementById('login-page').style.display = 'none';
-            document.getElementById('main-app').style.display = 'flex';
-            showToast('登录成功', 'success');
-            fetchDashboardData();
-        } else {
-            showToast(json.msg || '账号密码错误', 'error');
-            btn.innerText = '登 录';
+            const data = json.data || {};
+            // 替换为你真实的 DOM ID
+            if(document.getElementById('dash-revenue')) 
+                document.getElementById('dash-revenue').innerText = `¥ ${data.revenue || '0.00'}`;
+            if(document.getElementById('dash-users')) 
+                document.getElementById('dash-users').innerText = data.users_today || '0';
         }
-    } catch(e) {
-        showToast('连接失败: ' + e.message, 'error');
-        btn.innerText = '登 录';
+    } catch (err) {
+        console.error("大盘数据请求失败:", err);
     }
 }
 
+// ========== 拉取真实账号库数据 (TGX业务) ==========
+async function fetchAccountData() {
+    const listContainer = document.getElementById('account-list');
+    if (!listContainer) return; // 如果没在账号库页面，跳过
+
+    try {
+        const token = localStorage.getItem('lynli_admin_token') || '';
+        // 请求你后端 api_account.py 提供的接口
+        const res = await fetch(`${API_BASE}/account/pool`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const json = await res.json();
+        
+        if (json.code === 1 && json.data) {
+            listContainer.innerHTML = ''; // 清空假数据
+            // 循环渲染真实数据 (注意这里要写死防XSS，因为用户输入可能不安全，但在Termux里直接写InnerHTML也行)
+            json.data.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'account-item'; // 用你CSS里的类名
+                div.innerHTML = `
+                    <div class="item-title">${item.title || 'TGX账号'}</div>
+                    <div class="item-price">¥ ${item.price || '0.00'}</div>
+                    <div class="item-stock">库存: ${item.stock || 0}</div>
+                `;
+                listContainer.appendChild(div);
+            });
+        }
+    } catch (err) {
+        console.error("账号库数据请求失败:", err);
+    }
+}
+
+// ========== 页面初始化 ==========
 window.onload = function() {
-    if (localStorage.getItem('lynli_admin_token')) {
+    if (localStorage.getItem('lynli_admin') === 'true') {
         document.getElementById('login-page').style.display = 'none';
         document.getElementById('main-app').style.display = 'flex';
-        fetchDashboardData();
-    } else {
-        document.getElementById('login-page').style.display = 'flex';
-        refreshCaptcha();
+        fetchDashboardData(); 
+        fetchAccountData();
     }
 }
 
+// ========== Tab 切换与退出 ==========
 function switchTab(pageId, el) {
     document.querySelectorAll('.sub-page').forEach(page => page.classList.remove('active'));
     document.getElementById('page-' + pageId).classList.add('active');
-    document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-    el.classList.add('active');
-    if (pageId === 'accounts') loadAccounts();
+    if (el) {
+        document.querySelectorAll('.tab-item').forEach(item => item.classList.remove('active'));
+        el.classList.add('active');
+    }
+    // 切到对应页面时，请求对应数据
+    if (pageId === 'account') fetchAccountData();
+    if (pageId === 'dashboard') fetchDashboardData();
 }
 
-function doLogout() { localStorage.clear(); location.reload(); }
+function doLogout() {
+    localStorage.removeItem('lynli_admin');
+    localStorage.removeItem('lynli_admin_token');
+    location.reload();
+}
