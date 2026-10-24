@@ -10,6 +10,7 @@ function showToast(msg, type = 'success') {
     window._toastTimer = setTimeout(() => { toast.classList.remove('show'); }, 3000);
 }
 
+// ========== 数据大盘 ==========
 async function fetchDashboardData() {
     const elRev = document.getElementById('dash-revenue');
     if (!elRev) return;
@@ -25,41 +26,64 @@ async function fetchDashboardData() {
             document.getElementById('dash-users').innerText = data.total_users || 0;
             document.getElementById('dash-orders').innerText = data.today_orders || 0;
         }
-    } catch (err) { console.error(err); }
+    } catch (err) {
+        console.error("大盘拉取失败", err);
+    }
 }
 
+// ========== 账号库（纯真实数据，没有就是没有） ==========
 async function loadAccounts() {
     const tbody = document.getElementById('account-list');
     if(!tbody) return;
-    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">获取中...</td></tr>';
+    
+    // 表头恢复成商品列表的结构
+    document.querySelector('.table thead').innerHTML = '<tr><th>商品名称</th><th>价格</th><th>库存</th><th>操作</th></tr>';
+    
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-tertiary)">正在从数据库拉取...</td></tr>';
+    
     try {
+        // 直接请求你已有的真实接口
         const res = await fetch(`${API_BASE}/api/v1/account/products`);
         const json = await res.json();
-        if (json.code === 1 && json.data) {
+        
+        if (json.code === 1) {
             tbody.innerHTML = '';
-            if (json.data.length === 0) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">暂无商品</td></tr>'; return; }
-            json.data.forEach(item => {
+            const list = json.data || [];
+            
+            if (list.length === 0) {
+                // 数据库里没上架商品，就老老实实显示空
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-tertiary)">您还没有上架任何商品</td></tr>';
+                return;
+            }
+            
+            // 有商品才渲染
+            list.forEach(item => {
                 tbody.innerHTML += `
                     <tr>
                         <td style="font-weight:500">${item.title}</td>
                         <td class="text-primary" style="font-weight:600">¥ ${item.price}</td>
-                        <td>${item.stock}</td>
-                        <td><button class="btn btn-ghost btn-sm" onclick="extractAccount('${item.id}')">拿号</button></td>
+                        <td>${item.stock} 个</td>
+                        <td><button class="btn btn-ghost btn-sm" onclick="extractAccount('${item.id}')">测试拿号</button></td>
                     </tr>
                 `;
             });
         } else {
-            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:var(--danger)">${json.msg || '加载失败'}</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:var(--danger)">接口报错: ${json.msg || '未知错误'}</td></tr>`;
         }
-    } catch(e) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--danger)">网络请求失败</td></tr>'; }
+    } catch(e) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--danger)">网络请求失败，无法连接后端</td></tr>';
+    }
 }
 
+// ========== 拿号（真实购买扣费逻辑） ==========
 async function extractAccount(productId) {
     const resultBox = document.getElementById('extract-result');
     const dataBox = document.getElementById('extract-data');
     if(!resultBox || !dataBox) return;
+    
     resultBox.style.display = 'block';
-    dataBox.innerText = '正在从池子提取...';
+    dataBox.innerText = '正在扣费提取...';
+
     try {
         const token = localStorage.getItem('lynli_admin_token') || '';
         const res = await fetch(`${API_BASE}/api/v1/account/buy`, {
@@ -68,18 +92,22 @@ async function extractAccount(productId) {
             body: JSON.stringify({ product_id: productId })
         });
         const json = await res.json();
+        
         if (json.code === 1) {
-            dataBox.innerText = json.data.account || json.data.email || JSON.stringify(json.data);
+            dataBox.innerText = json.data.account || json.data.email || json.data.data || JSON.stringify(json.data);
             showToast('提取成功', 'success');
-            loadAccounts();
+            loadAccounts(); // 刷新库存
         } else {
-            dataBox.innerText = '提取失败';
+            dataBox.innerText = '提取失败：' + (json.msg || '未知错误');
             showToast(json.msg || '提取失败', 'error');
         }
-    } catch(e) { dataBox.innerText = '网络请求失败'; }
+    } catch(e) {
+        dataBox.innerText = '网络请求失败';
+        showToast('网络请求失败', 'error');
+    }
 }
 
-// 验证码逻辑：生成后自动填入输入框
+// ========== 登录逻辑 ==========
 let currentCaptcha = '';
 function refreshCaptcha() {
     const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -93,12 +121,10 @@ function refreshCaptcha() {
         capEl.style.fontSize = '20px';
         capEl.style.fontWeight = 'bold';
     }
-    // 自动填入验证码，免去手动输入
     const capInput = document.getElementById('captcha-input');
     if (capInput) capInput.value = currentCaptcha;
 }
 
-// 登录逻辑：只有拿到 token 才算成功
 async function doLogin() {
     const user = document.getElementById('login-user').value.trim();
     const pass = document.getElementById('login-pass').value.trim();
@@ -116,7 +142,6 @@ async function doLogin() {
         const json = await res.json();
         
         if (json.code === 1) {
-            // 尝试获取 token 的所有可能字段
             const token = json.data.token || json.data.auth_data?.auth || json.data.access_token || json.token;
             if (token) {
                 localStorage.setItem('lynli_admin_token', token);
@@ -139,16 +164,14 @@ async function doLogin() {
     }
 }
 
-// 初始化：严格校验 Token
+// ========== 初始化 ==========
 window.onload = function() {
     const token = localStorage.getItem('lynli_admin_token');
-    // 必须有真实 Token 才直接进后台
     if (token && token !== 'undefined' && token !== 'null') {
         document.getElementById('login-page').style.display = 'none';
         document.getElementById('main-app').style.display = 'flex';
         fetchDashboardData();
     } else {
-        // 没有 Token 就强制清空状态并显示登录页
         localStorage.clear();
         document.getElementById('login-page').style.display = 'flex';
         refreshCaptcha();
@@ -159,10 +182,12 @@ function switchTab(pageId, el) {
     document.querySelectorAll('.sub-page').forEach(page => page.classList.remove('active'));
     const target = document.getElementById('page-' + pageId);
     if (target) target.classList.add('active');
+    
     if (el) {
         document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
         el.classList.add('active');
     }
+    
     if (pageId === 'accounts') loadAccounts();
 }
 
