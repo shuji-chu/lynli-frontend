@@ -1,77 +1,117 @@
-// 注意：如果你的接口不是 /api/v1，请修改这里
+// ============================================================
+// SOCKS5 管理中枢 - 核心逻辑
+// 登录路由: /api/v1/passport/auth/login  (后端 api_auth.py)
+// 真实验证码: /api/v1/auth/captcha       (后端 api_captcha.py, 点字母式)
+// ============================================================
 const API_BASE = "https://api.lynli.me/api/v1";
 
+// ---------- Toast 提示（统一走这里，不再使用原生 alert） ----------
 function showToast(msg, icon = 'ℹ️') {
-    const toast = document.getElementById('toast');
-    if (!toast) { alert(msg); return; } // 兜底：如果连toast都没了，用原生弹窗
+    let toast = document.getElementById('toast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'toast';
+        toast.className = 'toast';
+        toast.innerHTML = '<div class="toast-icon"></div><div class="toast-text" id="toast-text"></div>';
+        document.body.appendChild(toast);
+    }
     toast.querySelector('.toast-icon').innerText = icon;
     document.getElementById('toast-text').innerText = msg;
     toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 3500);
+    clearTimeout(showToast._timer);
+    showToast._timer = setTimeout(() => toast.classList.remove('show'), 3500);
 }
 
-// 验证码
-let currentCaptcha = '';
-function refreshCaptcha() {
-    const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    let res = '';
-    for (let i = 0; i < 4; i++) res += chars[Math.floor(Math.random() * 36)];
-    currentCaptcha = res;
-    const el = document.getElementById('captcha-img');
-    if (el) el.innerText = res;
-}
-refreshCaptcha();
+// ---------- 真实验证码（点字母式） ----------
+let captchaId = null;
+let captchaPassed = false;
 
-function autoFillCaptcha() {
+async function loadCaptcha() {
+    captchaPassed = false;
     const input = document.getElementById('captcha-input');
-    if(input) {
-        input.value = currentCaptcha;
-        showToast('已自动填充验证码', '✨');
+    if (input) input.value = '';
+    try {
+        const res = await fetch(`${API_BASE}/auth/captcha`, { method: 'GET' });
+        const json = await res.json();
+        if (json.code === 1 && json.data) {
+            captchaId = json.data.id;
+            const img = document.getElementById('captcha-img');
+            if (img) img.src = json.data.image;
+            const hint = document.getElementById('captcha-hint');
+            if (hint) hint.innerText = `（${json.data.hint}，点击图片刷新）`;
+        } else {
+            showToast('验证码加载失败', '❌');
+        }
+    } catch (err) {
+        console.error('验证码加载错误:', err);
+        showToast('验证码加载失败，请检查网络', '📡');
     }
 }
 
-// 登录逻辑（增强错误捕获）
+async function onCaptchaClick(evt) {
+    const img = document.getElementById('captcha-img');
+    const rect = img.getBoundingClientRect();
+    // 换算成图片原始坐标
+    const scaleX = (img.naturalWidth || rect.width) / rect.width;
+    const scaleY = (img.naturalHeight || rect.height) / rect.height;
+    const x = (evt.clientX - rect.left) * scaleX;
+    const y = (evt.clientY - rect.top) * scaleY;
+
+    if (!captchaId) { await loadCaptcha(); return; }
+
+    try {
+        const res = await fetch(`${API_BASE}/auth/captcha/check`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: captchaId, x, y })
+        });
+        const json = await res.json();
+        if (json.code === 1 && json.data && json.data.pass) {
+            captchaPassed = true;
+            const input = document.getElementById('captcha-input');
+            if (input) input.value = '已通过';
+            showToast('验证码已通过', '✅');
+        } else {
+            showToast(json.message || '点错了，请重试', '❌');
+            await loadCaptcha();
+        }
+    } catch (err) {
+        console.error('验证码校验错误:', err);
+        showToast('验证码校验失败，请重试', '📡');
+        await loadCaptcha();
+    }
+}
+
+// ---------- 登录 ----------
 async function doLogin() {
-    const account = document.getElementById('account-input')?.value.trim();
-    const password = document.getElementById('password-input')?.value.trim();
-    const captcha = document.getElementById('captcha-input')?.value.trim();
+    const account = document.getElementById('login-user')?.value.trim();
+    const password = document.getElementById('login-pass')?.value.trim();
 
     if (!account || !password) { showToast('账号或密码没填', '⚠️'); return; }
-    if (!captcha || captcha.toUpperCase() !== currentCaptcha.toUpperCase()) {
-        showToast('验证码错误', '❌'); 
-        refreshCaptcha(); 
-        return;
-    }
+    if (!captchaPassed) { showToast('请先点击图片中的字母完成验证', '🔐'); return; }
 
     showToast('正在连接后端...', '⏳');
 
     try {
-        // 注意：如果后端字段是 account 不是 username，请把下面 username 改掉
-        const res = await fetch(`${API_BASE}/user/login`, {
+        // 真实路由：/api/v1/passport/auth/login，字段为 email + password
+        const res = await fetch(`${API_BASE}/passport/auth/login`, {
             method: 'POST',
-            headers: { 
+            headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'
             },
-            // 尝试发送两种通用字段名兼容
-            body: JSON.stringify({ 
-                username: account,
-                account: account, 
-                password: password 
-            })
+            body: JSON.stringify({ email: account, password: password })
         });
 
-        // 检查 HTTP 状态码
         if (!res.ok) {
-            throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+            throw new Error(`HTTP ${res.status}`);
         }
 
         const json = await res.json();
         console.log("后端返回:", json);
 
-        if (json.code === 1 || json.success || json.code === 200) {
-            const token = json.data?.token || json.token;
-            if (token) localStorage.setItem('lynli_admin_token', token);
+        if (json.data && json.data.token) {
+            localStorage.setItem('lynli_admin_token', json.data.token);
             if (document.getElementById('remember-me')?.checked) {
                 localStorage.setItem('lynli_admin', 'true');
             }
@@ -79,14 +119,13 @@ async function doLogin() {
             setTimeout(() => {
                 document.getElementById('login-page').style.display = 'none';
                 document.getElementById('main-app').style.display = 'flex';
-                if(typeof fetchDashboardData === 'function') fetchDashboardData(); 
+                if (typeof fetchDashboardData === 'function') fetchDashboardData();
             }, 500);
         } else {
-            // 后端返回了错误（比如密码错误）
-            showToast(json.msg || json.message || '账号或密码错误', '❌');
+            showToast(json.message || '账号或密码错误', '❌');
+            await loadCaptcha();
         }
     } catch (err) {
-        // 捕获网络错误、跨域错误、JSON解析错误
         console.error('登录报错详情:', err);
         let errMsg = '请求失败';
         if (err.message.includes('Failed to fetch')) {
@@ -98,21 +137,23 @@ async function doLogin() {
     }
 }
 
-// 模拟数据大盘请求（先跑通登录再管这个）
+// ---------- 数据大盘 ----------
 async function fetchDashboardData() {
     console.log("准备请求大盘数据...");
 }
 
-window.onload = function() {
-    if (localStorage.getItem('lynli_admin') === 'true') {
-        document.getElementById('login-page').style.display = 'none';
-        document.getElementById('main-app').style.display = 'flex';
-        fetchDashboardData(); 
-    }
-}
-
+// ---------- 退出 ----------
 function doLogout() {
     localStorage.removeItem('lynli_admin');
     localStorage.removeItem('lynli_admin_token');
     location.reload();
 }
+
+window.onload = function () {
+    loadCaptcha();
+    if (localStorage.getItem('lynli_admin') === 'true') {
+        document.getElementById('login-page').style.display = 'none';
+        document.getElementById('main-app').style.display = 'flex';
+        fetchDashboardData();
+    }
+};

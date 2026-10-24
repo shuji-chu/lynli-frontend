@@ -1,4 +1,6 @@
 import { toast } from "../ui.js";
+// 暴露给模板内联 onclick 使用（替代原生 alert）
+window.crmToast = (msg, type) => toast(msg, type || 'info');
 export async function render(container) {
   container.innerHTML = `
     <div class="toolbar">
@@ -18,7 +20,7 @@ export async function render(container) {
             <td style="color:#10b981; font-weight:bold;">¥ 1,250.00</td>
             <td>¥ 8,400.00</td>
             <td><span class="badge badge-success">正常</span></td>
-            <td><a href="javascript:;" style="color:var(--pri); margin-right:8px;" onclick="alert('打开余额修改弹窗')">调整余额</a><a href="javascript:;" style="color:#f87171;" onclick="alert('已封禁')">封禁</a></td>
+            <td><a href="javascript:;" style="color:var(--pri); margin-right:8px;" onclick="crmToast('调整余额功能开发中')">调整余额</a><a href="javascript:;" style="color:#f87171;" onclick="crmToast('已封禁', 'error')">封禁</a></td>
           </tr>
           <tr>
             <td><div style="font-weight:bold;">李四 (139****2222)</div><div style="font-size:12px; color:var(--dim);">注册: 2023-05-12</div></td>
