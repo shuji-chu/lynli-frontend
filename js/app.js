@@ -260,19 +260,33 @@ function countUp(el, target, duration = 900) {
     requestAnimationFrame(frame);
 }
 
-// ---------- ECharts 动态加载 ----------
+// ---------- ECharts 动态加载（多 CDN 容灾 + 单源超时） ----------
+const ECHARTS_CDNS = [
+  "https://cdnjs.cloudflare.com/ajax/libs/echarts/5.5.0/echarts.min.js",
+  "https://unpkg.com/echarts@5.5.0/dist/echarts.min.js",
+  "https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js",
+];
 let _echartsLoading = null;
+function _loadScriptWithTimeout(url, ms = 8000) {
+  return new Promise((resolve) => {
+    const s = document.createElement("script");
+    const timer = setTimeout(() => { s.remove(); resolve(false); }, ms);
+    s.onload = () => { clearTimeout(timer); resolve(true); };
+    s.onerror = () => { clearTimeout(timer); s.remove(); resolve(false); };
+    s.src = url;
+    document.head.appendChild(s);
+  });
+}
 function loadECharts() {
-    if (window.echarts) return Promise.resolve();
-    if (_echartsLoading) return _echartsLoading;
-    _echartsLoading = new Promise((resolve) => {
-        const s = document.createElement('script');
-        s.src = 'https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js';
-        s.onload = () => resolve();
-        s.onerror = () => resolve(); // 失败也 resolve，业务层降级
-        document.head.appendChild(s);
-    });
-    return _echartsLoading;
+  if (window.echarts) return Promise.resolve();
+  if (_echartsLoading) return _echartsLoading;
+  _echartsLoading = (async () => {
+    for (const url of ECHARTS_CDNS) {
+      const ok = await _loadScriptWithTimeout(url);
+      if (ok && window.echarts) return;
+    }
+  })();
+  return _echartsLoading;
 }
 
 // ---------- 数据大盘（真实数据：节点 / 商品 / 套餐 / 账户流量） ----------

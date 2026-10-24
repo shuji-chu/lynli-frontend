@@ -5,14 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>SOCKS5 管理中枢</title>
   <!-- S5 品牌图标 -->
-  <link rel="icon" type="image/png" href="./favicon.png?v=20261024e">
-  <link rel="apple-touch-icon" href="./apple-touch-icon.png?v=20261024e">
+  <link rel="icon" type="image/png" href="./favicon.png?v=20261024f">
+  <link rel="apple-touch-icon" href="./apple-touch-icon.png?v=20261024f">
   <!-- 使用相对路径，解决 GitHub Pages 白屏 -->
-  <link rel="stylesheet" href="./css/style.css?v=20261024e">
-  <!-- Leaflet 地图库（卫星地图） -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="./css/style.css?v=20261024f">
+  <!-- Leaflet 地图库（卫星地图，jsdelivr 主源 + cdnjs 容灾） -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" onerror="this.onerror=null;this.href='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css'">
   <!-- Anime.js 丝滑动画 -->
-  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.2/lib/anime.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.2/lib/anime.min.js" onerror="document.write('<script src=\"https:\/\/cdnjs.cloudflare.com\/ajax\/libs\/animejs\/3.2.2\/anime.min.js\"><\/script>')"></script>
 </head>
 <body>
 
@@ -67,7 +67,7 @@
   <div id="main-app" class="admin-shell" style="display: none;">
     <aside class="admin-sidebar">
       <div class="sidebar-brand">
-        <img src="./logo.png?v=20261024e" class="brand-mark" alt="logo" style="object-fit: cover;">
+        <img src="./logo.png?v=20261024f" class="brand-mark" alt="logo" style="object-fit: cover;">
         <span class="brand-text">SOCKS5</span>
       </div>
       <nav class="sidebar-nav">
@@ -221,9 +221,9 @@
   </div>
 
   <div id="toast" class="toast"><div class="toast-icon"></div><div class="toast-text" id="toast-text"></div></div>
-  <!-- Leaflet JS -->
-  <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="./js/app.js?v=20261024e"></script>
-  <script src="./js/map-page.js?v=20261024e"></script>
+  <!-- Leaflet JS（jsdelivr 主源 + cdnjs 容灾） -->
+  <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js" onerror="document.write('<script src=\"https:\/\/cdnjs.cloudflare.com\/ajax\/libs\/leaflet\/1.9.4\/leaflet.min.js\"><\/script>')"></script>
+  <script src="./js/app.js?v=20261024f"></script>
+  <script src="./js/map-page.js?v=20261024f"></script>
 </body>
 </html>
