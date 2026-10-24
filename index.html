@@ -4,15 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SOCKS5 管理中枢</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='25' fill='%233b82f6'/><text x='50' y='68' font-size='45' font-weight='bold' text-anchor='middle' fill='white' font-family='sans-serif'>S5</text></svg>">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='25' fill='%236366f1'/><text x='50' y='68' font-size='45' font-weight='bold' text-anchor='middle' fill='white' font-family='sans-serif'>S5</text></svg>">
     <link rel="stylesheet" href="./css/style.css">
 </head>
 <body>
 
-    <div class="glow-spot-1"></div>
-    <div class="glow-spot-2"></div>
+    <!-- 高级光晕背景 -->
+    <div class="glow-1"></div>
+    <div class="glow-2"></div>
 
-    <!-- 高级 Toast 提示容器 -->
+    <!-- 高级 Toast -->
     <div id="toast">
         <span class="toast-icon">ℹ️</span>
         <span id="toast-text">提示信息</span>
@@ -29,8 +30,7 @@
             <div class="input-group"><input type="password" id="password" placeholder="登录密码"></div>
             
             <div class="input-group captcha-group">
-                <input type="text" id="captcha-input" placeholder="验证码 (点击右侧可自动填)">
-                <!-- 点击右侧验证码，自动填入 -->
+                <input type="text" id="captcha-input" placeholder="验证码 (点击右侧自动填)">
                 <div class="captcha-img" id="captcha-img" onclick="autoFillCaptcha()"></div>
             </div>
 
@@ -115,7 +115,7 @@
             <div class="content-area">
                 <div class="glass-card" style="display:flex; align-items:center; gap:15px;">
                     <div class="avatar" style="width:60px; height:60px;"></div>
-                    <div><h2 style="font-size:20px; margin-bottom:5px;">Boss</h2><p style="color:var(--text-sub); font-size:13px;">超级管理员</p></div>
+                    <div><h2 style="font-size:20px; margin-bottom:5px; color:#fff;">Boss</h2><p style="color:var(--text-sub); font-size:13px;">超级管理员</p></div>
                 </div>
                 <div class="task-list" style="margin-top:20px;">
                     <div class="task-item" onclick="doLogout()">
