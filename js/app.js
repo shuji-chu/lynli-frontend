@@ -1,127 +1,131 @@
-(function () {
-  const pageLogin = document.getElementById('page-login');
-  const pageAdmin = document.getElementById('page-admin');
-  const btnLogin = document.getElementById('btn-login');
-  const btnLogout = document.getElementById('btn-logout');
-  const inputUser = document.getElementById('login-user');
-  const inputPass = document.getElementById('login-pass');
-  const inputCode = document.getElementById('login-code');
-  const captchaBox = document.getElementById('captcha-box');
-  const rememberMe = document.getElementById('remember-me');
+// ========== 全局配置 ==========
+const API_BASE = "https://api.lynli.me/api/v1";
 
-  let currentCaptcha = 'XY8A';
+// 无 emoji 的高级 Toast
+function showToast(msg, type = 'success') {
+    const toast = document.getElementById('toast');
+    const text = document.getElementById('toast-text');
+    if (!toast || !text) return;
+    
+    toast.className = 'toast show' + (type === 'error' ? ' is-error' : type === 'warning' ? ' is-warning' : '');
+    text.innerText = msg;
+    
+    clearTimeout(window._toastTimer);
+    window._toastTimer = setTimeout(() => { toast.classList.remove('show'); }, 2500);
+}
 
-  function generateCaptcha() {
-    const chars = 'ABCDEFGHJKMNPQRSTWXYZ23456789';
+// ========== 获取真实数据大盘 ==========
+async function fetchDashboardData() {
+    const elRev = document.getElementById('dash-revenue');
+    const elUsers = document.getElementById('dash-users');
+    const elOrders = document.getElementById('dash-orders');
+    
+    if (!elRev) return;
+    elRev.innerText = '加载中...';
+    elUsers.innerText = '加载中...';
+    elOrders.innerText = '加载中...';
+
+    try {
+        const token = localStorage.getItem('lynli_admin_token') || '';
+        const res = await fetch(`${API_BASE}/admin/dashboard`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const json = await res.json();
+
+        // 按照你后端真实的 code === 1 判定
+        if (json.code === 1) {
+            const data = json.data || {};
+            elRev.innerText = `¥ ${data.revenue || '0.00'}`;
+            elUsers.innerText = data.users_today || 0;
+            elOrders.innerText = data.orders_today || 0;
+        } else {
+            elRev.innerText = '¥ --';
+            elUsers.innerText = '--';
+            elOrders.innerText = '--';
+            showToast(json.msg || '获取数据失败', 'error');
+        }
+    } catch (err) {
+        console.error("大盘数据请求失败:", err);
+        elRev.innerText = '¥ --';
+        elUsers.innerText = '--';
+        elOrders.innerText = '--';
+        showToast('网络请求失败', 'error');
+    }
+}
+
+// ========== 验证码逻辑 ==========
+let currentCaptcha = '';
+function refreshCaptcha() {
+    const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     let res = '';
-    for (let i = 0; i < 4; i++) res += chars.charAt(Math.floor(Math.random() * chars.length));
+    for (let i = 0; i < 4; i++) res += chars[Math.floor(Math.random() * 36)];
     currentCaptcha = res;
-    captchaBox.textContent = res;
-  }
+    const capEl = document.getElementById('captcha-img');
+    if (capEl) capEl.innerText = res;
+}
 
-  function initRememberMe() {
-    const savedUser = localStorage.getItem('lynli_remember_user');
-    const savedPass = localStorage.getItem('lynli_remember_pass');
-    if (savedUser && savedPass) {
-      inputUser.value = savedUser;
-      inputPass.value = savedPass;
-      rememberMe.checked = true;
-    }
-  }
+function autoFillCaptcha() {
+    const capInput = document.getElementById('captcha-input');
+    if (capInput) capInput.value = currentCaptcha;
+}
 
-  function handleRememberMe() {
-    if (rememberMe.checked) {
-      localStorage.setItem('lynli_remember_user', inputUser.value.trim());
-      localStorage.setItem('lynli_remember_pass', inputPass.value.trim());
-    } else {
-      localStorage.removeItem('lynli_remember_user');
-      localStorage.removeItem('lynli_remember_pass');
-    }
-  }
+// ========== 登录逻辑 ==========
+function doLogin() {
+    const user = document.getElementById('login-user').value.trim();
+    const pass = document.getElementById('login-pass').value.trim();
+    const captcha = document.getElementById('captcha-input').value.trim();
 
-  captchaBox.addEventListener('click', () => { inputCode.value = currentCaptcha; });
-
-  btnLogin.addEventListener('click', async () => {
-    const user = inputUser.value.trim();
-    const pass = inputPass.value.trim();
-    const code = inputCode.value.trim().toUpperCase();
-
-    if (!user || !pass) return window.toast.error('请输入账号和密码');
-    if (!code) return window.toast.error('请输入验证码');
-    if (code !== currentCaptcha) {
-      window.toast.error('验证码错误');
-      generateCaptcha(); inputCode.value = ''; return;
+    if (!user || !pass) return showToast('请输入账号和密码', 'warning');
+    if (!captcha) return showToast('请输入验证码', 'warning');
+    if (captcha.toUpperCase() !== currentCaptcha.toUpperCase()) {
+        showToast('验证码错误', 'error'); 
+        refreshCaptcha(); 
+        document.getElementById('captcha-input').value = '';
+        return;
     }
 
-    btnLogin.textContent = '登录中...'; btnLogin.disabled = true;
-
-    try {
-      // 真实登录请求（替换为你的真实 login 接口，如果后端暂未通，先注释掉这行用 setTimeout 演示）
-      // const res = await api.post('/login', { username: user, password: pass });
-      // api.setToken(res.token);
-      await new Promise(r => setTimeout(r, 500)); // 演示用，等后端好了一删即可
-      
-      window.toast.success('登录成功');
-      handleRememberMe();
-      pageLogin.style.display = 'none';
-      pageAdmin.style.display = 'flex';
-      
-      // 进入后台立刻请求真实数据
-      loadDashboard();
-    } catch (e) {
-      // 错误由 api.js 拦截
-    } finally {
-      btnLogin.textContent = '登 录'; btnLogin.disabled = false;
+    if (document.getElementById('remember-me').checked) {
+        localStorage.setItem('lynli_admin', 'true');
     }
-  });
-
-  btnLogout.addEventListener('click', () => {
-    api.setToken('');
-    pageAdmin.style.display = 'none';
-    pageLogin.style.display = 'flex';
-    generateCaptcha(); inputCode.value = '';
-  });
-
-  document.querySelectorAll('.nav-item').forEach(item => {
-    item.addEventListener('click', (e) => {
-      e.preventDefault();
-      document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('is-active'));
-      item.classList.add('is-active');
-
-      const targetId = 'content-' + item.dataset.page;
-      document.querySelectorAll('.page-content').forEach(page => page.classList.remove('is-active'));
-      const targetContent = document.getElementById(targetId);
-      if (targetContent) targetContent.classList.add('is-active');
-
-      document.querySelector('.admin-main').scrollTo({ top: 0, behavior: 'smooth' });
-    });
-  });
-
-  // ===== 对接真实 API：数据大盘 =====
-  async function loadDashboard() {
-    const elMetric = document.getElementById('metric-accounts');
-    const elDelta = document.getElementById('metric-delta');
-    if (!elMetric) return;
     
-    elMetric.textContent = '加载中...';
+    const loginPage = document.getElementById('login-page');
+    loginPage.style.opacity = '0';
     
-    try {
-      // 真实请求你交接单里的接口
-      const res = await api.get('/admin/dashboard');
-      
-      // 根据你的接口返回格式调整这里（假设返回 { total_accounts: 100, delta: "12.4%" }）
-      // 如果返回结构不同，请在这里修改字段名！
-      const data = res.data || res; 
-      elMetric.textContent = data.total_accounts || '0';
-      if (elDelta) elDelta.textContent = data.delta || '+0%';
-      
-    } catch (e) {
-      // api.js 已经弹了 Toast，这里只需要把 UI 改成失败态
-      elMetric.textContent = '—';
-      console.error('Dashboard加载失败:', e);
-    }
-  }
+    setTimeout(() => {
+        loginPage.style.display = 'none';
+        document.getElementById('main-app').style.display = 'flex';
+        showToast('欢迎回来', 'success');
+        fetchDashboardData(); // 登录后立刻拉取真实数据
+    }, 300);
+}
 
-  generateCaptcha();
-  initRememberMe();
-})();
+// ========== 页面初始化 ==========
+window.onload = function() {
+    refreshCaptcha();
+    if (localStorage.getItem('lynli_admin') === 'true') {
+        document.getElementById('login-page').style.display = 'none';
+        document.getElementById('main-app').style.display = 'flex';
+        fetchDashboardData();
+    }
+}
+
+// Tab 切换
+function switchTab(pageId, el) {
+    document.querySelectorAll('.sub-page').forEach(page => page.classList.remove('active'));
+    const target = document.getElementById('page-' + pageId);
+    if (target) target.classList.add('active');
+    
+    if (el) {
+        document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+        el.classList.add('active');
+    }
+    // 切换时滑动回顶部
+    document.querySelector('.admin-main').scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// 退出登录
+function doLogout() {
+    localStorage.removeItem('lynli_admin');
+    localStorage.removeItem('lynli_admin_token');
+    location.reload();
+}
