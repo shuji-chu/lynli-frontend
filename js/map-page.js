@@ -318,11 +318,34 @@ function _bindRoutePanel() {
     _routePts.start = { lat: _meLoc.lat, lng: _meLoc.lng, label: "我的位置" };
     sync(); showToast("起点已设为我的位置", "success", 1600);
   });
-  // 地图点选
-  panel.querySelector("#route-pick").addEventListener("click", () => {
-    _pickMode = _pickMode ? null : "end";
+  // 地图点选：按钮自动补第一个缺失的点；点击输入框则可指定选起点/终点
+  const setPick = (mode) => {
+    _pickMode = _pickMode === mode ? null : mode;
     panel.querySelector("#route-pick").classList.toggle("active", !!_pickMode);
-    if (_pickMode) showToast("请在地图上点击选择终点", "info", 2200);
+    if (_pickMode) showToast(_pickMode === "start" ? "请在地图上点击选择起点" : "请在地图上点击选择终点", "info", 2200);
+  };
+  panel.querySelector("#route-pick").addEventListener("click", () => {
+    setPick(_routePts.start ? "end" : "start");
+  });
+  startInput.addEventListener("click", () => setPick("start"));
+  endInput.addEventListener("click", () => setPick("end"));
+  // 手动输入坐标（纬度,经度）也可直接设置起终点
+  const parseLatLng = (txt) => {
+    const m = (txt || "").match(/^\s*(-?\d+(?:\.\d+)?)\s*[,，]\s*(-?\d+(?:\.\d+)?)\s*$/);
+    if (!m) return null;
+    const lat = parseFloat(m[1]), lng = parseFloat(m[2]);
+    if (lat < -90 || lat > 90 || lng < -180 || lng > 180) return null;
+    return { lat, lng, label: `坐标 (${lat.toFixed(3)}, ${lng.toFixed(3)})` };
+  };
+  startInput.addEventListener("change", () => {
+    const p = parseLatLng(startInput.value);
+    if (p) { _routePts.start = p; sync(); showToast("起点已设置", "success", 1400); }
+    else if (startInput.value.trim()) { showToast("格式应为：纬度,经度（如 39.9042,116.4074）", "warn"); startInput.value = fmt(_routePts.start); }
+  });
+  endInput.addEventListener("change", () => {
+    const p = parseLatLng(endInput.value);
+    if (p) { _routePts.end = p; sync(); showToast("终点已设置", "success", 1400); }
+    else if (endInput.value.trim()) { showToast("格式应为：纬度,经度（如 31.2397,121.4998）", "warn"); endInput.value = fmt(_routePts.end); }
   });
   // 交换起终点
   swapBtn.addEventListener("click", () => {

@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>LynLi · 超级管理中枢</title>
   <!-- 品牌图标 -->
-  <link rel="icon" type="image/png" href="./favicon.png?v=20261026b">
-  <link rel="apple-touch-icon" href="./apple-touch-icon.png?v=20261026b">
+  <link rel="icon" type="image/png" href="./favicon.png?v=20261026c">
+  <link rel="apple-touch-icon" href="./apple-touch-icon.png?v=20261026c">
   <!-- 蓝白主题（相对路径，解决 GitHub Pages 白屏） -->
-  <link rel="stylesheet" href="./css/style.css?v=20261026b">
+  <link rel="stylesheet" href="./css/style.css?v=20261026c">
   <!-- Leaflet 地图库（jsdelivr 主源 + cdnjs 容灾） -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" onerror="this.onerror=null;this.href='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css'">
   <!-- Anime.js 丝滑动画 -->
@@ -313,12 +313,12 @@
             <div class="route-form">
               <div class="route-field">
                 <span class="route-pt-dot start"></span>
-                <input type="text" id="route-start" class="input" placeholder="起点（默认我的位置）" readonly>
+                <input type="text" id="route-start" class="input" placeholder="起点：我的位置 / 点击地图选点 / 输入 纬度,经度">
                 <button class="btn btn-ghost btn-xs" id="route-start-me" type="button">我的位置</button>
               </div>
               <div class="route-field">
                 <span class="route-pt-dot end"></span>
-                <input type="text" id="route-end" class="input" placeholder="终点" readonly>
+                <input type="text" id="route-end" class="input" placeholder="终点：点击地图选点 / 输入 纬度,经度">
                 <button class="btn btn-ghost btn-xs" id="route-pick" type="button">地图选点</button>
               </div>
               <div class="route-actions">
@@ -670,11 +670,11 @@
   <!-- Leaflet JS（jsdelivr 主源 + cdnjs 容灾） -->
   <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js" onerror="document.write('<script src=\"https:\/\/cdnjs.cloudflare.com\/ajax\/libs\/leaflet\/1.9.4\/leaflet.min.js\"><\/script>')"></script>
   <!-- 全局用户信息同步中心（所有子站复用）：必须先于业务脚本加载 -->
-  <script src="./js/user-store.js?v=20261026b"></script>
-  <script src="./js/app.js?v=20261026b"></script>
-  <script src="./js/map-page.js?v=20261026b"></script>
-  <script src="./js/profile-page.js?v=20261026b"></script>
-  <script src="./js/ai-widget.js?v=20261026b"></script>
+  <script src="./js/user-store.js?v=20261026c"></script>
+  <script src="./js/app.js?v=20261026c"></script>
+  <script src="./js/map-page.js?v=20261026c"></script>
+  <script src="./js/profile-page.js?v=20261026c"></script>
+  <script src="./js/ai-widget.js?v=20261026c"></script>
   <script>
     /* ---------- 蓝白熊猫漂浮动画 ----------
        Lottie-Web 播放熊猫动画；无源/加载失败时自动降级为 CSS 剪影动画 */
