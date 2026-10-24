@@ -40,6 +40,45 @@ function currentRole() { return normalizeRole(localStorage.getItem("lynli_admin_
 function roleLabel(r) { r = r || currentRole(); return ROLE_LABELS[r] || r; }
 function roleBadgeClass(r) { r = r || currentRole(); return ROLE_BADGE_CLASS[r] || "r-user"; }
 
+// ---------- 会话自愈与强制重登（修复旧会话缺 role / token 失效） ----------
+// 后端为单会话机制：任一设备新登录会使旧 token 失效；
+// 旧版本前端未存储 role，会导致角色显示"普通用户"并触发 RBAC 隐藏菜单。
+function _isAuthFail(j) {
+  return !!j && (j.status === "fail" || (j.data === null && /unauth/i.test(j.message || "")));
+}
+let _reLogging = false;
+function _forceReLogin(msg) {
+  if (_reLogging) return;
+  _reLogging = true;
+  ["lynli_admin", "lynli_admin_token", "lynli_admin_email", "lynli_admin_role", "lynli_admin_isadmin"]
+    .forEach(k => localStorage.removeItem(k));
+  document.body.classList.remove("logged-in");
+  showToast(msg || "登录状态已失效，请重新登录", "warn");
+  setTimeout(() => location.reload(), 1400);
+}
+// 探活会话：返回 'ok' | 'auth_fail' | 'net_error'；role 缺失时自动探测管理权限自愈
+async function _probeSession(tok) {
+  try {
+    const r = await fetch(`${API_BASE}/user/info`, { headers: { "Authorization": "Bearer " + tok } });
+    const j = await r.json().catch(() => null);
+    if (j && j.data) {
+      if (!localStorage.getItem("lynli_admin_role")) {
+        let role = "user";
+        try {
+          const ar = await fetch(`${API_BASE}/admin/dashboard`, { headers: { "Authorization": "Bearer " + tok } });
+          const aj = await ar.json().catch(() => null);
+          if (aj && aj.code === 1) role = "admin";
+        } catch (e) { /* 探测失败按普通用户 */ }
+        localStorage.setItem("lynli_admin_role", role);
+      }
+      return "ok";
+    }
+    return _isAuthFail(j) ? "auth_fail" : "auth_fail";
+  } catch (e) {
+    return "net_error";
+  }
+}
+
 // ---------- 菜单图标（单色极简 SVG 线条） ----------
 const ICONS = {
   grid: '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>',
@@ -263,6 +302,7 @@ async function doLogin() {
             localStorage.setItem('lynli_admin_token', json.data.token);
             localStorage.setItem('lynli_admin_email', account);
             localStorage.setItem('lynli_admin_role', json.data.role || 'user');
+            localStorage.setItem('lynli_admin_isadmin', json.data.isAdmin ? '1' : '0');
             if (document.getElementById('remember-me')?.checked) {
                 localStorage.setItem('lynli_admin', 'true');
             }
@@ -292,7 +332,9 @@ async function doLogin() {
 function renderDrawer() {
     const nav = document.getElementById('drawer-nav');
     if (!nav) return;
-    const role = currentRole();
+    let role = currentRole();
+    // 自愈：旧会话缺 role 但后端标记过 isAdmin 时，按超管渲染
+    if (role === 'user' && localStorage.getItem('lynli_admin_isadmin') === '1') role = 'super';
     const email = localStorage.getItem('lynli_admin_email') || '--';
 
     let html = '';
@@ -489,6 +531,9 @@ async function fetchDashboardData() {
     const plans = (plansR.value && Array.isArray(plansR.value.data)) ? plansR.value.data : [];
     const info = (infoR.value && infoR.value.data) ? infoR.value.data : {};
     const dash = (dashR.value && dashR.value.code === 1) ? (dashR.value.data || null) : null;
+
+    // token 失效检测（单会话机制：旧 token 被新登录废止）→ 强制重登
+    if (tok && infoR.value && _isAuthFail(infoR.value)) { _forceReLogin('登录状态已失效，请重新登录'); return; }
 
     const online = nodes.filter(n => n.status === 'online' || n.enabled === 1).length;
 
@@ -937,16 +982,25 @@ async function loadProfile() {
         const res = await fetch(`${API_BASE}/user/info`, { headers: { 'Authorization': 'Bearer ' + tok } });
         const json = await res.json();
         const u = (json && json.data) ? json.data : null;
-        if (!u) return;
+        if (!u) {
+            // token 失效（单会话机制下旧 token 会被新登录废止）→ 强制重登
+            if (_isAuthFail(json)) { _forceReLogin('登录状态已失效，请重新登录'); return; }
+            showToast('用户信息拉取失败', 'warn');
+            return;
+        }
         if (emailEl) emailEl.innerText = u.email || email;
         const t = document.getElementById('profile-traffic');
-        if (t) t.innerText = fmtBytes(u.transferEnable);
+        if (t) t.innerText = fmtBytes(u.transferEnable ?? u.transfer_enable);
         const ex = document.getElementById('profile-expire');
-        if (ex) ex.innerText = u.expiredAt ? fmtTime(u.expiredAt) : '永久有效';
+        if (ex) ex.innerText = (u.expiredAt ?? u.expired_at) ? fmtTime(u.expiredAt ?? u.expired_at) : '永久有效';
         const cr = document.getElementById('profile-created');
-        if (cr) cr.innerText = fmtTime(u.createdAt);
+        if (cr) cr.innerText = (u.createdAt ?? u.created_at) ? fmtTime(u.createdAt ?? u.created_at) : '--';
         const ll = document.getElementById('profile-lastlogin');
-        if (ll) ll.innerText = u.lastLoginAt ? fmtTime(u.lastLoginAt) : '--';
+        if (ll) ll.innerText = (u.lastLoginAt ?? u.last_login_at) ? fmtTime(u.lastLoginAt ?? u.last_login_at) : '--';
+        const sid = document.getElementById('profile-shortid');
+        if (sid) sid.innerText = (u.shortId ?? u.short_id) ? '#' + (u.shortId ?? u.short_id) : '--';
+        const bal = document.getElementById('profile-balance');
+        if (bal) bal.innerText = '¥' + Number(u.balance || 0).toFixed(2);
     } catch (e) {
         showToast('用户信息拉取失败', 'warn');
     }
@@ -977,9 +1031,18 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-window.onload = function () {
+window.onload = async function () {
     drawCaptcha();
     if (localStorage.getItem('lynli_admin') === 'true') {
+        const tok = localStorage.getItem('lynli_admin_token');
+        if (!tok) { _forceReLogin('登录状态异常，请重新登录'); return; }
+        // 会话探活：token 失效则强制重登；role 缺失则自动探测管理权限自愈
+        const st = await _probeSession(tok);
+        if (st === 'auth_fail') { _forceReLogin('登录状态已过期，请重新登录'); return; }
+        if (st === 'net_error') {
+            // 网络异常：不踢出，按已有信息降级进入（个人中心会再次提示）
+            if (!localStorage.getItem('lynli_admin_role')) localStorage.setItem('lynli_admin_role', 'user');
+        }
         renderDrawer();
         document.body.classList.add('logged-in'); // AI 悬浮窗登录后可见
         document.getElementById('login-page').style.display = 'none';
