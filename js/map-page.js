@@ -52,7 +52,8 @@ async function initNodeMap(force = false) {
     nodes.forEach(n => {
       const lat = parseFloat(n.lat), lng = parseFloat(n.lng);
       if (isNaN(lat) || isNaN(lng)) return;
-      const live = n.enabled === 1 || n.enabled === "1";
+      // 公开接口返回 status: "online"/"offline"（兼容旧字段 enabled）
+      const live = n.status ? n.status === "online" : (n.enabled === 1 || n.enabled === "1");
       const icon = L.divIcon({
         className: "",
         html: `<div class="node-marker ${live ? "" : "offline"}"><div class="pulse"></div><div class="core"></div></div>`,

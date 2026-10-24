@@ -196,6 +196,46 @@ function enterMainApp() {
     }, 420);
 }
 
+// ---------- 子页面切换（侧边栏导航） ----------
+function switchTab(tab, el) {
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    if (el) el.classList.add('active');
+    document.querySelectorAll('.sub-page').forEach(p => p.classList.remove('active'));
+    const page = document.getElementById('page-' + tab);
+    if (page) page.classList.add('active');
+    // 地图页懒加载：容器可见后再初始化，Leaflet 才能正确计算尺寸
+    if (tab === 'map') {
+        setTimeout(() => { if (typeof initNodeMap === 'function') initNodeMap(); }, 80);
+    }
+    if (tab === 'accounts' && typeof loadAccounts === 'function') loadAccounts();
+}
+
+// ---------- 账号库商品列表（真实数据：account_products 表，只读展示） ----------
+async function loadAccounts() {
+    const tbody = document.getElementById('account-list');
+    if (!tbody) return;
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">加载中...</td></tr>';
+    try {
+        const res = await fetch(`${API_BASE}/account/products`);
+        const json = await res.json();
+        const list = (json.code === 1 && json.data) ? json.data : [];
+        if (!list.length) {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#94a3b8;">暂无商品</td></tr>';
+            return;
+        }
+        tbody.innerHTML = list.map(p => `
+            <tr>
+                <td>${escapeHtml(p.title || '-')}</td>
+                <td style="color:#2563eb; font-weight:700;">¥${Number(p.price || 0).toFixed(2)}</td>
+                <td>${p.stock > 0 ? p.stock : '<span style="color:#ef4444;">售罄</span>'}</td>
+                <td style="color:#94a3b8;">—</td>
+            </tr>`).join('');
+    } catch (e) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#ef4444;">加载失败，请重试</td></tr>';
+        showToast('商品列表加载失败', '❌');
+    }
+}
+
 // ---------- 数据大盘 ----------
 async function fetchDashboardData() {
     console.log("准备请求大盘数据...");
