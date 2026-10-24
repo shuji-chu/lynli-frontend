@@ -3,26 +3,18 @@ export const routes = {
   chat: { title: "客服工作台", render: null },
   orders: { title: "交易中心", render: null },
   aftersales: { title: "售后工单", render: null },
-  products: { title: "商品中心", render: null },
-  spider: { title: "AI选品采集", render: null },
-  proxy: { title: "爬虫与代理池", render: null },
-  purchases: { title: "采购与代发", render: null },
-  suppliers: { title: "供应商管理", render: null },
-  marketing: { title: "营销中心", render: null },
-  crm: { title: "客户与会员", render: null },
+  account: { title: "账号售卖商城", render: null },
+  products: { title: "电商商品库", render: null },
+  proxy: { title: "节点与代理", render: null },
+  users: { title: "客户与会员", render: null },
   finance: { title: "财务与提现", render: null },
-  logistics: { title: "运费与仓储", render: null },
-  organization: { title: "组织架构", render: null },
-  roles: { title: "角色与权限", render: null },
+  docs: { title: "开发者文档", render: null },
   system: { title: "系统设置", render: null }
 };
 
 export const navGroups = [
-  { group: "概览", items: ["dashboard"] },
-  { group: "客户与沟通", items: ["chat", "crm"] },
-  { group: "交易与售后", items: ["orders", "aftersales"] },
-  { group: "商品与供应链", items: ["products", "spider", "proxy", "purchases", "suppliers"] },
-  { group: "运营中心", items: ["marketing"] },
-  { group: "财务与仓储", items: ["finance", "logistics"] },
-  { group: "组织与系统", items: ["organization", "roles", "system"] }
+  { group: "工作台", items: ["dashboard", "chat"] },
+  { group: "核心业务", items: ["orders", "account", "products", "proxy"] },
+  { group: "客户与财务", items: ["users", "aftersales", "finance"] },
+  { group: "开发与系统", items: ["docs", "system"] }
 ];
