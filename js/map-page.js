@@ -35,14 +35,86 @@ const BASEMAPS = {
 };
 const LAYER_LABELS = { nodes: "节点分布", logistics: "电商物流", idc: "服务器机房" };
 const NOMINATIM = "https://nominatim.openstreetmap.org";
+const PHOTON = "https://photon.komoot.io"; // 备用开源地理编码（Komoot，OSM 数据）
 const OSRM = "https://router.project-osrm.org/route/v1/driving";
+
+/* ---------- 双引擎地理编码：Nominatim 优先，不可达/超时自动降级 Photon ----------
+   两个均为免费开源 OSM 地理编码服务；带 6s 超时，避免部分网络下挂起。 */
+function _fetchTimeout(url, ms = 5000) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), ms);
+  return fetch(url, { signal: ctrl.signal }).finally(() => clearTimeout(timer));
+}
+
+function _normNominatim(list) {
+  return (list || []).map((it) => ({
+    name: it.name || (it.display_name || "").split(",")[0],
+    display_name: it.display_name || "",
+    lat: parseFloat(it.lat), lon: parseFloat(it.lon),
+  })).filter((x) => !isNaN(x.lat) && !isNaN(x.lon));
+}
+
+function _normPhoton(json) {
+  const feats = (json && json.features) || [];
+  return feats.map((f) => {
+    const p = f.properties || {};
+    const full = [p.name, p.street, p.housenumber && p.street ? null : (p.city || p.town || p.village || p.municipality), p.state, p.country].filter(Boolean).join(" · ");
+    return {
+      name: p.name || full.split(" · ")[0] || "地点",
+      display_name: full,
+      lat: f.geometry.coordinates[1], lon: f.geometry.coordinates[0],
+    };
+  }).filter((x) => !isNaN(x.lat) && !isNaN(x.lon));
+}
+
+// 关键词地理编码（搜索框）：返回 { engine, list }
+async function _geocode(q, limit = 8) {
+  try {
+    const res = await _fetchTimeout(`${NOMINATIM}/search?format=jsonv2&limit=${limit}&accept-language=zh-CN&q=${encodeURIComponent(q)}`);
+    const list = _normNominatim(await res.json());
+    if (list.length) return { engine: "Nominatim", list };
+  } catch (e) { /* 超时/网络异常 → 降级 */ }
+  try {
+    const res = await _fetchTimeout(`${PHOTON}/api/?q=${encodeURIComponent(q)}&limit=${limit}`);
+    return { engine: "Photon", list: _normPhoton(await res.json()) };
+  } catch (e) {
+    return { engine: null, list: [] };
+  }
+}
+
+// 视野内 POI 检索（周边 Tab）：b = Leaflet LatLngBounds；type = POI_TYPES 项
+async function _geocodePoi(type, b, limit = 15) {
+  const viewbox = `${b.getWest()},${b.getNorth()},${b.getEast()},${b.getSouth()}`;
+  try {
+    const res = await _fetchTimeout(`${NOMINATIM}/search?format=jsonv2&limit=${limit}&accept-language=zh-CN&viewbox=${encodeURIComponent(viewbox)}&bounded=1&q=${encodeURIComponent(type.q)}`);
+    const list = _normNominatim(await res.json());
+    if (list.length) return { engine: "Nominatim", list };
+  } catch (e) { /* 超时/网络异常 → 降级 */ }
+  // 降级：Overpass（bbox 顺序 = 南,西,北,东）
+  try {
+    const bbox = `${b.getSouth()},${b.getWest()},${b.getNorth()},${b.getEast()}`;
+    const q = `[out:json][timeout:8];node${type.osm || `["amenity"="${type.key}"]`}(${bbox});out ${limit};`;
+    const res = await _fetchTimeout(`${OVERPASS}?data=${encodeURIComponent(q)}`, 9000);
+    const json = await res.json();
+    const list = (json.elements || []).map((el) => {
+      const t = el.tags || {};
+      const addr = [t["addr:street"], t["addr:housenumber"], t["addr:city"]].filter(Boolean).join(" ");
+      return { name: t.name || "", display_name: addr || type.label, lat: el.lat, lon: el.lon };
+    }).filter((x) => !isNaN(x.lat) && !isNaN(x.lon));
+    return { engine: "Overpass", list };
+  } catch (e) {
+    return { engine: null, list: [] };
+  }
+}
 const POI_TYPES = [
-  { key: "restaurant", label: "餐饮", q: "restaurant" },
-  { key: "hotel", label: "酒店", q: "hotel" },
-  { key: "fuel", label: "加油站", q: "fuel" },
-  { key: "atm", label: "ATM", q: "atm" },
-  { key: "hospital", label: "医院", q: "hospital" },
+  { key: "restaurant", label: "餐饮", q: "restaurant", osm: '["amenity"="restaurant"]' },
+  { key: "hotel", label: "酒店", q: "hotel", osm: '["tourism"="hotel"]' },
+  { key: "fuel", label: "加油站", q: "fuel", osm: '["amenity"="fuel"]' },
+  { key: "atm", label: "ATM", q: "atm", osm: '["amenity"="atm"]' },
+  { key: "hospital", label: "医院", q: "hospital", osm: '["amenity"="hospital"]' },
 ];
+// Overpass：OSM 官方 POI 检索引擎（周边检索降级通道）
+const OVERPASS = "https://overpass-api.de/api/interpreter";
 
 function _apiBase() {
   return (location.hostname === "web.lynli.me") ? "/api/v1" : "https://api.lynli.me/api/v1";
@@ -229,31 +301,24 @@ function _bindMapSearch() {
     if (!q) { panel.classList.remove("show"); panel.innerHTML = ""; return; }
     panel.innerHTML = `<div class="search-loading">搜索中...</div>`;
     panel.classList.add("show");
-    try {
-      const res = await fetch(`${NOMINATIM}/search?format=jsonv2&limit=8&accept-language=zh-CN&q=${encodeURIComponent(q)}`);
-      const list = await res.json();
-      if (!Array.isArray(list) || !list.length) {
-        panel.innerHTML = `<div class="search-empty">未找到相关地点，换个关键词试试</div>`;
-        return;
-      }
-      panel.innerHTML = list.map((it, i) => `
-        <div class="search-item" data-i="${i}">
-          <div class="search-item-name">${escapeHtml(it.name || it.display_name.split(",")[0])}</div>
-          <div class="search-item-sub">${escapeHtml(it.display_name)}</div>
-        </div>`).join("");
-      panel.querySelectorAll(".search-item").forEach((el) => {
-        el.addEventListener("click", () => {
-          const it = list[Number(el.dataset.i)];
-          const lat = parseFloat(it.lat), lng = parseFloat(it.lon);
-          if (isNaN(lat) || isNaN(lng)) return;
-          _gotoSearchResult(lat, lng, it);
-          panel.classList.remove("show");
-          input.value = it.name || it.display_name.split(",")[0];
-        });
-      });
-    } catch (e) {
-      panel.innerHTML = `<div class="search-empty">搜索服务暂不可用（Nominatim）</div>`;
+    const { engine, list } = await _geocode(q);
+    if (!list.length) {
+      panel.innerHTML = `<div class="search-empty">${engine === null ? "搜索服务暂不可用（Nominatim/Photon）" : "未找到相关地点，换个关键词试试"}</div>`;
+      return;
     }
+    panel.innerHTML = list.map((it, i) => `
+      <div class="search-item" data-i="${i}">
+        <div class="search-item-name">${escapeHtml(it.name)}</div>
+        <div class="search-item-sub">${escapeHtml(it.display_name)}</div>
+      </div>`).join("");
+    panel.querySelectorAll(".search-item").forEach((el) => {
+      el.addEventListener("click", () => {
+        const it = list[Number(el.dataset.i)];
+        _gotoSearchResult(it.lat, it.lon, it);
+        panel.classList.remove("show");
+        input.value = it.name;
+      });
+    });
   };
 
   input.addEventListener("input", () => {
@@ -425,39 +490,33 @@ function _bindPoiPanel() {
       listBox.innerHTML = `<div class="poi-loading">正在检索附近${type.label}...</div>`;
       if (!_nodeMap) return;
       const b = _nodeMap.getBounds();
-      const viewbox = `${b.getWest()},${b.getNorth()},${b.getEast()},${b.getSouth()}`;
-      try {
-        const res = await fetch(`${NOMINATIM}/search?format=jsonv2&limit=15&accept-language=zh-CN&viewbox=${encodeURIComponent(viewbox)}&bounded=1&q=${encodeURIComponent(type.q)}`);
-        const list = await res.json();
-        if (!Array.isArray(list) || !list.length) {
-          listBox.innerHTML = `<div class="poi-empty">当前视野内未找到${type.label}，可缩放地图后重试</div>`;
-          return;
-        }
-        _clearPoiMarkers();
-        list.forEach((it) => {
-          const lat = parseFloat(it.lat), lng = parseFloat(it.lon);
-          if (isNaN(lat) || isNaN(lng)) return;
-          const icon = L.divIcon({
-            className: "",
-            html: `<div class="poi-marker"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#fff" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></div>`,
-            iconSize: [24, 24], iconAnchor: [12, 12], popupAnchor: [0, -12],
-          });
-          _poiMarkers.push(L.marker([lat, lng], { icon }).addTo(_nodeMap).bindPopup(
-            `<div class="node-popup"><b>${escapeHtml(it.name || type.label)}</b><div class="row"><span>类型</span><span>${type.label}</span></div><div class="row"><span>地址</span><span>${escapeHtml(it.display_name)}</span></div></div>`));
-        });
-        listBox.innerHTML = list.slice(0, 8).map((it) => `
-          <div class="poi-item" data-lat="${it.lat}" data-lon="${it.lon}">
-            <div class="poi-item-name">${escapeHtml(it.name || type.label)}</div>
-            <div class="poi-item-sub">${escapeHtml(it.display_name)}</div>
-          </div>`).join("");
-        listBox.querySelectorAll(".poi-item").forEach((el) => {
-          el.addEventListener("click", () => {
-            _nodeMap.flyTo([parseFloat(el.dataset.lat), parseFloat(el.dataset.lon)], 15, { duration: 1 });
-          });
-        });
-      } catch (e) {
-        listBox.innerHTML = `<div class="poi-empty">周边服务暂不可用（Nominatim）</div>`;
+      const { engine, list } = await _geocodePoi(type, b);
+      if (!list.length) {
+        listBox.innerHTML = `<div class="poi-empty">${engine === null ? "周边服务暂不可用（Nominatim/Overpass）" : `当前视野内未找到${type.label}，可缩放地图后重试`}</div>`;
+        return;
       }
+      _clearPoiMarkers();
+      list.forEach((it) => {
+        const lat = parseFloat(it.lat), lng = parseFloat(it.lon);
+        if (isNaN(lat) || isNaN(lng)) return;
+        const icon = L.divIcon({
+          className: "",
+          html: `<div class="poi-marker"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#fff" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></div>`,
+          iconSize: [24, 24], iconAnchor: [12, 12], popupAnchor: [0, -12],
+        });
+        _poiMarkers.push(L.marker([lat, lng], { icon }).addTo(_nodeMap).bindPopup(
+          `<div class="node-popup"><b>${escapeHtml(it.name || type.label)}</b><div class="row"><span>类型</span><span>${type.label}</span></div><div class="row"><span>地址</span><span>${escapeHtml(it.display_name)}</span></div></div>`));
+      });
+      listBox.innerHTML = list.slice(0, 8).map((it) => `
+        <div class="poi-item" data-lat="${it.lat}" data-lon="${it.lon}">
+          <div class="poi-item-name">${escapeHtml(it.name || type.label)}</div>
+          <div class="poi-item-sub">${escapeHtml(it.display_name)}</div>
+        </div>`).join("");
+      listBox.querySelectorAll(".poi-item").forEach((el) => {
+        el.addEventListener("click", () => {
+          _nodeMap.flyTo([parseFloat(el.dataset.lat), parseFloat(el.dataset.lon)], 15, { duration: 1 });
+        });
+      });
     });
   });
 }
