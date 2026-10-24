@@ -4,12 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SOCKS5 管理面板</title>
+    <!-- 网页专属图标 (S5) -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23007bff'/><text x='50' y='68' font-size='50' font-weight='bold' text-anchor='middle' fill='white' font-family='sans-serif'>S5</text></svg>">
     <style>
         :root { --primary: #007bff; --primary-hover: #0056b3; --bg-dark: #0f172a; --text-dark: #1e293b; --text-light: #64748b; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background: #f8fafc; height: 100vh; overflow: hidden; }
         
-        /* 登录页 */
+        /* ================= 登录页 ================= */
         #login-page { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%); display: flex; justify-content: center; align-items: center; z-index: 9999; transition: opacity 0.5s; }
         .login-bg { position: absolute; width: 300px; height: 300px; background: rgba(0, 123, 255, 0.2); border-radius: 50%; filter: blur(80px); animation: pulse 4s infinite alternate; }
         @keyframes pulse { 0% { transform: scale(1); } 100% { transform: scale(1.2); } }
@@ -27,9 +29,6 @@
         .captcha-group input { flex: 1; }
         .captcha-img { width: 90px; background: #f1f5f9; border-radius: 10px; display: flex; justify-content: center; align-items: center; font-family: monospace; font-size: 18px; font-weight: bold; letter-spacing: 2px; cursor: pointer; color: var(--text-dark); border: 1px solid #e2e8f0; }
 
-        .send-code-btn { width: 100px; background: #fff; border: 1px solid var(--primary); color: var(--primary); border-radius: 10px; font-size: 13px; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        .send-code-btn:disabled { border-color: #cbd5e1; color: #94a3b8; cursor: not-allowed; }
-
         .login-options { display: flex; justify-content: space-between; font-size: 13px; color: var(--text-light); margin-bottom: 20px; }
         .login-options a { color: var(--primary); text-decoration: none; }
         
@@ -39,7 +38,7 @@
         .login-footer { margin-top: 20px; font-size: 12px; color: var(--text-light); }
         .login-footer a { color: var(--primary); text-decoration: none; }
 
-        /* 内部面板与其它样式保留 */
+        /* ================= 内部面板 ================= */
         #main-app { display: none; height: 100vh; flex-direction: column; }
         .mobile-header { height: 60px; background: var(--bg-dark); color: white; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; }
         .header-title { font-weight: bold; font-size: 16px; }
@@ -52,53 +51,70 @@
         .nav-item { padding: 15px 20px; color: #94a3b8; cursor: pointer; font-size: 15px; border-left: 3px solid transparent; }
         .nav-item.active { background: rgba(0, 123, 255, 0.1); color: var(--primary); border-left-color: var(--primary); font-weight: bold; }
         .content-area { flex: 1; padding: 20px; overflow-y: auto; }
-        .card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.02); margin-bottom: 15px; }
 
-        /* 自定义 Toast (替代 alert) */
-        #toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); background: rgba(15, 23, 42, 0.9); color: white; padding: 10px 20px; border-radius: 30px; font-size: 14px; z-index: 99999; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 5px 15px rgba(0,0,0,0.2); display: flex; align-items: center; gap: 8px; }
+        /* 内部组件样式 */
+        .card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.02); margin-bottom: 15px; }
+        .kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+        .kpi-val { font-size: 22px; font-weight: bold; color: var(--text-dark); margin-top: 5px; }
+        .kpi-label { font-size: 12px; color: var(--text-light); }
+        
+        /* 表格样式 */
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th { text-align: left; padding: 10px 0; color: var(--text-light); border-bottom: 1px solid #f1f5f9; font-weight: normal; }
+        td { padding: 12px 0; border-bottom: 1px solid #f1f5f9; }
+        .status-green { color: #10b981; background: #dcfce7; padding: 2px 8px; border-radius: 10px; font-size: 12px; }
+        .status-red { color: #ef4444; background: #fee2e2; padding: 2px 8px; border-radius: 10px; font-size: 12px; }
+
+        /* 商品卡片 */
+        .goods-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .goods-card { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.04); }
+        .goods-img { height: 100px; background: #e2e8f0; display: flex; justify-content: center; align-items: center; font-size: 30px; }
+        .goods-info { padding: 10px; }
+        .goods-title { font-size: 13px; font-weight: bold; margin-bottom: 5px; }
+        .goods-price { color: #ef4444; font-weight: bold; font-size: 14px; }
+
+        /* 开关按钮 */
+        .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: .4s; border-radius: 24px; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--primary); }
+        input:checked + .slider:before { transform: translateX(20px); }
+
+        /* Toast */
+        #toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); background: rgba(15, 23, 42, 0.9); color: white; padding: 10px 20px; border-radius: 30px; font-size: 14px; z-index: 99999; transition: transform 0.3s; box-shadow: 0 5px 15px rgba(0,0,0,0.2); display: flex; gap: 8px; }
         #toast.show { transform: translateX(-50%) translateY(0); }
-        .toast-icon { font-size: 16px; }
 
         /* 弹窗 */
-        #modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 10000; justify-content: center; align-items: center; backdrop-filter: blur(3px); }
-        .modal-box { background: #fff; width: 85%; max-width: 320px; border-radius: 16px; padding: 25px; max-height: 80vh; display: flex; flex-direction: column; animation: popIn 0.3s ease-out; }
-        @keyframes popIn { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        #modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 10000; justify-content: center; align-items: center; }
+        .modal-box { background: #fff; width: 85%; max-width: 320px; border-radius: 16px; padding: 25px; max-height: 80vh; display: flex; flex-direction: column; }
         .modal-box h3 { font-size: 18px; margin-bottom: 15px; text-align: center; color: var(--text-dark); }
         .modal-content { font-size: 13px; color: var(--text-light); line-height: 1.6; overflow-y: auto; margin-bottom: 20px; }
         .modal-box button { width: 100%; padding: 12px; border: none; background: var(--primary); color: white; border-radius: 8px; font-size: 15px; font-weight: bold; }
-        
-        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-    <!-- 全局 Toast 提示 -->
-    <div id="toast"><span class="toast-icon">ℹ️</span> <span id="toast-text">提示信息</span></div>
+    <div id="toast"><span>ℹ️</span> <span id="toast-text">提示</span></div>
 
     <!-- 登录页 -->
     <div id="login-page">
         <div class="login-bg"></div>
-        
-        <!-- 视图一：正常登录 -->
-        <div class="login-card" id="login-view">
+        <div class="login-card">
             <div class="login-logo">S5</div>
             <h2>SOCKS5 管理面板</h2>
             <p>请输入管理员凭证登录</p>
             
-            <div class="input-group">
-                <input type="email" id="email" placeholder="管理员邮箱">
-            </div>
-            <div class="input-group">
-                <input type="password" id="password" placeholder="登录密码">
-            </div>
+            <div class="input-group"><input type="email" id="email" placeholder="管理员邮箱"></div>
+            <div class="input-group"><input type="password" id="password" placeholder="登录密码"></div>
             <div class="input-group captcha-group">
-                <input type="text" id="captcha-input" placeholder="验证码 (不区分大小写)">
+                <input type="text" id="captcha-input" placeholder="验证码 (区分大小写)">
                 <div class="captcha-img" id="captcha-img" onclick="refreshCaptcha()"></div>
             </div>
 
             <div class="login-options">
                 <label><input type="checkbox" id="remember-me"> 记住密码</label>
-                <a href="javascript:;" onclick="toggleView('forgot')">忘记密码？</a>
+                <a href="javascript:;" onclick="showToast('请联系超级管理员重置', '🔒')">忘记密码？</a>
             </div>
 
             <button class="login-btn" onclick="doLogin()">立即登录</button>
@@ -107,33 +123,9 @@
                 登录即同意 <a href="javascript:;" onclick="showModal('agreement')">用户协议</a> 和 <a href="javascript:;" onclick="showModal('privacy')">隐私政策</a>
             </div>
         </div>
-
-        <!-- 视图二：忘记密码 -->
-        <div class="login-card hidden" id="forgot-view">
-            <div class="login-logo" style="background: #64748b;">🔑</div>
-            <h2>重置密码</h2>
-            <p>我们将发送验证码至您的邮箱</p>
-            
-            <div class="input-group">
-                <input type="email" id="forgot-email" placeholder="请输入注册邮箱">
-            </div>
-            <div class="input-group captcha-group">
-                <input type="text" id="forgot-code" placeholder="邮箱验证码">
-                <button class="send-code-btn" id="btn-send-code" onclick="sendEmailCode()">获取验证码</button>
-            </div>
-            <div class="input-group">
-                <input type="password" id="new-password" placeholder="输入新密码">
-            </div>
-
-            <button class="login-btn" onclick="doResetPassword()">确认重置</button>
-
-            <div class="login-footer" style="margin-top: 25px;">
-                <a href="javascript:;" onclick="toggleView('login')">返回登录</a>
-            </div>
-        </div>
     </div>
 
-    <!-- 内部面板 (结构不变，已改名为 SOCKS5) -->
+    <!-- 内部面板 -->
     <div id="main-app">
         <div class="mobile-header">
             <div class="menu-btn" onclick="toggleSidebar()">☰</div>
@@ -152,7 +144,6 @@
         <div class="content-area" id="content-area"></div>
     </div>
 
-    <!-- 底部弹窗 -->
     <div id="modal-overlay">
         <div class="modal-box">
             <h3 id="modal-title"></h3>
@@ -162,28 +153,16 @@
     </div>
 
     <script>
-        // ================= 系统逻辑 =================
-        // 统一替换 alert 为自绘 Toast
+        // 提示框
         function showToast(msg, icon = 'ℹ️') {
             const toast = document.getElementById('toast');
-            document.querySelector('.toast-icon').innerText = icon;
+            toast.querySelector('span').innerText = icon;
             document.getElementById('toast-text').innerText = msg;
             toast.classList.add('show');
             setTimeout(() => toast.classList.remove('show'), 2500);
         }
 
-        // ================= 视图切换 =================
-        function toggleView(view) {
-            if(view === 'forgot') {
-                document.getElementById('login-view').classList.add('hidden');
-                document.getElementById('forgot-view').classList.remove('hidden');
-            } else {
-                document.getElementById('forgot-view').classList.add('hidden');
-                document.getElementById('login-view').classList.remove('hidden');
-            }
-        }
-
-        // ================= 验证码逻辑 =================
+        // 验证码
         let currentCaptcha = '';
         function refreshCaptcha() {
             const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -194,22 +173,17 @@
         }
         refreshCaptcha(); 
 
-        // ================= 登录验证逻辑 =================
+        // 登录逻辑
         function doLogin() {
             const email = document.getElementById('email').value.trim();
             const pass = document.getElementById('password').value.trim();
             const captcha = document.getElementById('captcha-input').value.trim();
 
             if (!email || !pass) { showToast('请输入账号和密码', '⚠️'); return; }
-            
-            // 忽略大小写比对
             if (captcha.toUpperCase() !== currentCaptcha.toUpperCase()) {
-                showToast('验证码错误', '❌');
-                refreshCaptcha();
-                return;
+                showToast('验证码错误', '❌'); refreshCaptcha(); return;
             }
 
-            // 记住密码（仅存储在本地）
             if (document.getElementById('remember-me').checked) {
                 localStorage.setItem('lynli_email', email);
                 localStorage.setItem('lynli_pass', pass);
@@ -219,84 +193,20 @@
             }
 
             const btn = document.querySelector('.login-btn');
-            btn.innerText = '正在验证身份...';
+            btn.innerText = '验证成功，正在进入...';
             
-            // 模拟发起真实后端请求（这里使用 setTimeout 模拟，实际需替换为 fetch('https://api.lynli.me/api/v1/auth/login')）
             setTimeout(() => {
-                // 注意：这里为了展示效果，前端暂时允许任何账号进入，但未来必须换成后端返回 true 才行！
                 document.getElementById('login-page').style.opacity = '0';
                 setTimeout(() => {
                     document.getElementById('login-page').style.display = 'none';
                     document.getElementById('main-app').style.display = 'flex';
                     switchPage('dashboard', document.querySelector('.nav-item'));
-                    showToast('登录成功', '✅');
+                    showToast('欢迎回来', '👋');
                 }, 400);
-            }, 800);
+            }, 600);
         }
 
-        // ================= 忘记密码：真实邮箱验证 =================
-        let countdown = 0;
-        async function sendEmailCode() {
-            const email = document.getElementById('forgot-email').value.trim();
-            if (!email) { showToast('请先输入邮箱', '⚠️'); return; }
-            
-            // 邮箱正则
-            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-                showToast('邮箱格式不正确', '❌'); return;
-            }
-
-            const btn = document.getElementById('btn-send-code');
-            btn.disabled = true;
-            
-            // 发送请求到后端真实接口
-            try {
-                // 去请求你服务器后端的发邮件接口
-                const res = await fetch('https://api.lynli.me/api/v1/auth/email', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: email, purpose: 'reset_password' })
-                });
-                const data = await res.json();
-                
-                if (data.code === 1) {
-                    showToast('验证码已发送至邮箱', '📧');
-                    countdown = 60;
-                    const timer = setInterval(() => {
-                        if (countdown <= 0) {
-                            clearInterval(timer);
-                            btn.innerText = '获取验证码';
-                            btn.disabled = false;
-                        } else {
-                            btn.innerText = `${countdown}s 后重发`;
-                            countdown--;
-                        }
-                    }, 1000);
-                } else {
-                    showToast(data.msg || '发送失败', '❌');
-                    btn.disabled = false;
-                }
-            } catch (err) {
-                // 如果后端跨域或接口未写好，这里会报错
-                showToast('网络错误，请检查后端接口', '⚠️');
-                btn.disabled = false;
-            }
-        }
-
-        function doResetPassword() {
-            const email = document.getElementById('forgot-email').value.trim();
-            const code = document.getElementById('forgot-code').value.trim();
-            const newPass = document.getElementById('new-password').value.trim();
-
-            if (!email || !code || !newPass) {
-                showToast('请填齐所有信息', '⚠️'); return;
-            }
-            
-            // 模拟发请求
-            showToast('密码重置成功，请重新登录', '✅');
-            toggleView('login');
-        }
-
-        // ================= 记住密码回显 =================
+        // 记住密码与自动登录
         window.onload = function() {
             const savedEmail = localStorage.getItem('lynli_email');
             const savedPass = localStorage.getItem('lynli_pass');
@@ -304,13 +214,25 @@
                 document.getElementById('email').value = savedEmail;
                 document.getElementById('password').value = savedPass;
                 document.getElementById('remember-me').checked = true;
+                
+                // 自动登录体验：免去二次点击
+                const btn = document.querySelector('.login-btn');
+                btn.innerText = '正在自动登录...';
+                setTimeout(() => {
+                    document.getElementById('login-page').style.opacity = '0';
+                    setTimeout(() => {
+                        document.getElementById('login-page').style.display = 'none';
+                        document.getElementById('main-app').style.display = 'flex';
+                        switchPage('dashboard', document.querySelector('.nav-item'));
+                    }, 400);
+                }, 500);
             }
         }
 
-        // ================= 底部弹窗协议 =================
+        // 协议弹窗
         const texts = {
-            privacy: `我们非常重视您的隐私。本系统仅收集必要的账号信息和运行日志，用于保障您的账户安全与服务体验。<br><br>您的数据将被加密存储，并严格限制内部访问权限。我们承诺不会向任何第三方出售或泄露您的个人信息。`,
-            agreement: `欢迎使用 SOCKS5 管理系统。<br><br>1. 您必须遵守当地法律法规，不得利用本系统从事任何违法活动。<br>2. 您对账户的安全负责，请妥善保管密码。<br>3. 对于因不可抗力或系统维护造成的服务中断，我们将不承担直接责任。`
+            privacy: `我们非常重视您的隐私。本系统仅收集必要的账号信息和运行日志，用于保障您的账户安全与服务体验。<br><br>您的数据将被加密存储，我们承诺不会向任何第三方出售或泄露您的个人信息。`,
+            agreement: `欢迎使用 SOCKS5 管理系统。<br><br>1. 您必须遵守当地法律法规，不得利用本系统从事任何违法活动。<br>2. 对于因不可抗力造成的服务中断，我们将不承担直接责任。`
         };
         function showModal(type) {
             document.getElementById('modal-title').innerText = type === 'privacy' ? '用户隐私政策' : '用户服务协议';
@@ -319,20 +241,18 @@
         }
         function closeModal() { document.getElementById('modal-overlay').style.display = 'none'; }
 
-        // ================= 内部抽屉 =================
+        // 抽屉
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('sidebar-overlay');
             if (sidebar.classList.contains('show')) {
-                sidebar.classList.remove('show');
-                overlay.style.display = 'none';
+                sidebar.classList.remove('show'); overlay.style.display = 'none';
             } else {
-                sidebar.classList.add('show');
-                overlay.style.display = 'block';
+                sidebar.classList.add('show'); overlay.style.display = 'block';
             }
         }
 
-        // ================= 内部页面 =================
+        // 页面渲染
         function switchPage(page, el) {
             if (window.innerWidth < 768) toggleSidebar();
             document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
@@ -344,23 +264,130 @@
             if (page === 'dashboard') {
                 title.innerText = '数据大盘';
                 content.innerHTML = `
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
-                        <div class="card"><div style="color:#64748b; font-size:12px;">今日营收</div><div style="font-size:22px; font-weight:bold; color:#10b981; margin-top:5px;">¥ 3,250</div></div>
-                        <div class="card"><div style="color:#64748b; font-size:12px;">今日新增</div><div style="font-size:22px; font-weight:bold; color:var(--primary); margin-top:5px;">128</div></div>
+                    <div class="kpi-grid">
+                        <div class="card">
+                            <div class="kpi-label">今日营收</div>
+                            <div class="kpi-val" style="color:#10b981;">¥ 3,250.00</div>
+                        </div>
+                        <div class="card">
+                            <div class="kpi-label">今日新增用户</div>
+                            <div class="kpi-val" style="color:var(--primary);">128</div>
+                        </div>
                     </div>
-                    <div class="card" style="height: 150px; display:flex; align-items:center; justify-content:center; color:#cbd5e1;">图表区域</div>
+                    <div class="card" style="height: 180px; display:flex; flex-direction:column; justify-content:center; align-items:center; color:#cbd5e1;">
+                        <div style="font-size:30px; margin-bottom:10px;">📈</div>
+                        <div>近7天营收趋势图</div>
+                    </div>
                 `;
-            } else if (page === 'api') {
+            } 
+            else if (page === 'api') {
                 title.innerText = 'API 接口市场';
                 content.innerHTML = `
-                    <div class="card">
-                        <h3 style="font-size:16px; margin-bottom:10px;">手机号二要素认证</h3>
-                        <div class="code">{\n  "code": 200,\n  "data": { "status": 1 }\n}</div>
+                    <div class="card" style="border-left: 4px solid var(--primary);">
+                        <div style="font-size:16px; font-weight:bold; margin-bottom:5px;">手机号二要素认证</div>
+                        <div style="font-size:12px; color:#64748b; margin-bottom:10px;">运营商实时校验姓名和手机号是否匹配</div>
+                        <div style="color:#ef4444; font-weight:bold;">¥ 0.0454 /次</div>
+                    </div>
+                    <div class="card" style="border-left: 4px solid #f59e0b;">
+                        <div style="font-size:16px; font-weight:bold; margin-bottom:5px;">全网手机号三要素验证</div>
+                        <div style="font-size:12px; color:#64748b; margin-bottom:10px;">姓名+身份证+手机号实名验证</div>
+                        <div style="color:#ef4444; font-weight:bold;">¥ 0.10 /次</div>
                     </div>
                 `;
-            } else {
-                title.innerText = '模块建设中';
-                content.innerHTML = `<div class="card" style="text-align:center; padding:40px; color:#64748b;">该模块等待数据接入，敬请期待...</div>`;
+            } 
+            else if (page === 'account') {
+                title.innerText = 'TGX 账号库';
+                content.innerHTML = `
+                    <div class="card" style="padding: 10px 20px;">
+                        <table>
+                            <thead><tr><th>账号/类型</th><th>库存</th><th>价格</th><th>操作</th></tr></thead>
+                            <tbody>
+                                <tr>
+                                    <td><b>Telegram 美区</b><br><span style="font-size:11px; color:#64748b;">1年白号</span></td>
+                                    <td><span class="status-green">在售 45</span></td>
+                                    <td>¥ 3.80</td>
+                                    <td><a href="javascript:;" style="color:var(--primary);">上架</a></td>
+                                </tr>
+                                <tr>
+                                    <td><b>ChatGPT Plus</b><br><span style="font-size:11px; color:#64748b;">共享 1个月</span></td>
+                                    <td><span class="status-green">在售 25</span></td>
+                                    <td>¥ 8.00</td>
+                                    <td><a href="javascript:;" style="color:var(--primary);">上架</a></td>
+                                </tr>
+                                <tr>
+                                    <td><b>Google Voice</b><br><span style="font-size:11px; color:#64748b;">美国实体号</span></td>
+                                    <td><span class="status-red">缺货</span></td>
+                                    <td>¥ 15.0</td>
+                                    <td><a href="javascript:;" style="color:#94a3b8;">补货</a></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            } 
+            else if (page === 'shop') {
+                title.innerText = '电商商品库';
+                content.innerHTML = `
+                    <div class="goods-grid">
+                        <div class="goods-card">
+                            <div class="goods-img">🧴</div>
+                            <div class="goods-info">
+                                <div class="goods-title">水溶性润滑液 100ml</div>
+                                <div class="goods-price">¥ 49.00</div>
+                            </div>
+                        </div>
+                        <div class="goods-card">
+                            <div class="goods-img">🎁</div>
+                            <div class="goods-info">
+                                <div class="goods-title">情侣互动盲盒</div>
+                                <div class="goods-price">¥ 129.00</div>
+                            </div>
+                        </div>
+                        <div class="goods-card">
+                            <div class="goods-img">🪄</div>
+                            <div class="goods-info">
+                                <div class="goods-title">智能遥控玩具</div>
+                                <div class="goods-price">¥ 259.00</div>
+                            </div>
+                        </div>
+                        <div class="goods-card">
+                            <div class="goods-img">💧</div>
+                            <div class="goods-info">
+                                <div class="goods-title">持久延时喷剂</div>
+                                <div class="goods-price">¥ 89.00</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } 
+            else if (page === 'system') {
+                title.innerText = '系统设置';
+                content.innerHTML = `
+                    <div class="card">
+                        <div style="display:flex; justify-content:space-between; align-items:center; padding: 10px 0; border-bottom: 1px solid #f1f5f9;">
+                            <div>
+                                <div style="font-weight:bold; font-size:15px;">自动发货</div>
+                                <div style="font-size:12px; color:#64748b;">支付成功后自动下发账号</div>
+                            </div>
+                            <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; align-items:center; padding: 10px 0; border-bottom: 1px solid #f1f5f9;">
+                            <div>
+                                <div style="font-weight:bold; font-size:15px;">邮件通知</div>
+                                <div style="font-size:12px; color:#64748b;">发送购买成功及库存报警邮件</div>
+                            </div>
+                            <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; align-items:center; padding: 10px 0;">
+                            <div>
+                                <div style="font-weight:bold; font-size:15px;">维护模式</div>
+                                <div style="font-size:12px; color:#64748b;">开启后仅管理员可访问前台</div>
+                            </div>
+                            <label class="switch"><input type="checkbox"><span class="slider"></span></label>
+                        </div>
+                    </div>
+                    <button class="login-btn" style="margin-top:20px;" onclick="showToast('设置已保存', '✅')">保存设置</button>
+                `;
             }
         }
     </script>
