@@ -280,7 +280,7 @@ async function fetchDashboardData() {
     const [nodesR, productsR, plansR, infoR] = await Promise.allSettled([
         fetch(`${API_BASE}/public/nodes`).then(r => r.json()).catch(() => null),
         fetch(`${API_BASE}/account/products`).then(r => r.json()).catch(() => null),
-        fetch(`${API_BASE}/plans`).then(r => r.json()).catch(() => null),
+        fetch(`${API_BASE}/user/plan/fetch`).then(r => r.json()).catch(() => null),
         (async () => {
             const tok = localStorage.getItem('lynli_admin_token');
             if (!tok) return null;
@@ -291,7 +291,8 @@ async function fetchDashboardData() {
 
     const nodes = (nodesR.value && nodesR.value.code === 1) ? (nodesR.value.data || []) : [];
     const products = (productsR.value && productsR.value.code === 1) ? (productsR.value.data || []) : [];
-    const plans = (plansR.value && plansR.value.code === 1) ? (plansR.value.data || []) : [];
+    // 套餐接口响应无 code 字段，data 为数组即可用
+    const plans = (plansR.value && Array.isArray(plansR.value.data)) ? plansR.value.data : [];
     const info = (infoR.value && infoR.value.data) ? infoR.value.data : {};
 
     const online = nodes.filter(n => n.status === 'online' || n.enabled === 1).length;
