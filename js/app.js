@@ -64,3 +64,4 @@ function doLogout() {
     localStorage.removeItem('lynli_admin');
     location.reload();
 }
+// Force update
