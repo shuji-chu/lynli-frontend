@@ -2,112 +2,282 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>LYNLI PRO - 控制台</title>
     <style>
-        :root { --primary: #007bff; --bg-dark: #0f172a; }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, sans-serif; }
+        :root { --primary: #007bff; --bg-dark: #0f172a; --text-dark: #1e293b; --text-light: #64748b; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background: #f8fafc; height: 100vh; overflow: hidden; }
         
-        /* 登录页动画 */
+        /* ================= 登录页 ================= */
         #login-page { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%); display: flex; justify-content: center; align-items: center; z-index: 9999; transition: opacity 0.5s; }
-        .login-bg { position: absolute; width: 400px; height: 400px; background: rgba(0, 123, 255, 0.2); border-radius: 50%; filter: blur(80px); animation: pulse 4s infinite alternate; }
+        .login-bg { position: absolute; width: 300px; height: 300px; background: rgba(0, 123, 255, 0.2); border-radius: 50%; filter: blur(80px); animation: pulse 4s infinite alternate; }
         @keyframes pulse { 0% { transform: scale(1); } 100% { transform: scale(1.2); } }
-        .login-card { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(20px); padding: 40px; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); width: 90%; max-width: 400px; text-align: center; position: relative; z-index: 10; animation: slideUp 0.6s ease-out; }
-        @keyframes slideUp { 0% { transform: translateY(30px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
-        .login-logo { width: 80px; height: 80px; margin: 0 auto 20px; border-radius: 18px; background: var(--primary); color: white; display: flex; justify-content: center; align-items: center; font-size: 36px; font-weight: bold; box-shadow: 0 10px 20px rgba(0, 123, 255, 0.3); animation: float 3s ease-in-out infinite; }
-        @keyframes float { 0% { transform: translateY(0); } 50% { transform: translateY(-8px); } 100% { transform: translateY(0); } }
-        .login-card h2 { color: #1e293b; margin-bottom: 8px; }
-        .login-card p { color: #94a3b8; font-size: 14px; margin-bottom: 30px; }
-        .input-group { margin-bottom: 20px; text-align: left; }
-        .input-group input { width: 100%; padding: 12px 15px; border: 2px solid #e2e8f0; border-radius: 10px; outline: none; }
-        .login-btn { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        .login-btn:hover { background: #0056b3; }
+        .login-card { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(20px); padding: 35px 25px; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); width: 90%; max-width: 380px; text-align: center; position: relative; z-index: 10; }
+        .login-logo { width: 70px; height: 70px; margin: 0 auto 15px; border-radius: 16px; background: var(--primary); color: white; display: flex; justify-content: center; align-items: center; font-size: 32px; font-weight: bold; box-shadow: 0 10px 20px rgba(0, 123, 255, 0.3); animation: float 3s ease-in-out infinite; }
+        @keyframes float { 0% { transform: translateY(0); } 50% { transform: translateY(-6px); } 100% { transform: translateY(0); } }
+        .login-card h2 { color: var(--text-dark); margin-bottom: 5px; font-size: 22px; }
+        .login-card p { color: var(--text-light); font-size: 13px; margin-bottom: 25px; }
+        .input-group { margin-bottom: 15px; text-align: left; }
+        .input-group input { width: 100%; padding: 12px 15px; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 14px; outline: none; background: #fff; transition: 0.3s; }
+        .input-group input:focus { border-color: var(--primary); }
         
-        /* 主面板 */
-        #main-app { display: none; height: 100vh; }
-        .sidebar { width: 240px; background: var(--bg-dark); display: flex; flex-direction: column; }
-        .sidebar-logo { height: 70px; display: flex; align-items: center; padding: 0 20px; gap: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); color: white; font-weight: bold; font-size: 20px; }
-        .sidebar-logo .icon { width: 32px; height: 32px; background: var(--primary); border-radius: 8px; display: flex; justify-content: center; align-items: center; font-size: 16px; }
-        .nav-item { padding: 15px 20px; color: #94a3b8; cursor: pointer; transition: 0.2s; border-left: 3px solid transparent; }
-        .nav-item:hover { background: rgba(255,255,255,0.05); color: white; }
+        .captcha-group { display: flex; gap: 10px; }
+        .captcha-group input { flex: 1; }
+        .captcha-img { width: 90px; background: #f1f5f9; border-radius: 10px; display: flex; justify-content: center; align-items: center; font-family: monospace; font-size: 18px; font-weight: bold; letter-spacing: 2px; cursor: pointer; color: var(--text-dark); border: 1px solid #e2e8f0; }
+
+        .login-options { display: flex; justify-content: space-between; font-size: 13px; color: var(--text-light); margin-bottom: 20px; }
+        .login-options a { color: var(--primary); text-decoration: none; }
+        
+        .login-btn { width: 100%; padding: 13px; background: var(--primary); color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .login-btn:active { transform: scale(0.98); }
+        
+        .login-footer { margin-top: 20px; font-size: 12px; color: var(--text-light); }
+        .login-footer a { color: var(--primary); text-decoration: none; }
+
+        /* ================= 手机端内部面板 ================= */
+        #main-app { display: none; height: 100vh; flex-direction: column; }
+        
+        /* 顶部导航 */
+        .mobile-header { height: 60px; background: var(--bg-dark); color: white; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; position: relative; z-index: 5; }
+        .menu-btn { font-size: 24px; cursor: pointer; }
+        .header-title { font-weight: bold; font-size: 16px; }
+        
+        /* 遮罩层 */
+        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10; }
+        
+        /* 侧边抽屉菜单 */
+        .sidebar { position: fixed; top: 0; left: -260px; width: 260px; height: 100%; background: var(--bg-dark); z-index: 20; transition: transform 0.3s ease; display: flex; flex-direction: column; }
+        .sidebar.show { transform: translateX(260px); }
+        .sidebar-logo { height: 60px; display: flex; align-items: center; padding: 0 20px; gap: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); color: white; font-weight: bold; font-size: 18px; }
+        .sidebar-logo .icon { width: 30px; height: 30px; background: var(--primary); border-radius: 8px; display: flex; justify-content: center; align-items: center; font-size: 14px; }
+        
+        .nav-item { padding: 15px 20px; color: #94a3b8; cursor: pointer; font-size: 15px; transition: 0.2s; border-left: 3px solid transparent; }
+        .nav-item:active { background: rgba(255,255,255,0.05); }
         .nav-item.active { background: rgba(0, 123, 255, 0.1); color: var(--primary); border-left-color: var(--primary); font-weight: bold; }
-        .main-content { flex: 1; display: flex; flex-direction: column; background: #f8fafc; }
-        .header { height: 70px; background: white; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; padding: 0 30px; font-weight: bold; font-size: 18px; }
-        .content { flex: 1; padding: 30px; overflow-y: auto; }
-        .card { background: white; border-radius: 12px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.02); margin-bottom: 20px; }
-        .tag { display: inline-block; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: bold; margin-right: 10px; }
-        .tag-g { background: #dcfce7; color: #166534; } .tag-b { background: #e0f2fe; color: #0284c7; }
-        .code { background: #0f172a; color: #10b981; padding: 20px; border-radius: 8px; font-family: monospace; white-space: pre-wrap; }
-        table { width: 100%; border-collapse: collapse; } th, td { padding: 12px 0; border-bottom: 1px solid #f1f5f9; text-align: left; }
+
+        /* 内容区 */
+        .content-area { flex: 1; padding: 20px; overflow-y: auto; background: #f8fafc; }
+        
+        /* 通用卡片 */
+        .card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.02); margin-bottom: 15px; }
+        
+        /* 内部特定样式 */
+        .tag { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; margin-right: 8px; }
+        .tag-g { background: #dcfce7; color: #166534; } 
+        .tag-b { background: #e0f2fe; color: #0284c7; }
+        .code { background: #0f172a; color: #10b981; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 12px; white-space: pre-wrap; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th, td { padding: 10px 0; border-bottom: 1px solid #f1f5f9; text-align: left; }
+
+        /* 弹窗 */
+        #modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 10000; justify-content: center; align-items: center; }
+        .modal-box { background: #fff; width: 85%; max-width: 320px; border-radius: 14px; padding: 20px; max-height: 80vh; display: flex; flex-direction: column; }
+        .modal-box h3 { font-size: 18px; margin-bottom: 15px; text-align: center; color: var(--text-dark); }
+        .modal-content { font-size: 13px; color: var(--text-light); line-height: 1.6; overflow-y: auto; margin-bottom: 20px; }
+        .modal-box button { width: 100%; padding: 12px; border: none; background: var(--primary); color: white; border-radius: 8px; font-size: 15px; font-weight: bold; }
     </style>
 </head>
 <body>
 
+    <!-- 登录页 -->
     <div id="login-page">
         <div class="login-bg"></div>
         <div class="login-card">
             <div class="login-logo">S5</div>
             <h2>LYNLI PRO</h2>
-            <p>请输入管理员凭证登录系统</p>
-            <div class="input-group"><input type="text" placeholder="管理员账号"></div>
-            <div class="input-group"><input type="password" placeholder="••••••••"></div>
+            <p>请输入管理员凭证登录</p>
+            
+            <div class="input-group">
+                <input type="text" id="email" placeholder="管理员账号 (boss@lynli.me)">
+            </div>
+            <div class="input-group">
+                <input type="password" id="password" placeholder="登录密码">
+            </div>
+            <div class="input-group captcha-group">
+                <input type="text" id="captcha-input" placeholder="验证码">
+                <div class="captcha-img" id="captcha-img" onclick="refreshCaptcha()"></div>
+            </div>
+
+            <div class="login-options">
+                <label><input type="checkbox" id="remember-me"> 记住密码</label>
+                <a href="javascript:;" onclick="alert('请联系超级管理员重置密码')">忘记密码？</a>
+            </div>
+
             <button class="login-btn" onclick="doLogin()">立即登录</button>
+
+            <div class="login-footer">
+                登录即同意 <a href="javascript:;" onclick="showModal('agreement')">用户协议</a> 和 <a href="javascript:;" onclick="showModal('privacy')">隐私政策</a>
+            </div>
         </div>
     </div>
 
-    <div id="main-app" style="display: flex;">
-        <div class="sidebar">
+    <!-- 内部面板 -->
+    <div id="main-app">
+        <!-- 顶栏 -->
+        <div class="mobile-header">
+            <div class="menu-btn" onclick="toggleSidebar()">☰</div>
+            <div class="header-title" id="page-title">数据大盘</div>
+            <div style="width:24px;"></div>
+        </div>
+
+        <!-- 遮罩 -->
+        <div class="overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+        <!-- 抽屉菜单 -->
+        <div class="sidebar" id="sidebar">
             <div class="sidebar-logo"><div class="icon">S5</div> LYNLI</div>
             <div class="nav-item active" onclick="switchPage('dashboard', this)">数据大盘</div>
-            <div class="nav-item" onclick="switchPage('catalog', this)">API 市场</div>
+            <div class="nav-item" onclick="switchPage('api', this)">API 接口市场</div>
+            <div class="nav-item" onclick="switchPage('account', this)">TGX 账号库</div>
+            <div class="nav-item" onclick="switchPage('shop', this)">电商商品库</div>
+            <div class="nav-item" onclick="switchPage('node', this)">节点与代理</div>
+            <div class="nav-item" onclick="switchPage('system', this)">系统设置</div>
         </div>
-        <div class="main-content">
-            <div class="header" id="page-title">数据大盘</div>
-            <div class="content" id="content-area"></div>
+
+        <!-- 内容区 -->
+        <div class="content-area" id="content-area"></div>
+    </div>
+
+    <!-- 弹窗 -->
+    <div id="modal-overlay">
+        <div class="modal-box">
+            <h3 id="modal-title"></h3>
+            <div class="modal-content" id="modal-content"></div>
+            <button onclick="closeModal()">我知道了</button>
         </div>
     </div>
 
     <script>
+        // ================= 验证码逻辑 =================
+        let currentCaptcha = '';
+        function refreshCaptcha() {
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            let res = '';
+            for (let i = 0; i < 4; i++) res += chars[Math.floor(Math.random() * 36)];
+            currentCaptcha = res;
+            document.getElementById('captcha-img').innerText = res;
+        }
+        refreshCaptcha(); // 初始化
+
+        // ================= 登录逻辑 =================
         function doLogin() {
+            const email = document.getElementById('email').value.trim();
+            const pass = document.getElementById('password').value.trim();
+            const captcha = document.getElementById('captcha-input').value.trim();
+
+            if (captcha.toUpperCase() !== currentCaptcha) {
+                alert('验证码错误！');
+                refreshCaptcha();
+                return;
+            }
+            if (email !== 'boss@lynli.me' || pass !== 'chulingli520') {
+                alert('账号或密码错误！');
+                refreshCaptcha();
+                return;
+            }
+
+            if (document.getElementById('remember-me').checked) {
+                localStorage.setItem('lynli_email', email);
+                localStorage.setItem('lynli_pass', pass);
+            } else {
+                localStorage.removeItem('lynli_email');
+                localStorage.removeItem('lynli_pass');
+            }
+
             const btn = document.querySelector('.login-btn');
-            btn.innerText = '正在验证...';
+            btn.innerText = '验证成功，正在进入...';
+            
             setTimeout(() => {
                 document.getElementById('login-page').style.opacity = '0';
                 setTimeout(() => {
                     document.getElementById('login-page').style.display = 'none';
                     document.getElementById('main-app').style.display = 'flex';
                     switchPage('dashboard', document.querySelector('.nav-item'));
-                }, 500);
-            }, 600);
+                }, 400);
+            }, 500);
         }
 
+        // 读取记住的密码
+        window.onload = function() {
+            const savedEmail = localStorage.getItem('lynli_email');
+            const savedPass = localStorage.getItem('lynli_pass');
+            if (savedEmail && savedPass) {
+                document.getElementById('email').value = savedEmail;
+                document.getElementById('password').value = savedPass;
+                document.getElementById('remember-me').checked = true;
+            }
+        }
+
+        // ================= 弹窗逻辑 =================
+        const texts = {
+            privacy: `我们非常重视您的隐私。本系统仅收集必要的账号信息和运行日志，用于保障您的账户安全与服务体验。<br><br>您的数据将被加密存储，并严格限制内部访问权限。我们承诺不会向任何第三方出售或泄露您的个人信息。`,
+            agreement: `欢迎使用 LYNLI PRO 管理系统。<br><br>1. 您必须遵守当地法律法规，不得利用本系统从事任何违法活动。<br>2. 您对账户的安全负责，请妥善保管密码。<br>3. 对于因不可抗力或系统维护造成的服务中断，我们将不承担直接责任。`
+        };
+        function showModal(type) {
+            document.getElementById('modal-title').innerText = type === 'privacy' ? '用户隐私政策' : '用户服务协议';
+            document.getElementById('modal-content').innerHTML = texts[type];
+            document.getElementById('modal-overlay').style.display = 'flex';
+        }
+        function closeModal() { document.getElementById('modal-overlay').style.display = 'none'; }
+
+        // ================= 抽屉菜单 =================
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            if (sidebar.classList.contains('show')) {
+                sidebar.classList.remove('show');
+                overlay.style.display = 'none';
+            } else {
+                sidebar.classList.add('show');
+                overlay.style.display = 'block';
+            }
+        }
+
+        // ================= 页面切换与内容渲染 =================
         function switchPage(page, el) {
+            // 关闭抽屉
+            if (window.innerWidth < 768) toggleSidebar();
+            
+            // 高亮菜单
             document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
             if (el) el.classList.add('active');
+
             const content = document.getElementById('content-area');
             const title = document.getElementById('page-title');
 
             if (page === 'dashboard') {
                 title.innerText = '数据大盘';
                 content.innerHTML = `
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
-                        <div class="card"><div style="color:#64748b; font-size:14px;">今日总营收</div><div style="font-size:28px; font-weight:bold; color:#10b981; margin-top:10px;">¥ 3,250.00</div></div>
-                        <div class="card"><div style="color:#64748b; font-size:14px;">新增用户</div><div style="font-size:28px; font-weight:bold; color:#007bff; margin-top:10px;">128</div></div>
-                        <div class="card"><div style="color:#64748b; font-size:14px;">运行状态</div><div style="font-size:28px; font-weight:bold; color:#10b981; margin-top:10px;">正常</div></div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                        <div class="card"><div style="color:#64748b; font-size:12px;">今日营收</div><div style="font-size:22px; font-weight:bold; color:#10b981; margin-top:5px;">¥ 3,250</div></div>
+                        <div class="card"><div style="color:#64748b; font-size:12px;">今日新增</div><div style="font-size:22px; font-weight:bold; color:var(--primary); margin-top:5px;">128</div></div>
+                        <div class="card"><div style="color:#64748b; font-size:12px;">总用户数</div><div style="font-size:22px; font-weight:bold; margin-top:5px;">4,521</div></div>
+                        <div class="card"><div style="color:#64748b; font-size:12px;">系统状态</div><div style="font-size:22px; font-weight:bold; color:#10b981; margin-top:5px;">正常</div></div>
                     </div>
+                    <div class="card" style="height: 150px; display:flex; align-items:center; justify-content:center; color:#cbd5e1;">图表区域</div>
                 `;
-            } else if (page === 'catalog') {
-                title.innerText = 'API 接口市场';
+            } else if (page === 'api') {
+                title.innerText = 'API 市场';
                 content.innerHTML = `
-                    <div style="max-width: 900px;">
-                        <div style="color: #007bff; font-size: 12px; font-weight: bold; margin-bottom: 10px;">API MARKET / 手机号码</div>
-                        <h1 style="font-size: 28px; margin-bottom: 15px;">手机号二要素认证</h1>
-                        <div style="margin-bottom: 20px;"><span class="tag tag-g">正常</span><span class="tag tag-b">POST</span><span class="tag tag-b">JSON</span></div>
-                        <div class="card"><h3 style="border-bottom: 1px solid #e2e8f0; padding-bottom: 15px; margin-bottom: 15px;">请求参数</h3><table><thead><tr><th>参数名</th><th>必填</th><th>说明</th></tr></thead><tbody><tr><td style="color:#007bff; font-family:monospace;">name</td><td style="color:red;">是</td><td>真实姓名</td></tr><tr><td style="color:#007bff; font-family:monospace;">phone</td><td style="color:red;">是</td><td>手机号码</td></tr></tbody></table></div>
-                        <div class="card"><h3 style="border-bottom: 1px solid #e2e8f0; padding-bottom: 15px; margin-bottom: 15px;">返回示例</h3><div class="code">{\n  "code": 200,\n  "data": {\n    "verify_status": 1,\n    "desc": "一致"\n  }\n}</div></div>
+                    <div style="color: var(--primary); font-size: 12px; font-weight: bold; margin-bottom: 10px;">API MARKET / 手机号码</div>
+                    <h1 style="font-size: 22px; margin-bottom: 10px;">手机号二要素认证</h1>
+                    <div style="margin-bottom: 15px;"><span class="tag tag-g">正常</span><span class="tag tag-b">POST</span></div>
+                    <div class="card">
+                        <h3 style="font-size:15px; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 10px;">请求参数</h3>
+                        <table>
+                            <thead><tr><th>参数名</th><th>必填</th><th>说明</th></tr></thead>
+                            <tbody><tr><td style="color:var(--primary)">name</td><td style="color:red;">是</td><td>真实姓名</td></tr><tr><td style="color:var(--primary)">phone</td><td style="color:red;">是</td><td>手机号码</td></tr></tbody>
+                        </table>
+                    </div>
+                    <div class="card">
+                        <h3 style="font-size:15px; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 10px;">返回示例</h3>
+                        <div class="code">{\n  "code": 200,\n  "data": {\n    "verify_status": 1\n  }\n}</div>
                     </div>
                 `;
+            } else {
+                title.innerText = '模块建设中';
+                content.innerHTML = `<div class="card" style="text-align:center; padding:40px 20px; color:#64748b;">该模块等待数据接入，敬请期待...</div>`;
             }
         }
     </script>
