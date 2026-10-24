@@ -50,8 +50,11 @@ let _reLogging = false;
 function _forceReLogin(msg) {
   if (_reLogging) return;
   _reLogging = true;
-  ["lynli_admin", "lynli_admin_token", "lynli_admin_email", "lynli_admin_role", "lynli_admin_isadmin"]
-    .forEach(k => localStorage.removeItem(k));
+  if (window.LynliUser) { LynliUser.clear(); }
+  else {
+    ["lynli_admin", "lynli_admin_token", "lynli_admin_email", "lynli_admin_role", "lynli_admin_isadmin"]
+      .forEach(k => localStorage.removeItem(k));
+  }
   document.body.classList.remove("logged-in");
   showToast(msg || "登录状态已失效，请重新登录", "warn");
   setTimeout(() => location.reload(), 1400);
@@ -204,16 +207,16 @@ function drawCaptcha() {
     const ctx = canvas.getContext('2d');
     const W = canvas.width, H = canvas.height;
 
-    // 深色蓝紫渐变底
+    // 蓝白主题：浅底 + 深蓝字符
     const bg = ctx.createLinearGradient(0, 0, W, H);
-    bg.addColorStop(0, '#131a33');
-    bg.addColorStop(1, '#1d1650');
+    bg.addColorStop(0, '#f3f7ff');
+    bg.addColorStop(1, '#e4ecfb');
     ctx.fillStyle = bg;
     ctx.fillRect(0, 0, W, H);
 
-    // 暗色噪点
+    // 浅色噪点
     for (let i = 0; i < 60; i++) {
-        ctx.fillStyle = `rgba(${_randInt(120, 200)},${_randInt(140, 200)},255,${Math.random() * 0.35 + 0.1})`;
+        ctx.fillStyle = `rgba(${_randInt(120, 170)},${_randInt(140, 190)},${_randInt(200, 245)},${Math.random() * 0.4 + 0.12})`;
         ctx.fillRect(_randInt(0, W), _randInt(0, H), 2, 2);
     }
     // 干扰曲线
@@ -221,13 +224,13 @@ function drawCaptcha() {
         ctx.beginPath();
         ctx.moveTo(0, _randInt(0, H));
         ctx.bezierCurveTo(W * 0.3, _randInt(0, H), W * 0.6, _randInt(0, H), W, _randInt(0, H));
-        ctx.strokeStyle = `rgba(${_randInt(90, 160)},${_randInt(110, 180)},255,0.3)`;
+        ctx.strokeStyle = `rgba(${_randInt(90, 140)},${_randInt(110, 160)},${_randInt(200, 240)},0.35)`;
         ctx.lineWidth = _randInt(1, 2);
         ctx.stroke();
     }
 
-    // 亮色字符（深色底上保证可读）
-    const lights = ['#a9c0ff', '#c4b5fd', '#7dd3fc', '#f5c451', '#eef1fa'];
+    // 深蓝字符（浅底上保证可读）
+    const inks = ['#1e40af', '#2563eb', '#1d4ed8', '#3730a3', '#0e7490'];
     const cw = W / 4;
     for (let i = 0; i < captchaCode.length; i++) {
         ctx.save();
@@ -238,9 +241,9 @@ function drawCaptcha() {
         ctx.font = `bold ${_randInt(24, 30)}px "Segoe UI", Arial, sans-serif`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.shadowColor = 'rgba(91,140,255,.8)';
-        ctx.shadowBlur = 6;
-        ctx.fillStyle = lights[_randInt(0, lights.length - 1)];
+        ctx.shadowColor = 'rgba(37,99,235,.25)';
+        ctx.shadowBlur = 4;
+        ctx.fillStyle = inks[_randInt(0, inks.length - 1)];
         ctx.fillText(captchaCode[i], 0, 0);
         ctx.restore();
     }
@@ -299,15 +302,15 @@ async function doLogin() {
         const json = await res.json();
 
         if (json.data && json.data.token) {
-            localStorage.setItem('lynli_admin_token', json.data.token);
-            localStorage.setItem('lynli_admin_email', account);
-            localStorage.setItem('lynli_admin_role', json.data.role || 'user');
-            localStorage.setItem('lynli_admin_isadmin', json.data.isAdmin ? '1' : '0');
+            // 真实登录：token/role/isAdmin 立即入库；user_id/short_id/nickname/avatar
+            // login 接口不返回，由 LynliUser.afterLogin 立即向 /user/info 补齐（唯一真实来源）
+            showToast('登录成功，正在拉取账户信息', 'success');
+            setLoginLoading(false);
             if (document.getElementById('remember-me')?.checked) {
                 localStorage.setItem('lynli_admin', 'true');
             }
-            showToast('登录成功，正在进入中枢', 'success');
-            setLoginLoading(false);
+            await window.LynliUser.afterLogin(json.data, account);
+            renderDrawer();
             enterMainApp();
         } else {
             showToast(json.message || '账号或密码错误', 'error');
@@ -335,7 +338,6 @@ function renderDrawer() {
     let role = currentRole();
     // 自愈：旧会话缺 role 但后端标记过 isAdmin 时，按超管渲染
     if (role === 'user' && localStorage.getItem('lynli_admin_isadmin') === '1') role = 'super';
-    const email = localStorage.getItem('lynli_admin_email') || '--';
 
     let html = '';
     MENU_GROUPS.forEach(group => {
@@ -352,15 +354,14 @@ function renderDrawer() {
     });
     nav.innerHTML = html;
 
-    // 抽屉头 + 顶栏：账号与角色
-    const de = document.getElementById('drawer-email');
-    if (de) de.innerText = email;
-    const dr = document.getElementById('drawer-role');
-    if (dr) { dr.innerText = roleLabel(role); dr.className = 'role-badge ' + roleBadgeClass(role); }
-    const tu = document.getElementById('topbar-user');
-    if (tu) tu.innerText = email;
-    const tr = document.getElementById('topbar-role');
-    if (tr) { tr.innerText = roleLabel(role); tr.className = 'role-badge ' + roleBadgeClass(role); }
+    // 抽屉头 + 顶栏：真实昵称 / 头像 / 角色（统一由 LynliUser 渲染，全站同步）
+    if (window.LynliUser) {
+        LynliUser.renderDrawerHead();
+        LynliUser.renderTop();
+    } else {
+        const de = document.getElementById('drawer-email');
+        if (de) de.innerText = localStorage.getItem('lynli_admin_email') || '--';
+    }
 }
 
 // ---------- 抽屉开关 ----------
@@ -964,43 +965,67 @@ async function loadStaff() {
     }
 }
 
-// ---------- 个人中心：动态拉取真实用户数据 ----------
+// ---------- 个人中心：动态拉取真实用户数据（唯一来源 /user/info） ----------
 async function loadProfile() {
-    const tok = localStorage.getItem('lynli_admin_token');
-    const email = localStorage.getItem('lynli_admin_email') || '--';
+    const u = window.getUserInfo ? getUserInfo() : { email: '--', role: 'user', nickname: '', avatar: '' };
     const role = currentRole();
 
     const nameEl = document.getElementById('profile-name');
     const emailEl = document.getElementById('profile-email');
     const roleEl = document.getElementById('profile-role');
-    if (nameEl) nameEl.innerText = role === 'super' ? '超级管理员' : (roleLabel(role) || '用户');
-    if (emailEl) emailEl.innerText = email;
+    const avEl = document.getElementById('profile-avatar');
+    // 昵称优先，无昵称且为管理员显示「老板」，否则邮箱前缀（与顶栏/抽屉完全一致，绝不暴露长邮箱）
+    const showName = window.LynliUser ? LynliUser.displayName(u) : ((u.nickname && u.nickname.trim()) || (u.email || '用户').split('@')[0]);
+    if (nameEl) nameEl.innerText = showName;
+    if (emailEl) emailEl.innerText = u.email || '--';
     if (roleEl) roleEl.innerHTML = `<span class="role-badge ${roleBadgeClass(role)}">${roleLabel(role)}</span>`;
+    if (avEl) {
+        if (u.avatar) {
+            avEl.innerHTML = `<img src="${u.avatar}" alt="avatar" referrerpolicy="no-referrer"
+                onerror="this.onerror=null;this.parentNode.innerHTML='<span class=\\'avatar-fallback\\'>${(showName[0] || 'U').toUpperCase()}</span>'">`;
+        } else {
+            avEl.innerHTML = `<span class="avatar-fallback">${(showName[0] || 'U').toUpperCase()}</span>`;
+        }
+        avEl.title = '点击更换头像';
+    }
 
+    const tok = localStorage.getItem('lynli_admin_token');
     if (!tok) return;
     try {
         const res = await fetch(`${API_BASE}/user/info`, { headers: { 'Authorization': 'Bearer ' + tok } });
         const json = await res.json();
-        const u = (json && json.data) ? json.data : null;
-        if (!u) {
+        const d = (json && json.data) ? json.data : null;
+        if (!d) {
             // token 失效（单会话机制下旧 token 会被新登录废止）→ 强制重登
             if (_isAuthFail(json)) { _forceReLogin('登录状态已失效，请重新登录'); return; }
             showToast('用户信息拉取失败', 'warn');
             return;
         }
-        if (emailEl) emailEl.innerText = u.email || email;
+        // 回写真实字段到全局缓存（顶栏/抽屉/子站同步）
+        if (window.LynliUser) {
+            LynliUser.patch({
+                email: d.email || '', short_id: String(d.shortId ?? d.short_id ?? '') || '',
+                nickname: d.nickname || '', avatar: d.avatarURL || d.avatar || '',
+            });
+        }
+        if (emailEl) emailEl.innerText = d.email || u.email;
+        if (nameEl && d.nickname) nameEl.innerText = d.nickname;
+        if (avEl && d.avatarURL) {
+            avEl.innerHTML = `<img src="${d.avatarURL}" alt="avatar" referrerpolicy="no-referrer"
+                onerror="this.onerror=null;this.parentNode.innerHTML='<span class=\\'avatar-fallback\\'>${((d.nickname || showName)[0] || 'U').toUpperCase()}</span>'">`;
+        }
         const t = document.getElementById('profile-traffic');
-        if (t) t.innerText = fmtBytes(u.transferEnable ?? u.transfer_enable);
+        if (t) t.innerText = fmtBytes(d.transferEnable ?? d.transfer_enable);
         const ex = document.getElementById('profile-expire');
-        if (ex) ex.innerText = (u.expiredAt ?? u.expired_at) ? fmtTime(u.expiredAt ?? u.expired_at) : '永久有效';
+        if (ex) ex.innerText = (d.expiredAt ?? d.expired_at) ? fmtTime(d.expiredAt ?? d.expired_at) : '永久有效';
         const cr = document.getElementById('profile-created');
-        if (cr) cr.innerText = (u.createdAt ?? u.created_at) ? fmtTime(u.createdAt ?? u.created_at) : '--';
+        if (cr) cr.innerText = (d.createdAt ?? d.created_at) ? fmtTime(d.createdAt ?? d.created_at) : '--';
         const ll = document.getElementById('profile-lastlogin');
-        if (ll) ll.innerText = (u.lastLoginAt ?? u.last_login_at) ? fmtTime(u.lastLoginAt ?? u.last_login_at) : '--';
+        if (ll) ll.innerText = (d.lastLoginAt ?? d.last_login_at) ? fmtTime(d.lastLoginAt ?? d.last_login_at) : '--';
         const sid = document.getElementById('profile-shortid');
-        if (sid) sid.innerText = (u.shortId ?? u.short_id) ? '#' + (u.shortId ?? u.short_id) : '未设置';
+        if (sid) sid.innerText = (d.shortId ?? d.short_id) ? '#' + (d.shortId ?? d.short_id) : '未设置';
         const bal = document.getElementById('profile-balance');
-        if (bal) bal.innerText = '¥' + Number(u.balance || 0).toFixed(2);
+        if (bal) bal.innerText = '¥' + Number(d.balance || 0).toFixed(2);
     } catch (e) {
         showToast('用户信息拉取失败', 'warn');
     }
@@ -1008,10 +1033,13 @@ async function loadProfile() {
 
 // ---------- 退出 ----------
 function doLogout() {
-    localStorage.removeItem('lynli_admin');
-    localStorage.removeItem('lynli_admin_token');
-    localStorage.removeItem('lynli_admin_email');
-    localStorage.removeItem('lynli_admin_role');
+    if (window.LynliUser) LynliUser.clear();
+    else {
+        localStorage.removeItem('lynli_admin');
+        localStorage.removeItem('lynli_admin_token');
+        localStorage.removeItem('lynli_admin_email');
+        localStorage.removeItem('lynli_admin_role');
+    }
     document.body.classList.remove('logged-in');
     location.reload();
 }
@@ -1031,6 +1059,21 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
+// ---------- 大盘 KPI 卡片：点击跳转对应业务页（任务3：让卡片活起来） ----------
+// 总用户数/付费用户 → 用户列表(staff)；总订单/今日营收 → 订单记录(orders)；
+// 全球节点 → 节点管理(nodes)；在售商品 → TGX账号库(tgx)
+(function bindKpiCards() {
+    document.querySelectorAll('.stat-card[data-goto]').forEach(card => {
+        card.setAttribute('role', 'button');
+        card.tabIndex = 0;
+        const go = () => switchTab(card.getAttribute('data-goto'));
+        card.addEventListener('click', go);
+        card.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); }
+        });
+    });
+})();
+
 window.onload = async function () {
     drawCaptcha();
     if (localStorage.getItem('lynli_admin') === 'true') {
@@ -1043,11 +1086,14 @@ window.onload = async function () {
             // 网络异常：不踢出，按已有信息降级进入（个人中心会再次提示）
             if (!localStorage.getItem('lynli_admin_role')) localStorage.setItem('lynli_admin_role', 'user');
         }
+        // 全局用户信息同步：以 /user/info 为唯一真实来源刷新缓存并广播全站
+        if (window.LynliUser) { LynliUser.renderAll(); LynliUser.refresh(true); }
         renderDrawer();
         document.body.classList.add('logged-in'); // AI 悬浮窗登录后可见
         document.getElementById('login-page').style.display = 'none';
         document.getElementById('main-app').style.display = 'block';
         if (typeof loadProfile === 'function') loadProfile();
         if (typeof fetchDashboardData === 'function') fetchDashboardData();
+        if (typeof initDashMap === 'function') setTimeout(initDashMap, 200);
     }
 };

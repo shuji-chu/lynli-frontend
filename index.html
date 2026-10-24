@@ -5,23 +5,33 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>LynLi · 超级管理中枢</title>
   <!-- 品牌图标 -->
-  <link rel="icon" type="image/png" href="./favicon.png?v=20261025d">
-  <link rel="apple-touch-icon" href="./apple-touch-icon.png?v=20261025d">
-  <!-- 深色主题（相对路径，解决 GitHub Pages 白屏） -->
-  <link rel="stylesheet" href="./css/style.css?v=20261025d">
+  <link rel="icon" type="image/png" href="./favicon.png?v=20261026b">
+  <link rel="apple-touch-icon" href="./apple-touch-icon.png?v=20261026b">
+  <!-- 蓝白主题（相对路径，解决 GitHub Pages 白屏） -->
+  <link rel="stylesheet" href="./css/style.css?v=20261026b">
   <!-- Leaflet 地图库（jsdelivr 主源 + cdnjs 容灾） -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" onerror="this.onerror=null;this.href='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css'">
   <!-- Anime.js 丝滑动画 -->
   <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.2/lib/anime.min.js" onerror="document.write('<script src=\"https:\/\/cdnjs.cloudflare.com\/ajax\/libs\/animejs\/3.2.2\/anime.min.js\"><\/script>')"></script>
+  <!-- Lottie-Web（熊猫动画，失败时自动降级为 CSS 剪影动画） -->
+  <script src="https://cdn.jsdelivr.net/npm/lottie-web@5.12.2/build/player/lottie.min.js" onerror="window.__lottieFailed=true"></script>
 </head>
 <body>
 
-  <!-- ======================= 动态光影背景（深色蓝紫流光） ======================= -->
-  <div class="bg-aurora" aria-hidden="true">
-    <span class="blob blob-1"></span>
-    <span class="blob blob-2"></span>
-    <span class="blob blob-3"></span>
-    <span class="blob blob-4"></span>
+  <!-- ======================= 蓝白渐变背景 + 漂浮熊猫（Lottie/CSS 剪影双保险） ======================= -->
+  <div class="bg-panda" aria-hidden="true">
+    <span class="panda-glow panda-glow-1"></span>
+    <span class="panda-glow panda-glow-2"></span>
+    <span class="panda-glow panda-glow-3"></span>
+    <div class="panda-float panda-float-1" id="panda-lottie-1"></div>
+    <div class="panda-float panda-float-2" id="panda-lottie-2"></div>
+    <!-- Lottie 加载失败时的 CSS 剪影熊猫兜底 -->
+    <div class="panda-silhouette panda-silhouette-1" id="panda-css-1">
+      <div class="ps-body"><div class="ps-ear ps-ear-l"></div><div class="ps-ear ps-ear-r"></div><div class="ps-eye ps-eye-l"></div><div class="ps-eye ps-eye-r"></div><div class="ps-belly"></div></div>
+    </div>
+    <div class="panda-silhouette panda-silhouette-2" id="panda-css-2">
+      <div class="ps-body"><div class="ps-ear ps-ear-l"></div><div class="ps-ear ps-ear-r"></div><div class="ps-eye ps-eye-l"></div><div class="ps-eye ps-eye-r"></div><div class="ps-belly"></div></div>
+    </div>
   </div>
 
   <!-- ======================= 登录页 ======================= -->
@@ -82,8 +92,11 @@
       </div>
       <div class="topbar-right">
         <span class="topbar-page" id="topbar-page">数据大盘</span>
-        <span class="topbar-user" id="topbar-user" style="cursor:pointer" title="点击进入个人中心" onclick="switchTab('profile')">--</span>
-        <span class="role-badge" id="topbar-role">--</span>
+        <div class="topbar-user-box" id="topbar-user-box" style="cursor:pointer" title="点击进入个人中心" onclick="switchTab('profile')">
+          <span class="topbar-avatar u-avatar" id="topbar-avatar"></span>
+          <span class="topbar-user" id="topbar-user">--</span>
+          <span class="role-badge" id="topbar-role">--</span>
+        </div>
       </div>
     </header>
 
@@ -93,7 +106,7 @@
     <!-- 抽屉式导航（六大分类，RBAC 按角色显隐） -->
     <aside class="drawer" id="drawer">
       <div class="drawer-head">
-        <div class="drawer-logo">S5</div>
+        <span class="drawer-avatar u-avatar" id="drawer-avatar"></span>
         <div class="drawer-user">
           <div class="drawer-email" id="drawer-email">--</div>
           <span class="role-badge" id="drawer-role">--</span>
@@ -123,37 +136,37 @@
           <button class="btn btn-primary btn-sm" onclick="fetchDashboardData()">刷新数据</button>
         </div>
         <div class="dashboard-grid">
-          <div class="card stat-card" style="--d:0">
+          <div class="card stat-card stat-card-link" style="--d:0" data-goto="staff" title="点击查看用户列表">
             <div class="stat-icon icon-blue"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6"/></svg></div>
             <div class="stat-title">总用户数</div>
             <div class="stat-value text-primary" id="dash-users">...</div>
             <div class="stat-foot" id="dash-users-foot">今日新增 --</div>
           </div>
-          <div class="card stat-card" style="--d:1">
+          <div class="card stat-card stat-card-link" style="--d:1" data-goto="staff" title="点击查看用户列表">
             <div class="stat-icon icon-green"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l2.4 7.2H22l-6 4.4 2.3 7.4-6.3-4.6-6.3 4.6L8 13.6 2 9.2h7.6z"/></svg></div>
             <div class="stat-title">付费用户</div>
             <div class="stat-value" id="dash-paid">...</div>
             <div class="stat-foot" id="dash-paid-foot">付费转化率 --</div>
           </div>
-          <div class="card stat-card" style="--d:2">
+          <div class="card stat-card stat-card-link" style="--d:2" data-goto="orders" title="点击查看订单记录">
             <div class="stat-icon icon-violet"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/><path d="M7 14h4"/></svg></div>
             <div class="stat-title">总订单</div>
             <div class="stat-value" id="dash-orders">...</div>
             <div class="stat-foot" id="dash-orders-foot">今日 -- 单</div>
           </div>
-          <div class="card stat-card" style="--d:3">
+          <div class="card stat-card stat-card-link" style="--d:3" data-goto="orders" title="点击查看订单记录">
             <div class="stat-icon icon-amber"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5h5M9.5 14.5h5"/></svg></div>
             <div class="stat-title">今日营收</div>
             <div class="stat-value" id="dash-income">...</div>
             <div class="stat-foot" id="dash-income-foot">累计 ¥--</div>
           </div>
-          <div class="card stat-card" style="--d:4">
+          <div class="card stat-card stat-card-link" style="--d:4" data-goto="nodes" title="点击查看节点管理">
             <div class="stat-icon icon-blue"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.8 2.6 4 5.6 4 9s-1.2 6.4-4 9c-2.8-2.6-4-5.6-4-9s1.2-6.4 4-9z"/></svg></div>
             <div class="stat-title">全球节点</div>
             <div class="stat-value" id="dash-nodes">...</div>
             <div class="stat-foot" id="dash-nodes-foot">在线节点</div>
           </div>
-          <div class="card stat-card" style="--d:5">
+          <div class="card stat-card stat-card-link" style="--d:5" data-goto="tgx" title="点击查看 TGX 账号库">
             <div class="stat-icon icon-green"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/><path d="M7 14h4"/></svg></div>
             <div class="stat-title">在售商品</div>
             <div class="stat-value" id="dash-products">...</div>
@@ -216,7 +229,7 @@
         <div class="page-header">
           <div>
             <h2 class="page-title">全域可视化地图</h2>
-            <p class="page-sub">节点分布 · 电商物流 · 服务器机房</p>
+            <p class="page-sub">底图切换 · 地理编码搜索 · 真实定位 · 路线规划 · 周边检索</p>
           </div>
           <div class="map-header-actions">
             <span class="geo-chip" id="geo-chip"><i class="geo-dot"></i><span id="geo-text">定位中...</span></span>
@@ -226,29 +239,24 @@
         </div>
         <div class="card map-card">
           <div id="node-map"></div>
-          <!-- 图层切换器 -->
-          <div class="map-layer-switch" role="tablist" aria-label="地图图层切换">
-            <button class="layer-btn active" data-layer="nodes" onclick="switchMapLayer('nodes')" aria-label="节点分布图层">
-              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/></svg>
-              <span class="lb-text">节点分布</span>
-            </button>
-            <button class="layer-btn" data-layer="logistics" onclick="switchMapLayer('logistics')" aria-label="电商物流图层">
-              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 4h13v12H1z"/><path d="M14 9h4l3 3v4h-7"/><circle cx="6" cy="19" r="1.6"/><circle cx="17" cy="19" r="1.6"/></svg>
-              <span class="lb-text">电商物流</span>
-            </button>
-            <button class="layer-btn" data-layer="idc" onclick="switchMapLayer('idc')" aria-label="服务器机房图层">
-              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="7" rx="1.5"/><rect x="3" y="13" width="18" height="7" rx="1.5"/><path d="M7 7.5h.01M7 16.5h.01M11 7.5h4M11 16.5h4"/></svg>
-              <span class="lb-text">服务器机房</span>
-            </button>
-          </div>
-          <!-- 物流图层空态 -->
-          <div class="map-empty-layer" id="map-empty-layer">
-            <div class="mel-icon">
-              <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M1 4h13v12H1z"/><path d="M14 9h4l3 3v4h-7"/><circle cx="6" cy="19" r="1.6"/><circle cx="17" cy="19" r="1.6"/></svg>
+
+          <!-- 左上：Nominatim 开源地理编码搜索 -->
+          <div class="map-search" id="map-search">
+            <div class="map-search-box">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+              <input type="text" id="map-search-input" placeholder="搜索地点（Nominatim 地理编码）" autocomplete="off">
             </div>
-            <b>电商物流图层</b>
-            物流轨迹数据尚未接入，该图层将在订单代发模块上线后自动点亮。
+            <div class="map-search-panel" id="map-search-panel"></div>
           </div>
+
+          <!-- 右上：底图切换（毛玻璃自定义控件） -->
+          <div class="map-base-switch" role="tablist" aria-label="底图切换">
+            <button class="base-btn active" data-base="light" onclick="switchBase('light')" title="矢量浅色">浅色</button>
+            <button class="base-btn" data-base="dark" onclick="switchBase('dark')" title="矢量深色">深色</button>
+            <button class="base-btn" data-base="sat" onclick="switchBase('sat')" title="卫星影像">卫星</button>
+          </div>
+
+          <!-- 右上：自定义缩放控件（替代 Leaflet 默认 UI） -->
           <div class="map-zoom-ctrl">
             <button class="zoom-btn" onclick="mapZoomIn()" title="放大" aria-label="放大">
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg>
@@ -258,12 +266,91 @@
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14"/></svg>
             </button>
           </div>
-          <div class="map-legend">
-            <span class="legend-item"><i class="dot dot-live"></i>在线节点</span>
-            <span class="legend-item"><i class="dot dot-off"></i>离线节点</span>
-            <span class="legend-item"><i class="dot dot-me"></i>我的位置</span>
-            <span class="legend-item"><i class="dot dot-idc"></i>服务器机房</span>
-            <span class="legend-note" id="map-layer-note">当前图层：节点分布</span>
+
+          <!-- 底部 Tab：地图 / 路线 / 周边 -->
+          <div class="map-tabbar">
+            <button class="map-tab-btn active" data-tab="map" onclick="switchMapTab('map')">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 4L3 6.5v13L9 17l6 2.5 6-2.5v-13L15 6.5 9 4z"/><path d="M9 4v13M15 6.5v13"/></svg>
+              地图
+            </button>
+            <button class="map-tab-btn" data-tab="route" onclick="switchMapTab('route')">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="18" r="2.5"/><circle cx="18" cy="6" r="2.5"/><path d="M8.5 18h5a4 4 0 000-8h-4a4 4 0 010-8h4" stroke-dasharray="3 2.4"/></svg>
+              路线
+            </button>
+            <button class="map-tab-btn" data-tab="poi" onclick="switchMapTab('poi')">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+              周边
+            </button>
+          </div>
+
+          <!-- 面板：地图（图层切换 + 图例） -->
+          <div class="map-tab-panel show" data-tab="map">
+            <div class="map-layer-switch" role="tablist" aria-label="地图图层切换">
+              <button class="layer-btn active" data-layer="nodes" onclick="switchMapLayer('nodes')" aria-label="节点分布图层">
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/></svg>
+                <span class="lb-text">节点分布</span>
+              </button>
+              <button class="layer-btn" data-layer="logistics" onclick="switchMapLayer('logistics')" aria-label="电商物流图层">
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 4h13v12H1z"/><path d="M14 9h4l3 3v4h-7"/><circle cx="6" cy="19" r="1.6"/><circle cx="17" cy="19" r="1.6"/></svg>
+                <span class="lb-text">电商物流</span>
+              </button>
+              <button class="layer-btn" data-layer="idc" onclick="switchMapLayer('idc')" aria-label="服务器机房图层">
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="7" rx="1.5"/><rect x="3" y="13" width="18" height="7" rx="1.5"/><path d="M7 7.5h.01M7 16.5h.01M11 7.5h4M11 16.5h4"/></svg>
+                <span class="lb-text">服务器机房</span>
+              </button>
+            </div>
+            <div class="map-legend">
+              <span class="legend-item"><i class="dot dot-live"></i>在线节点</span>
+              <span class="legend-item"><i class="dot dot-off"></i>离线节点</span>
+              <span class="legend-item"><i class="dot dot-me"></i>我的位置</span>
+              <span class="legend-item"><i class="dot dot-idc"></i>服务器机房</span>
+              <span class="legend-note" id="map-layer-note">当前图层：节点分布</span>
+            </div>
+          </div>
+
+          <!-- 面板：路线（OSRM 开源路线规划） -->
+          <div class="map-tab-panel" data-tab="route">
+            <div class="route-form">
+              <div class="route-field">
+                <span class="route-pt-dot start"></span>
+                <input type="text" id="route-start" class="input" placeholder="起点（默认我的位置）" readonly>
+                <button class="btn btn-ghost btn-xs" id="route-start-me" type="button">我的位置</button>
+              </div>
+              <div class="route-field">
+                <span class="route-pt-dot end"></span>
+                <input type="text" id="route-end" class="input" placeholder="终点" readonly>
+                <button class="btn btn-ghost btn-xs" id="route-pick" type="button">地图选点</button>
+              </div>
+              <div class="route-actions">
+                <button class="btn btn-ghost btn-xs" id="route-swap" type="button" title="交换起终点">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 4v13M7 4L4 7M7 4l3 3M17 20V7M17 20l-3-3M17 20l3-3"/></svg>
+                  交换
+                </button>
+                <button class="btn btn-primary btn-xs" id="route-plan" type="button">开始规划</button>
+              </div>
+            </div>
+            <div class="route-info" id="route-info"><div class="route-tip">设置起点与终点后点击「开始规划」，基于 OSRM 开源引擎绘制陆路蓝线轨迹</div></div>
+          </div>
+
+          <!-- 面板：周边（Nominatim 视野内 POI） -->
+          <div class="map-tab-panel" data-tab="poi">
+            <div class="poi-chips">
+              <button class="poi-chip active" data-poi="restaurant">餐饮</button>
+              <button class="poi-chip" data-poi="hotel">酒店</button>
+              <button class="poi-chip" data-poi="fuel">加油站</button>
+              <button class="poi-chip" data-poi="atm">ATM</button>
+              <button class="poi-chip" data-poi="hospital">医院</button>
+            </div>
+            <div class="poi-list" id="poi-list"><div class="poi-tip">选择分类，检索当前地图视野内的周边点位（ Nominatim ）</div></div>
+          </div>
+
+          <!-- 物流图层空态 -->
+          <div class="map-empty-layer" id="map-empty-layer">
+            <div class="mel-icon">
+              <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M1 4h13v12H1z"/><path d="M14 9h4l3 3v4h-7"/><circle cx="6" cy="19" r="1.6"/><circle cx="17" cy="19" r="1.6"/></svg>
+            </div>
+            <b>电商物流图层</b>
+            物流轨迹数据尚未接入，该图层将在订单代发模块上线后自动点亮。
           </div>
         </div>
       </section>
@@ -510,12 +597,13 @@
         <div class="page-header">
           <div>
             <h2 class="page-title">个人中心</h2>
-            <p class="page-sub">账户信息 · 实时拉取</p>
+            <p class="page-sub">账户信息 · 头像 / 昵称 / 密码 · 实时拉取</p>
           </div>
           <button class="btn btn-primary btn-sm" onclick="loadProfile()">刷新资料</button>
         </div>
         <div class="card profile-card">
-          <div class="profile-avatar">S5</div>
+          <div class="profile-avatar" id="profile-avatar" title="点击更换头像（相册 / 拍照）"><span class="avatar-fallback">U</span></div>
+          <input type="file" id="avatar-file-input" accept="image/*" style="display:none">
           <h2 class="profile-name" id="profile-name">管理员</h2>
           <p class="profile-email" id="profile-email">--</p>
           <div class="profile-role" id="profile-role"></div>
@@ -531,7 +619,11 @@
             <div class="meta-item"><span class="meta-label">用户短ID</span><span class="meta-value" id="profile-shortid">--</span></div>
             <div class="meta-item"><span class="meta-label">账户余额</span><span class="meta-value" id="profile-balance">--</span></div>
           </div>
-          <button class="btn btn-danger btn-block" onclick="doLogout()">退出登录</button>
+          <div class="profile-actions">
+            <button class="btn btn-primary btn-block" onclick="LynliProfile.openNicknameModal()">修改昵称</button>
+            <button class="btn btn-primary btn-block" onclick="LynliProfile.openPasswordModal()">修改密码</button>
+            <button class="btn btn-danger btn-block" onclick="doLogout()">退出登录</button>
+          </div>
         </div>
       </section>
 
@@ -577,8 +669,84 @@
 
   <!-- Leaflet JS（jsdelivr 主源 + cdnjs 容灾） -->
   <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js" onerror="document.write('<script src=\"https:\/\/cdnjs.cloudflare.com\/ajax\/libs\/leaflet\/1.9.4\/leaflet.min.js\"><\/script>')"></script>
-  <script src="./js/app.js?v=20261025d"></script>
-  <script src="./js/map-page.js?v=20261025d"></script>
-  <script src="./js/ai-widget.js?v=20261025d"></script>
+  <!-- 全局用户信息同步中心（所有子站复用）：必须先于业务脚本加载 -->
+  <script src="./js/user-store.js?v=20261026b"></script>
+  <script src="./js/app.js?v=20261026b"></script>
+  <script src="./js/map-page.js?v=20261026b"></script>
+  <script src="./js/profile-page.js?v=20261026b"></script>
+  <script src="./js/ai-widget.js?v=20261026b"></script>
+  <script>
+    /* ---------- 蓝白熊猫漂浮动画 ----------
+       Lottie-Web 播放熊猫动画；无源/加载失败时自动降级为 CSS 剪影动画 */
+    (function () {
+      function initPanda() {
+        var css1 = document.getElementById('panda-css-1');
+        var css2 = document.getElementById('panda-css-2');
+        var hasLottie = (typeof lottie !== 'undefined') && !window.__lottieFailed;
+        if (hasLottie) {
+          // 用轻量内置动画数据（漂浮的圆形气泡+摆动），模拟熊猫呼吸漂浮
+          var pandaData = {
+            v: "5.7.4", fr: 30, ip: 0, op: 90, w: 100, h: 100, nm: "panda-float",
+            ddd: 0, assets: [], layers: [
+              { ddd: 0, ind: 1, ty: 4, nm: "body", sr: 1,
+                ks: { o: { a: 0, k: 60 }, r: { a: 1, k: [{ t: 0, s: [-6], e: [6], i: { x: [0.4], y: [1] }, o: { x: [0.6], y: [0] } }, { t: 90, s: [6] }] },
+                  p: { a: 1, k: [{ t: 0, s: [50, 58, 0], e: [50, 46, 0], i: { x: [0.4], y: [1] }, o: { x: [0.6], y: [0] } }, { t: 90, s: [50, 46, 0] }] },
+                  a: { a: 0, k: [0, 0, 0] }, s: { a: 0, k: [100, 100, 100] } },
+                shapes: [ { ty: "gr", it: [
+                  { d: 1, ty: "el", s: { a: 0, k: [46, 40] }, p: { a: 0, k: [0, 0] } },
+                  { ty: "fl", c: { a: 0, k: [1, 1, 1, 1] }, o: { a: 0, k: 100 } },
+                  { ty: "tr", p: { a: 0, k: [0, 0] }, a: { a: 0, k: [0, 0] }, s: { a: 0, k: [100, 100] }, r: { a: 0, k: 0 }, o: { a: 0, k: 100 } }
+                ] } ] },
+              { ddd: 0, ind: 2, ty: 4, nm: "belly", sr: 1,
+                ks: { o: { a: 0, k: 90 }, r: { a: 0, k: 0 }, p: { a: 0, k: [50, 62, 0] }, a: { a: 0, k: [0, 0, 0] }, s: { a: 0, k: [100, 100, 100] } },
+                shapes: [ { ty: "gr", it: [
+                  { d: 1, ty: "el", s: { a: 0, k: [26, 22] }, p: { a: 0, k: [0, 0] } },
+                  { ty: "fl", c: { a: 0, k: [0.86, 0.91, 1, 1] }, o: { a: 0, k: 100 } },
+                  { ty: "tr", p: { a: 0, k: [0, 0] }, a: { a: 0, k: [0, 0] }, s: { a: 0, k: [100, 100] }, r: { a: 0, k: 0 }, o: { a: 0, k: 100 } }
+                ] } ] },
+              { ddd: 0, ind: 3, ty: 4, nm: "ear-l", sr: 1,
+                ks: { o: { a: 0, k: 100 }, r: { a: 0, k: 0 }, p: { a: 0, k: [38, 42, 0] }, a: { a: 0, k: [0, 0, 0] }, s: { a: 0, k: [100, 100, 100] } },
+                shapes: [ { ty: "gr", it: [
+                  { d: 1, ty: "el", s: { a: 0, k: [12, 12] }, p: { a: 0, k: [0, 0] } },
+                  { ty: "fl", c: { a: 0, k: [0.23, 0.27, 0.42, 1] }, o: { a: 0, k: 100 } },
+                  { ty: "tr", p: { a: 0, k: [0, 0] }, a: { a: 0, k: [0, 0] }, s: { a: 0, k: [100, 100] }, r: { a: 0, k: 0 }, o: { a: 0, k: 100 } }
+                ] } ] },
+              { ddd: 0, ind: 4, ty: 4, nm: "ear-r", sr: 1,
+                ks: { o: { a: 0, k: 100 }, r: { a: 0, k: 0 }, p: { a: 0, k: [62, 42, 0] }, a: { a: 0, k: [0, 0, 0] }, s: { a: 0, k: [100, 100, 100] } },
+                shapes: [ { ty: "gr", it: [
+                  { d: 1, ty: "el", s: { a: 0, k: [12, 12] }, p: { a: 0, k: [0, 0] } },
+                  { ty: "fl", c: { a: 0, k: [0.23, 0.27, 0.42, 1] }, o: { a: 0, k: 100 } },
+                  { ty: "tr", p: { a: 0, k: [0, 0] }, a: { a: 0, k: [0, 0] }, s: { a: 0, k: [100, 100] }, r: { a: 0, k: 0 }, o: { a: 0, k: 100 } }
+                ] } ] },
+              { ddd: 0, ind: 5, ty: 4, nm: "eye-l", sr: 1,
+                ks: { o: { a: 0, k: 100 }, r: { a: 0, k: 0 }, p: { a: 0, k: [43, 55, 0] }, a: { a: 0, k: [0, 0, 0] }, s: { a: 0, k: [100, 100, 100] } },
+                shapes: [ { ty: "gr", it: [
+                  { d: 1, ty: "el", s: { a: 0, k: [5, 6] }, p: { a: 0, k: [0, 0] } },
+                  { ty: "fl", c: { a: 0, k: [0.23, 0.27, 0.42, 1] }, o: { a: 0, k: 100 } },
+                  { ty: "tr", p: { a: 0, k: [0, 0] }, a: { a: 0, k: [0, 0] }, s: { a: 0, k: [100, 100] }, r: { a: 0, k: 0 }, o: { a: 0, k: 100 } }
+                ] } ] },
+              { ddd: 0, ind: 6, ty: 4, nm: "eye-r", sr: 1,
+                ks: { o: { a: 0, k: 100 }, r: { a: 0, k: 0 }, p: { a: 0, k: [57, 55, 0] }, a: { a: 0, k: [0, 0, 0] }, s: { a: 0, k: [100, 100, 100] } },
+                shapes: [ { ty: "gr", it: [
+                  { d: 1, ty: "el", s: { a: 0, k: [5, 6] }, p: { a: 0, k: [0, 0] } },
+                  { ty: "fl", c: { a: 0, k: [0.23, 0.27, 0.42, 1] }, o: { a: 0, k: 100 } },
+                  { ty: "tr", p: { a: 0, k: [0, 0] }, a: { a: 0, k: [0, 0] }, s: { a: 0, k: [100, 100] }, r: { a: 0, k: 0 }, o: { a: 0, k: 100 } }
+                ] } ] }
+            ]
+          };
+          try {
+            lottie.loadAnimation({ container: document.getElementById('panda-lottie-1'), renderer: 'svg', loop: true, autoplay: true, animationData: JSON.parse(JSON.stringify(pandaData)) });
+            lottie.loadAnimation({ container: document.getElementById('panda-lottie-2'), renderer: 'svg', loop: true, autoplay: true, animationData: JSON.parse(JSON.stringify(pandaData)) });
+            return;
+          } catch (e) { /* 降级 CSS */ }
+        }
+        // CSS 剪影兜底
+        if (css1) css1.style.display = 'block';
+        if (css2) css2.style.display = 'block';
+      }
+      if (document.readyState === 'complete' || document.readyState === 'interactive') setTimeout(initPanda, 60);
+      else document.addEventListener('DOMContentLoaded', () => setTimeout(initPanda, 60));
+    })();
+  </script>
 </body>
 </html>
