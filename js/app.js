@@ -10,17 +10,30 @@ const API_BASE = (location.hostname === "web.lynli.me")
     : "https://api.lynli.me/api/v1";
 
 // ---------- Toast 提示（统一走这里，不再使用原生 alert） ----------
+// 防御式实现：页面 HTML 里可能已存在 #toast 节点但结构不完整，缺什么补什么
 function showToast(msg, icon = 'ℹ️') {
     let toast = document.getElementById('toast');
     if (!toast) {
         toast = document.createElement('div');
         toast.id = 'toast';
         toast.className = 'toast';
-        toast.innerHTML = '<div class="toast-icon"></div><div class="toast-text" id="toast-text"></div>';
         document.body.appendChild(toast);
     }
-    toast.querySelector('.toast-icon').innerText = icon;
-    document.getElementById('toast-text').innerText = msg;
+    let iconEl = toast.querySelector('.toast-icon');
+    if (!iconEl) {
+        iconEl = document.createElement('div');
+        iconEl.className = 'toast-icon';
+        toast.prepend(iconEl);
+    }
+    let textEl = toast.querySelector('.toast-text');
+    if (!textEl) {
+        textEl = document.createElement('div');
+        textEl.id = 'toast-text';
+        textEl.className = 'toast-text';
+        toast.appendChild(textEl);
+    }
+    iconEl.innerText = icon;
+    textEl.innerText = msg;
     toast.classList.add('show');
     clearTimeout(showToast._timer);
     showToast._timer = setTimeout(() => toast.classList.remove('show'), 3500);
