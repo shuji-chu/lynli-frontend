@@ -5,8 +5,10 @@
    - 本地支付弹窗（二维码 + 3 秒轮询查单，绝不跳转）
    ============================================================ */
 
-// ---------- API 基址（同源优先） ----------
-const API_BASE = (location.hostname.endsWith("lynli.me") && location.hostname !== "api.lynli.me")
+// ---------- API 基址 ----------
+// 域名说明：web.lynli.me（面板，nginx 同源代理 /api/）与 tg.lynli.me（商城，独立站点）是两个站。
+// 仅 web.lynli.me 走同源 /api/v1，其余 lynli.me 域名统一走 api.lynli.me
+const API_BASE = (location.hostname === "web.lynli.me")
   ? "/api/v1"
   : "https://api.lynli.me/api/v1";
 

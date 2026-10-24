@@ -8,8 +8,9 @@ let _markerLayer = null;
 
 const SAT_TILES = "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
 
+// 域名说明：仅 web.lynli.me（面板）走同源 /api/v1；tg.lynli.me 等商城域名走 api.lynli.me
 function _apiBase() {
-  return (location.hostname.endsWith("lynli.me") && location.hostname !== "api.lynli.me")
+  return (location.hostname === "web.lynli.me")
     ? "/api/v1"
     : "https://api.lynli.me/api/v1";
 }
