@@ -30,7 +30,7 @@ function toggleAiChat(force) {
     renderAiQuick();
     if (!_aiGreeted) {
       _aiGreeted = true;
-      appendAiMessage("bot", "你好，我是 LynLi 智能客服 🤖\n可以问我套餐、节点、续费、营收等问题，我会尽力帮你解答。");
+      appendAiMessage("bot", "你好，我是 LynLi 智能客服\n可以问我套餐、节点、续费、营收等问题，我会尽力帮你解答。");
     }
     setTimeout(() => {
       const input = document.getElementById("ai-input");
@@ -112,7 +112,7 @@ async function sendAiMessage() {
   if (_aiSending) return;
   const input = document.getElementById("ai-input");
   const text = (input?.value || "").trim();
-  if (!text) { showToast("请输入消息内容", "⚠️"); return; }
+  if (!text) { showToast("请输入消息内容", "warn"); return; }
 
   _aiSending = true;
   const sendBtn = document.getElementById("ai-send");
@@ -141,12 +141,12 @@ async function sendAiMessage() {
     } else {
       const msg = (json && json.msg) ? json.msg : "AI 服务暂时不可用，请稍后再试";
       appendAiMessage("bot", msg, true);
-      showToast("AI 回复失败", "⚠️");
+      showToast("AI 回复失败", "warn");
     }
   } catch (e) {
     if (typing) typing.remove();
     appendAiMessage("bot", "网络异常，AI 暂时失联了，请检查网络后重试", true);
-    showToast("AI 请求失败", "📡");
+    showToast("AI 请求失败", "error");
   } finally {
     _aiSending = false;
     if (sendBtn) sendBtn.disabled = false;

@@ -1,8 +1,10 @@
 // ============================================================
-// SOCKS5 管理中枢 · 大中台版核心逻辑
-// - 抽屉式导航 + 应用中心（六组菜单，RBAC 按角色显隐）
+// LynLi · 超级管理中枢 核心逻辑
+// - 抽屉式导航（六大分类，RBAC 按角色显隐）
 // - 登录路由: /api/v1/passport/auth/login（返回 token + role）
 // - 大盘: /api/v1/admin/dashboard（MySQL 真实聚合 + 7 日趋势）
+// - 员工: /api/v1/admin/users（真实成员列表）
+// - 节点: /api/v1/public/nodes（servers 表真实节点）
 // - 个人中心: /api/v1/user/info（动态拉取，不写死）
 // - 验证码: 前端本地生成 4 位字符（canvas 绘制，点击刷新，本地校验）
 // ============================================================
@@ -38,70 +40,81 @@ function currentRole() { return normalizeRole(localStorage.getItem("lynli_admin_
 function roleLabel(r) { r = r || currentRole(); return ROLE_LABELS[r] || r; }
 function roleBadgeClass(r) { r = r || currentRole(); return ROLE_BADGE_CLASS[r] || "r-user"; }
 
-// ---------- 菜单图标（SVG） ----------
+// ---------- 菜单图标（单色极简 SVG 线条） ----------
 const ICONS = {
   grid: '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>',
+  map: '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 4L3 6.5v13L9 17l6 2.5 6-2.5v-13L15 6.5 9 4z"/><path d="M9 4v13M15 6.5v13"/></svg>',
   logs: '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h9l4 4v14a1 1 0 01-1 1H6a1 1 0 01-1-1V4a1 1 0 011-1z"/><path d="M14 3v5h5"/><path d="M9 12h7M9 16h7"/></svg>',
   box: '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg>',
   receipt: '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 3h14v18l-2.5-1.5L14 21l-2-1.5L10 21l-2.5-1.5L5 21V3z"/><path d="M9 8h6M9 12h6"/></svg>',
-  truck: '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 4h13v12H1z"/><path d="M14 9h4l3 3v4h-7"/><circle cx="6" cy="19" r="1.6"/><circle cx="17" cy="19" r="1.6"/></svg>',
+  database: '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v7c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 12v7c0 1.7 3.6 3 8 3s8-1.3 8-3v-7"/></svg>',
   layers: '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l9 5-9 5-9-5 9-5z"/><path d="M3 12l9 5 9-5"/><path d="M3 17l9 5 9-5"/></svg>',
-  sms: '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M8 10h8M8 14h5"/></svg>',
   globe: '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.8 2.6 4 5.6 4 9s-1.2 6.4-4 9c-2.8-2.6-4-5.6-4-9s1.2-6.4 4-9z"/></svg>',
+  sms: '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M8 10h8M8 14h5"/></svg>',
+  key: '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="8" cy="15" r="4"/><path d="M10.8 12.2L20 3M17 6l2.5 2.5M14.5 8.5L17 11"/></svg>',
   activity: '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 12h-4l-3 8-6-16-3 8H2"/></svg>',
   dns: '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18"/><circle cx="12" cy="12" r="3.5"/></svg>',
+  radar: '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/><path d="M12 12l6-4"/></svg>',
   robot: '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="7" width="16" height="12" rx="3"/><path d="M12 7V4M9 4h6"/><circle cx="9" cy="13" r="1" fill="currentColor" stroke="none"/><circle cx="15" cy="13" r="1" fill="currentColor" stroke="none"/></svg>',
   ticket: '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 8V6a1 1 0 011-1h16a1 1 0 011 1v2a3 3 0 000 6v2a1 1 0 01-1 1H4a1 1 0 01-1-1v-2a3 3 0 000-6z"/><path d="M12 6v12" stroke-dasharray="2 2"/></svg>',
-  bot: '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="7" y="7" width="10" height="12" rx="2.5"/><path d="M12 7V4M9 19h6"/><circle cx="10" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="14" cy="12" r="1" fill="currentColor" stroke="none"/></svg>',
-  user: '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6"/></svg>',
+  gift: '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M3 12h18M12 8v13"/><path d="M12 8S9.5 3 7.5 4.5C5.8 5.8 6.8 8 12 8zM12 8s2.5-5 4.5-3.5C18.2 5.8 17.2 8 12 8z"/></svg>',
   users: '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3.5"/><path d="M2 20c0-3.5 3.1-5 7-5s7 1.5 7 5"/><circle cx="17" cy="9" r="2.8"/><path d="M16 15.5c2.8.3 5 1.6 5 4.5"/></svg>',
   shield: '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l8 3v6c0 5-3.4 9.4-8 11-4.6-1.6-8-6-8-11V5l8-3z"/><path d="M9 12l2 2 4-4"/></svg>',
   gear: '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09a1.65 1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33h.09a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51h.09a1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82v.09a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>',
+  credit: '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/><path d="M6 15h4"/></svg>',
+  mail: '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 7l10 6 10-6"/></svg>',
+  megaphone: '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11v3a1 1 0 001 1h2l5 4V6L6 10H4a1 1 0 00-1 1z"/><path d="M15 8a5 5 0 010 8M18 5.5a8.5 8.5 0 010 13"/></svg>',
+  server: '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="7" rx="1.5"/><rect x="3" y="13" width="18" height="7" rx="1.5"/><path d="M7 7.5h.01M7 16.5h.01M11 7.5h4M11 16.5h4"/></svg>',
+  user: '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6"/></svg>',
 };
 
-// ---------- 应用中心菜单（六组；roles 为空 = 全员可见） ----------
+// ---------- 六大分类菜单（roles 为空 = 全员可见） ----------
 const MENU_GROUPS = [
-  { label: "📊 工作台", items: [
+  { label: "工作台", icon: ICONS.grid, items: [
     { id: "dashboard", label: "数据大盘", icon: ICONS.grid },
-    { id: "logs", label: "运行日志", icon: ICONS.logs, roles: ["super", "operator"] },
+    { id: "map", label: "全域可视化地图", icon: ICONS.map },
+    { id: "logs", label: "系统日志", icon: ICONS.logs, roles: ["super", "operator"] },
   ]},
-  { label: "🛒 电商系统", items: [
+  { label: "电商业务", icon: ICONS.box, items: [
     { id: "products", label: "商品管理", icon: ICONS.box, roles: ["super", "operator"] },
-    { id: "orders", label: "订单管理", icon: ICONS.receipt, roles: ["super", "operator"] },
-    { id: "logistics", label: "物流跟踪", icon: ICONS.truck, roles: ["super", "operator"] },
+    { id: "orders", label: "订单代发", icon: ICONS.receipt, roles: ["super", "operator"] },
   ]},
-  { label: "📦 发卡系统", items: [
-    { id: "tgx", label: "TGX 号池", icon: ICONS.layers, roles: ["super", "operator"] },
-    { id: "sms", label: "接码平台", icon: ICONS.sms, roles: ["super", "operator"] },
+  { label: "TGX 业务", icon: ICONS.layers, items: [
+    { id: "tgx", label: "TGX 账号库", icon: ICONS.database, roles: ["super", "operator"] },
+    { id: "nodes", label: "节点与订阅", icon: ICONS.globe },
+    { id: "sms", label: "接码池", icon: ICONS.sms, roles: ["super", "operator"] },
+    { id: "apikeys", label: "API 分发", icon: ICONS.key, roles: ["super", "operator"] },
   ]},
-  { label: "🌐 网络基建", items: [
-    { id: "nodes", label: "节点管理", icon: ICONS.globe },
-    { id: "probe", label: "服务器探针", icon: ICONS.activity, roles: ["super", "operator"] },
-    { id: "dns", label: "域名解析", icon: ICONS.dns, roles: ["super", "operator"] },
+  { label: "网络基建", icon: ICONS.server, items: [
+    { id: "monitor", label: "节点监控", icon: ICONS.activity },
+    { id: "dns", label: "域名管理", icon: ICONS.dns, roles: ["super", "operator"] },
+    { id: "probe", label: "服务器探针", icon: ICONS.radar, roles: ["super", "operator"] },
   ]},
-  { label: "🤖 客服与营销", items: [
-    { id: "ai", label: "AI 对话", icon: ICONS.robot },
-    { id: "tickets", label: "工单系统", icon: ICONS.ticket, roles: ["super", "operator", "support"] },
-    { id: "bots", label: "机器人控制", icon: ICONS.bot, roles: ["super", "operator"] },
+  { label: "营销与客服", icon: ICONS.megaphone, items: [
+    { id: "ai", label: "AI 客服", icon: ICONS.robot },
+    { id: "tickets", label: "工单", icon: ICONS.ticket, roles: ["super", "operator", "support"] },
+    { id: "distribution", label: "签到分销", icon: ICONS.gift, roles: ["super", "operator"] },
   ]},
-  { label: "⚙️ 系统与权限", items: [
+  { label: "系统设置", icon: ICONS.gear, items: [
+    { id: "staff", label: "员工账号权限分配", icon: ICONS.users, roles: ["super"] },
+    { id: "payment", label: "支付配置", icon: ICONS.credit, roles: ["super"] },
+    { id: "mail", label: "邮件配置", icon: ICONS.mail, roles: ["super"] },
     { id: "profile", label: "个人中心", icon: ICONS.user },
-    { id: "staff", label: "员工账号", icon: ICONS.users, roles: ["super"] },
-    { id: "roles", label: "角色分配", icon: ICONS.shield, roles: ["super"] },
-    { id: "settings", label: "系统设置", icon: ICONS.gear, roles: ["super"] },
   ]},
 ];
 // 页面标题映射（顶栏显示）
 const PAGE_TITLES = {
-  dashboard: "数据大盘", logs: "运行日志", products: "商品管理", orders: "订单管理",
-  logistics: "物流跟踪", tgx: "TGX 号池", sms: "接码平台", nodes: "节点管理",
-  probe: "服务器探针", dns: "域名解析", ai: "AI 对话", tickets: "工单系统",
-  bots: "机器人控制", profile: "个人中心", staff: "员工账号", roles: "角色分配",
-  settings: "系统设置",
+  dashboard: "数据大盘", map: "全域可视化地图", logs: "系统日志",
+  products: "商品管理", orders: "订单代发",
+  tgx: "TGX 账号库", nodes: "节点与订阅", sms: "接码池", apikeys: "API 分发",
+  monitor: "节点监控", dns: "域名管理", probe: "服务器探针",
+  ai: "AI 客服", tickets: "工单", distribution: "签到分销",
+  staff: "员工账号权限分配", payment: "支付配置", mail: "邮件配置",
+  profile: "个人中心",
 };
 
-// ---------- Toast 提示（统一走这里，不再使用原生 alert） ----------
-function showToast(msg, icon = 'ℹ️') {
+// ---------- Toast 提示（黑金玻璃拟态，统一走这里，严禁原生 alert） ----------
+function showToast(msg, type = 'info') {
     let toast = document.getElementById('toast');
     if (!toast) {
         toast = document.createElement('div');
@@ -122,14 +135,18 @@ function showToast(msg, icon = 'ℹ️') {
         textEl.className = 'toast-text';
         toast.appendChild(textEl);
     }
-    iconEl.innerText = icon;
+    iconEl.innerHTML = '<span class="toast-dot"></span>';
     textEl.innerText = msg;
+    toast.classList.remove('t-success', 't-error', 't-warn');
+    if (type === 'success') toast.classList.add('t-success');
+    if (type === 'error') toast.classList.add('t-error');
+    if (type === 'warn') toast.classList.add('t-warn');
     toast.classList.add('show');
     clearTimeout(showToast._timer);
     showToast._timer = setTimeout(() => toast.classList.remove('show'), 3500);
 }
 
-// ---------- 传统 4 位字符验证码（canvas 本地生成，点击刷新） ----------
+// ---------- 传统 4 位字符验证码（canvas 本地生成，深色配色） ----------
 const CAPTCHA_CHARS = 'ACDEFGHJKMNPQRTUVWXY34679';
 let captchaCode = '';
 
@@ -148,26 +165,30 @@ function drawCaptcha() {
     const ctx = canvas.getContext('2d');
     const W = canvas.width, H = canvas.height;
 
+    // 深色蓝紫渐变底
     const bg = ctx.createLinearGradient(0, 0, W, H);
-    bg.addColorStop(0, '#eef4ff');
-    bg.addColorStop(1, '#dbe7ff');
+    bg.addColorStop(0, '#131a33');
+    bg.addColorStop(1, '#1d1650');
     ctx.fillStyle = bg;
     ctx.fillRect(0, 0, W, H);
 
+    // 暗色噪点
     for (let i = 0; i < 60; i++) {
-        ctx.fillStyle = `rgba(${_randInt(100, 180)},${_randInt(130, 200)},255,${Math.random() * 0.5 + 0.2})`;
+        ctx.fillStyle = `rgba(${_randInt(120, 200)},${_randInt(140, 200)},255,${Math.random() * 0.35 + 0.1})`;
         ctx.fillRect(_randInt(0, W), _randInt(0, H), 2, 2);
     }
+    // 干扰曲线
     for (let i = 0; i < 3; i++) {
         ctx.beginPath();
         ctx.moveTo(0, _randInt(0, H));
         ctx.bezierCurveTo(W * 0.3, _randInt(0, H), W * 0.6, _randInt(0, H), W, _randInt(0, H));
-        ctx.strokeStyle = `rgba(${_randInt(60, 120)},${_randInt(100, 160)},235,0.45)`;
+        ctx.strokeStyle = `rgba(${_randInt(90, 160)},${_randInt(110, 180)},255,0.3)`;
         ctx.lineWidth = _randInt(1, 2);
         ctx.stroke();
     }
 
-    const blues = ['#1d4ed8', '#2563eb', '#1e40af', '#3b82f6'];
+    // 亮色字符（深色底上保证可读）
+    const lights = ['#a9c0ff', '#c4b5fd', '#7dd3fc', '#f5c451', '#eef1fa'];
     const cw = W / 4;
     for (let i = 0; i < captchaCode.length; i++) {
         ctx.save();
@@ -178,7 +199,9 @@ function drawCaptcha() {
         ctx.font = `bold ${_randInt(24, 30)}px "Segoe UI", Arial, sans-serif`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillStyle = blues[_randInt(0, blues.length - 1)];
+        ctx.shadowColor = 'rgba(91,140,255,.8)';
+        ctx.shadowBlur = 6;
+        ctx.fillStyle = lights[_randInt(0, lights.length - 1)];
         ctx.fillText(captchaCode[i], 0, 0);
         ctx.restore();
     }
@@ -210,15 +233,15 @@ async function doLogin() {
     const account = document.getElementById('login-user')?.value.trim();
     const password = document.getElementById('login-pass')?.value.trim();
 
-    if (!account || !password) { showToast('账号或密码没填', '⚠️'); return; }
+    if (!account || !password) { showToast('账号或密码没填', 'warn'); return; }
     if (!checkCaptcha()) {
-        showToast('验证码错误，请重新输入', '🔐');
+        showToast('验证码错误，请重新输入', 'warn');
         refreshCaptcha();
         return;
     }
 
     setLoginLoading(true);
-    showToast('正在连接后端...', '⏳');
+    showToast('正在连接后端...', 'info');
 
     try {
         const res = await fetch(`${API_BASE}/passport/auth/login`, {
@@ -243,11 +266,11 @@ async function doLogin() {
             if (document.getElementById('remember-me')?.checked) {
                 localStorage.setItem('lynli_admin', 'true');
             }
-            showToast('登录成功', '👋');
+            showToast('登录成功，正在进入中枢', 'success');
             setLoginLoading(false);
             enterMainApp();
         } else {
-            showToast(json.message || '账号或密码错误', '❌');
+            showToast(json.message || '账号或密码错误', 'error');
             refreshCaptcha();
             setLoginLoading(false);
         }
@@ -259,13 +282,13 @@ async function doLogin() {
         } else {
             errMsg = err.message;
         }
-        showToast(`登录失败: ${errMsg}`, '📡');
+        showToast(`登录失败: ${errMsg}`, 'error');
         refreshCaptcha();
         setLoginLoading(false);
     }
 }
 
-// ---------- 抽屉导航：渲染应用中心（RBAC） ----------
+// ---------- 抽屉导航：渲染六大分类（RBAC） ----------
 function renderDrawer() {
     const nav = document.getElementById('drawer-nav');
     if (!nav) return;
@@ -276,7 +299,7 @@ function renderDrawer() {
     MENU_GROUPS.forEach(group => {
         const items = group.items.filter(it => !it.roles || it.roles.includes(role));
         if (!items.length) return; // 整组无权限则隐藏
-        html += `<div class="drawer-group-label">${group.label}</div>`;
+        html += `<div class="drawer-group-label"><span class="dg-icon">${group.icon}</span>${group.label}</div>`;
         items.forEach(it => {
             html += `
             <a class="drawer-item" data-page="${it.id}" href="javascript:void(0)" onclick="switchTab('${it.id}', this)">
@@ -331,6 +354,10 @@ function enterMainApp() {
 function switchTab(tab, el) {
     document.querySelectorAll('.drawer-item').forEach(n => n.classList.remove('active'));
     if (el) el.classList.add('active');
+    else {
+        const target = document.querySelector(`.drawer-item[data-page="${tab}"]`);
+        if (target) target.classList.add('active');
+    }
     document.querySelectorAll('.sub-page').forEach(p => p.classList.remove('active'));
     const page = document.getElementById('page-' + tab);
     if (page) {
@@ -344,11 +371,16 @@ function switchTab(tab, el) {
     if (tp) tp.innerText = PAGE_TITLES[tab] || tab;
     // 小屏：选完自动收起抽屉
     if (window.innerWidth <= 768) toggleDrawer(false);
-    // 懒加载
-    if (tab === 'nodes') {
+    // 懒加载各业务页真实数据
+    if (tab === 'map') {
         setTimeout(() => { if (typeof initNodeMap === 'function') initNodeMap(); }, 80);
     }
     if (tab === 'products' && typeof loadAccounts === 'function') loadAccounts();
+    if (tab === 'tgx' && typeof loadAccountPool === 'function') loadAccountPool();
+    if (tab === 'nodes' && typeof loadNodeCards === 'function') loadNodeCards();
+    if (tab === 'monitor' && typeof loadMonitor === 'function') loadMonitor();
+    if (tab === 'dns' && typeof loadDns === 'function') loadDns();
+    if (tab === 'staff' && typeof loadStaff === 'function') loadStaff();
     if (tab === 'profile' && typeof loadProfile === 'function') loadProfile();
     if (tab === 'dashboard' && typeof fetchDashboardData === 'function') fetchDashboardData();
 }
@@ -383,6 +415,10 @@ function fmtTime(ts) {
     if (isNaN(d.getTime())) return '--';
     const p = n => String(n).padStart(2, '0');
     return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+
+function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }
 
 // KPI 数字滚动动画
@@ -495,6 +531,11 @@ async function fetchDashboardData() {
             renderStockChart(products);
         }
     } catch (e) { /* 图表降级 */ }
+
+    // ---- 工作台首屏：全域可视化地图 ----
+    try {
+        if (typeof initDashMap === 'function') initDashMap();
+    } catch (e) { /* 地图降级 */ }
 }
 
 // ---------- 折线图：近 7 日营收趋势（真实聚合） ----------
@@ -511,31 +552,31 @@ function renderTrendChart(days, income) {
         grid: { left: 52, right: 18, top: 26, bottom: 36 },
         tooltip: {
             trigger: 'axis',
-            backgroundColor: 'rgba(17,24,39,.92)', borderWidth: 0,
-            textStyle: { color: '#fff', fontSize: 12 },
+            backgroundColor: 'rgba(13,17,38,.92)', borderWidth: 0,
+            textStyle: { color: '#eef1fa', fontSize: 12 },
             valueFormatter: v => '¥' + Number(v || 0).toFixed(2)
         },
         xAxis: {
             type: 'category', data: days, boundaryGap: false,
-            axisLine: { lineStyle: { color: '#e5e7eb' } },
+            axisLine: { lineStyle: { color: 'rgba(255,255,255,.14)' } },
             axisTick: { show: false },
-            axisLabel: { color: '#6b7280', fontSize: 11 }
+            axisLabel: { color: '#8b93b8', fontSize: 11 }
         },
         yAxis: {
             type: 'value', name: '营收 (¥)',
-            nameTextStyle: { color: '#9ca3af', fontSize: 11 },
-            splitLine: { lineStyle: { color: '#f1f5f9' } },
-            axisLabel: { color: '#9ca3af', fontSize: 11 }
+            nameTextStyle: { color: '#8b93b8', fontSize: 11 },
+            splitLine: { lineStyle: { color: 'rgba(255,255,255,.07)' } },
+            axisLabel: { color: '#8b93b8', fontSize: 11 }
         },
         series: [{
             name: '营收', type: 'line', data: income, smooth: true,
             symbol: 'circle', symbolSize: 8,
-            lineStyle: { width: 3, color: '#2563eb' },
-            itemStyle: { color: '#2563eb', borderColor: '#fff', borderWidth: 2 },
+            lineStyle: { width: 3, color: '#5b8cff' },
+            itemStyle: { color: '#5b8cff', borderColor: '#fff', borderWidth: 2 },
             areaStyle: {
                 color: {
                     type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
-                    colorStops: [{ offset: 0, color: 'rgba(37,99,235,.28)' }, { offset: 1, color: 'rgba(37,99,235,.02)' }]
+                    colorStops: [{ offset: 0, color: 'rgba(91,140,255,.3)' }, { offset: 1, color: 'rgba(91,140,255,.02)' }]
                 }
             },
             animationDuration: 900, animationEasing: 'cubicOut'
@@ -558,28 +599,28 @@ function renderBarChart(days, users) {
         grid: { left: 40, right: 14, top: 26, bottom: 36 },
         tooltip: {
             trigger: 'axis', axisPointer: { type: 'shadow' },
-            backgroundColor: 'rgba(17,24,39,.92)', borderWidth: 0,
-            textStyle: { color: '#fff', fontSize: 12 }
+            backgroundColor: 'rgba(13,17,38,.92)', borderWidth: 0,
+            textStyle: { color: '#eef1fa', fontSize: 12 }
         },
         xAxis: {
             type: 'category', data: days,
-            axisLine: { lineStyle: { color: '#e5e7eb' } },
+            axisLine: { lineStyle: { color: 'rgba(255,255,255,.14)' } },
             axisTick: { show: false },
-            axisLabel: { color: '#6b7280', fontSize: 10, interval: 0, rotate: 30 }
+            axisLabel: { color: '#8b93b8', fontSize: 10, interval: 0, rotate: 30 }
         },
         yAxis: {
             type: 'value', name: '人',
-            nameTextStyle: { color: '#9ca3af', fontSize: 11 },
-            splitLine: { lineStyle: { color: '#f1f5f9' } },
-            axisLabel: { color: '#9ca3af', fontSize: 11 }
+            nameTextStyle: { color: '#8b93b8', fontSize: 11 },
+            splitLine: { lineStyle: { color: 'rgba(255,255,255,.07)' } },
+            axisLabel: { color: '#8b93b8', fontSize: 11 }
         },
         series: [{
             name: '新增用户', type: 'bar', data: users, barMaxWidth: 26,
             itemStyle: {
                 borderRadius: [6, 6, 0, 0],
-                color: { type: 'linear', x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: '#3b82f6' }, { offset: 1, color: '#93c5fd' }] }
+                color: { type: 'linear', x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: '#7c6cff' }, { offset: 1, color: '#5b8cff' }] }
             },
-            emphasis: { itemStyle: { color: '#2563eb' } },
+            emphasis: { itemStyle: { color: '#5b8cff' } },
             animationDelay: idx => idx * 90,
             animationDuration: 700
         }]
@@ -605,31 +646,31 @@ function renderPlanChart(plans) {
         grid: { left: 46, right: 18, top: 26, bottom: 36 },
         tooltip: {
             trigger: 'axis',
-            backgroundColor: 'rgba(17,24,39,.92)', borderWidth: 0,
-            textStyle: { color: '#fff', fontSize: 12 },
+            backgroundColor: 'rgba(13,17,38,.92)', borderWidth: 0,
+            textStyle: { color: '#eef1fa', fontSize: 12 },
             valueFormatter: v => v + ' GB'
         },
         xAxis: {
             type: 'category', data: names, boundaryGap: false,
-            axisLine: { lineStyle: { color: '#e5e7eb' } },
+            axisLine: { lineStyle: { color: 'rgba(255,255,255,.14)' } },
             axisTick: { show: false },
-            axisLabel: { color: '#6b7280', fontSize: 11, interval: 0, rotate: names.length > 5 ? 30 : 0 }
+            axisLabel: { color: '#8b93b8', fontSize: 11, interval: 0, rotate: names.length > 5 ? 30 : 0 }
         },
         yAxis: {
             type: 'value', name: 'GB',
-            nameTextStyle: { color: '#9ca3af', fontSize: 11 },
-            splitLine: { lineStyle: { color: '#f1f5f9' } },
-            axisLabel: { color: '#9ca3af', fontSize: 11 }
+            nameTextStyle: { color: '#8b93b8', fontSize: 11 },
+            splitLine: { lineStyle: { color: 'rgba(255,255,255,.07)' } },
+            axisLabel: { color: '#8b93b8', fontSize: 11 }
         },
         series: [{
             name: '流量额度', type: 'line', data, smooth: true,
             symbol: 'circle', symbolSize: 8,
-            lineStyle: { width: 3, color: '#2563eb' },
-            itemStyle: { color: '#2563eb', borderColor: '#fff', borderWidth: 2 },
+            lineStyle: { width: 3, color: '#5b8cff' },
+            itemStyle: { color: '#5b8cff', borderColor: '#fff', borderWidth: 2 },
             areaStyle: {
                 color: {
                     type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
-                    colorStops: [{ offset: 0, color: 'rgba(37,99,235,.28)' }, { offset: 1, color: 'rgba(37,99,235,.02)' }]
+                    colorStops: [{ offset: 0, color: 'rgba(91,140,255,.3)' }, { offset: 1, color: 'rgba(91,140,255,.02)' }]
                 }
             },
             animationDuration: 900, animationEasing: 'cubicOut'
@@ -653,27 +694,27 @@ function renderStockChart(products) {
         grid: { left: 40, right: 14, top: 26, bottom: 36 },
         tooltip: {
             trigger: 'axis', axisPointer: { type: 'shadow' },
-            backgroundColor: 'rgba(17,24,39,.92)', borderWidth: 0,
-            textStyle: { color: '#fff', fontSize: 12 }
+            backgroundColor: 'rgba(13,17,38,.92)', borderWidth: 0,
+            textStyle: { color: '#eef1fa', fontSize: 12 }
         },
         xAxis: {
             type: 'category', data: names,
-            axisLine: { lineStyle: { color: '#e5e7eb' } },
+            axisLine: { lineStyle: { color: 'rgba(255,255,255,.14)' } },
             axisTick: { show: false },
-            axisLabel: { color: '#6b7280', fontSize: 10, interval: 0, rotate: names.length > 4 ? 28 : 0 }
+            axisLabel: { color: '#8b93b8', fontSize: 10, interval: 0, rotate: names.length > 4 ? 28 : 0 }
         },
         yAxis: {
             type: 'value',
-            splitLine: { lineStyle: { color: '#f1f5f9' } },
-            axisLabel: { color: '#9ca3af', fontSize: 11 }
+            splitLine: { lineStyle: { color: 'rgba(255,255,255,.07)' } },
+            axisLabel: { color: '#8b93b8', fontSize: 11 }
         },
         series: [{
             name: '库存', type: 'bar', data, barMaxWidth: 26,
             itemStyle: {
                 borderRadius: [6, 6, 0, 0],
-                color: { type: 'linear', x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: '#3b82f6' }, { offset: 1, color: '#93c5fd' }] }
+                color: { type: 'linear', x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: '#7c6cff' }, { offset: 1, color: '#5b8cff' }] }
             },
-            emphasis: { itemStyle: { color: '#2563eb' } },
+            emphasis: { itemStyle: { color: '#5b8cff' } },
             animationDelay: idx => idx * 90,
             animationDuration: 700
         }]
@@ -681,7 +722,7 @@ function renderStockChart(products) {
     setTimeout(() => chart.resize(), 60);
 }
 
-// ---------- 商品管理：卡片式列表 + 状态指示灯 ----------
+// ---------- 电商业务 · 商品管理：卡片式列表 + 状态指示灯 ----------
 async function loadAccounts() {
     const grid = document.getElementById('account-list');
     if (!grid) return;
@@ -710,7 +751,171 @@ async function loadAccounts() {
         }).join('');
     } catch (e) {
         grid.innerHTML = '<div class="empty-tip">加载失败，请重试</div>';
-        showToast('商品列表加载失败', '❌');
+        showToast('商品列表加载失败', 'error');
+    }
+}
+
+// ---------- TGX 业务 · TGX 账号库：真实库存表格 ----------
+async function loadAccountPool() {
+    const tbody = document.querySelector('#tgx-pool-table tbody');
+    if (!tbody) return;
+    tbody.innerHTML = '<tr><td colspan="5" class="empty-tip">加载中...</td></tr>';
+    try {
+        const res = await fetch(`${API_BASE}/account/products`);
+        const json = await res.json();
+        const list = (json.code === 1 && json.data) ? json.data : [];
+        if (!list.length) {
+            tbody.innerHTML = '<tr><td colspan="5" class="empty-tip">账号库暂无库存</td></tr>';
+            return;
+        }
+        tbody.innerHTML = list.map(p => {
+            const inStock = Number(p.stock) > 0;
+            const type = /TG|电报|飞机/.test(p.title || '') ? 'TG 账号' : (/节点|套餐|订阅/.test(p.title || '') ? '节点订阅' : '账号商品');
+            return `
+            <tr>
+              <td>${escapeHtml(p.title || '未命名')}</td>
+              <td><span class="tag-live">${type}</span></td>
+              <td class="text-primary" style="font-weight:700">¥${Number(p.price || 0).toFixed(2)}</td>
+              <td>${Number(p.stock || 0)}</td>
+              <td>${inStock ? '<span class="tag-live">有货</span>' : '<span class="tag-off">缺货</span>'}</td>
+            </tr>`;
+        }).join('');
+    } catch (e) {
+        tbody.innerHTML = '<tr><td colspan="5" class="empty-tip">加载失败，请重试</td></tr>';
+        showToast('账号库加载失败', 'error');
+    }
+}
+
+// ---------- TGX 业务 · 节点与订阅：真实节点卡片 ----------
+async function loadNodeCards() {
+    const grid = document.getElementById('node-card-list');
+    if (!grid) return;
+    grid.innerHTML = '<div class="empty-tip">加载中...</div>';
+    try {
+        const res = await fetch(`${API_BASE}/public/nodes`);
+        const json = await res.json();
+        const nodes = (json.code === 1 && json.data) ? json.data : [];
+        if (!nodes.length) {
+            grid.innerHTML = '<div class="empty-tip">暂无节点数据</div>';
+            return;
+        }
+        grid.innerHTML = nodes.map((n, i) => {
+            const live = n.status === 'online';
+            return `
+            <div class="product-card" style="--d:${i}">
+              <div class="pc-head">
+                <div class="pc-title">${escapeHtml(n.name || '未命名节点')}</div>
+                <span class="stock-light ${live ? 'live' : 'out'}"><i></i>${live ? '在线' : '离线'}</span>
+              </div>
+              <p class="pc-desc">${escapeHtml(n.region_name || n.region || '--')} · ${escapeHtml(n.ip || '--')}</p>
+              <div class="pc-foot">
+                <span style="font-size:12px; color:var(--text-tertiary)">${escapeHtml(n.domain || '暂无域名')}</span>
+                <button class="btn btn-primary btn-sm" onclick="switchTab('map')">地图查看</button>
+              </div>
+            </div>`;
+        }).join('');
+    } catch (e) {
+        grid.innerHTML = '<div class="empty-tip">加载失败，请重试</div>';
+        showToast('节点列表加载失败', 'error');
+    }
+}
+
+// ---------- 网络基建 · 节点监控：真实状态表 ----------
+async function loadMonitor() {
+    const tbody = document.querySelector('#monitor-table tbody');
+    if (!tbody) return;
+    tbody.innerHTML = '<tr><td colspan="5" class="empty-tip">加载中...</td></tr>';
+    try {
+        const res = await fetch(`${API_BASE}/public/nodes`);
+        const json = await res.json();
+        const nodes = (json.code === 1 && json.data) ? json.data : [];
+        if (!nodes.length) {
+            tbody.innerHTML = '<tr><td colspan="5" class="empty-tip">暂无节点数据</td></tr>';
+            return;
+        }
+        tbody.innerHTML = nodes.map(n => {
+            const live = n.status === 'online';
+            return `
+            <tr>
+              <td style="font-weight:600">${escapeHtml(n.name || '--')}</td>
+              <td>${escapeHtml(n.ip || '--')}</td>
+              <td>${escapeHtml(n.region_name || n.region || '--')}</td>
+              <td>${live ? '<span class="tag-live">在线</span>' : '<span class="tag-off">离线</span>'}</td>
+              <td style="color:var(--text-tertiary)">${Number(n.lat || 0).toFixed(2)}, ${Number(n.lng || 0).toFixed(2)}</td>
+            </tr>`;
+        }).join('');
+    } catch (e) {
+        tbody.innerHTML = '<tr><td colspan="5" class="empty-tip">加载失败，请重试</td></tr>';
+        showToast('节点监控加载失败', 'error');
+    }
+}
+
+// ---------- 网络基建 · 域名管理：真实解析表 ----------
+async function loadDns() {
+    const tbody = document.querySelector('#dns-table tbody');
+    if (!tbody) return;
+    tbody.innerHTML = '<tr><td colspan="4" class="empty-tip">加载中...</td></tr>';
+    try {
+        const res = await fetch(`${API_BASE}/public/nodes`);
+        const json = await res.json();
+        const nodes = (json.code === 1 && json.data) ? json.data : [];
+        const withDomain = nodes.filter(n => n.domain);
+        if (!withDomain.length) {
+            tbody.innerHTML = '<tr><td colspan="4" class="empty-tip">暂无已解析域名</td></tr>';
+            return;
+        }
+        tbody.innerHTML = withDomain.map(n => `
+            <tr>
+              <td style="font-weight:600">${escapeHtml(n.domain)}</td>
+              <td>${escapeHtml(n.ip || '--')}</td>
+              <td>${escapeHtml(n.region_name || n.region || '--')}</td>
+              <td><span class="tag-warn">节点接入</span></td>
+            </tr>`).join('');
+    } catch (e) {
+        tbody.innerHTML = '<tr><td colspan="4" class="empty-tip">加载失败，请重试</td></tr>';
+        showToast('域名列表加载失败', 'error');
+    }
+}
+
+// ---------- 系统设置 · 员工账号权限分配：真实成员表 ----------
+async function loadStaff() {
+    const tbody = document.querySelector('#staff-table tbody');
+    if (!tbody) return;
+    tbody.innerHTML = '<tr><td colspan="6" class="empty-tip">加载中...</td></tr>';
+    const tok = localStorage.getItem('lynli_admin_token');
+    const me = (localStorage.getItem('lynli_admin_email') || '').toLowerCase();
+    if (!tok) {
+        tbody.innerHTML = '<tr><td colspan="6" class="empty-tip">未登录，无法加载成员列表</td></tr>';
+        return;
+    }
+    try {
+        const res = await fetch(`${API_BASE}/admin/users`, { headers: { 'Authorization': 'Bearer ' + tok } });
+        const json = await res.json();
+        const users = (json.code === 1 && json.data) ? json.data : [];
+        if (!users.length) {
+            tbody.innerHTML = '<tr><td colspan="6" class="empty-tip">暂无成员数据</td></tr>';
+            return;
+        }
+        tbody.innerHTML = users.map(u => {
+            const isMe = (u.email || '').toLowerCase() === me;
+            const used = Number(u.u || 0) + Number(u.d || 0);
+            const perm = isMe ? '<span class="tag-warn">超级管理员</span>' : '<span class="tag-off">普通用户</span>';
+            const banned = Number(u.banned) === 1;
+            const state = banned ? '<span class="tag-off">已封禁</span>' : '<span class="tag-live">正常</span>';
+            const expire = u.expired_at ? fmtTime(u.expired_at) : '永久有效';
+            return `
+            <tr>
+              <td style="color:var(--text-tertiary)">${u.id}</td>
+              <td style="font-weight:600">${escapeHtml(u.email || '--')}${isMe ? ' <span style="color:var(--gold);font-size:11px">(当前账号)</span>' : ''}</td>
+              <td>${perm}</td>
+              <td>${fmtBytes(used)}</td>
+              <td style="color:var(--text-tertiary)">${expire}</td>
+              <td>${state}</td>
+            </tr>`;
+        }).join('');
+    } catch (e) {
+        tbody.innerHTML = '<tr><td colspan="6" class="empty-tip">加载失败，请重试</td></tr>';
+        showToast('成员列表加载失败', 'error');
     }
 }
 
@@ -743,12 +948,8 @@ async function loadProfile() {
         const ll = document.getElementById('profile-lastlogin');
         if (ll) ll.innerText = u.lastLoginAt ? fmtTime(u.lastLoginAt) : '--';
     } catch (e) {
-        showToast('用户信息拉取失败', '⚠️');
+        showToast('用户信息拉取失败', 'warn');
     }
-}
-
-function escapeHtml(s) {
-    return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }
 
 // ---------- 退出 ----------

@@ -3,27 +3,33 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>SOCKS5 管理中枢</title>
-  <!-- S5 品牌图标 -->
-  <link rel="icon" type="image/png" href="./favicon.png?v=20261024h">
-  <link rel="apple-touch-icon" href="./apple-touch-icon.png?v=20261024h">
-  <!-- 使用相对路径，解决 GitHub Pages 白屏 -->
-  <link rel="stylesheet" href="./css/style.css?v=20261024h">
-  <!-- Leaflet 地图库（卫星地图，jsdelivr 主源 + cdnjs 容灾） -->
+  <title>LynLi · 超级管理中枢</title>
+  <!-- 品牌图标 -->
+  <link rel="icon" type="image/png" href="./favicon.png?v=20261025a">
+  <link rel="apple-touch-icon" href="./apple-touch-icon.png?v=20261025a">
+  <!-- 深色主题（相对路径，解决 GitHub Pages 白屏） -->
+  <link rel="stylesheet" href="./css/style.css?v=20261025a">
+  <!-- Leaflet 地图库（jsdelivr 主源 + cdnjs 容灾） -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" onerror="this.onerror=null;this.href='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css'">
   <!-- Anime.js 丝滑动画 -->
   <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.2/lib/anime.min.js" onerror="document.write('<script src=\"https:\/\/cdnjs.cloudflare.com\/ajax\/libs\/animejs\/3.2.2\/anime.min.js\"><\/script>')"></script>
 </head>
 <body>
 
+  <!-- ======================= 动态光影背景（深色蓝紫流光） ======================= -->
+  <div class="bg-aurora" aria-hidden="true">
+    <span class="blob blob-1"></span>
+    <span class="blob blob-2"></span>
+    <span class="blob blob-3"></span>
+    <span class="blob blob-4"></span>
+  </div>
+
   <!-- ======================= 登录页 ======================= -->
   <div id="login-page" class="page-container">
     <div class="login-box card">
       <div class="login-header">
-        <div class="brand-logo">
-          <div style="width: 64px; height: 64px; background: linear-gradient(135deg, #3b82f6, #2563eb); color: #fff; font-weight: bold; font-size: 32px; display: flex; align-items: center; justify-content: center; border-radius: 12px; margin: 0 auto 20px; box-shadow: 0 4px 12px rgba(59,130,246,0.3);">S5</div>
-        </div>
-        <h2>SOCKS5 管理中枢</h2>
+        <div class="brand-logo">S5</div>
+        <h2>LynLi 管理中枢</h2>
         <p>欢迎回来，请登录您的账号</p>
       </div>
 
@@ -62,7 +68,7 @@
     </div>
   </div>
 
-  <!-- ======================= 中台主界面 ======================= -->
+  <!-- ======================= 超级大中台主界面 ======================= -->
   <div id="main-app" class="console-shell" style="display: none;">
 
     <!-- 顶部栏：左上角抽屉触发器 -->
@@ -72,11 +78,11 @@
       </button>
       <div class="topbar-brand">
         <span class="topbar-logo">S5</span>
-        <span class="topbar-title">SOCKS5 管理中枢</span>
+        <span class="topbar-title">LynLi 超级管理中枢</span>
       </div>
       <div class="topbar-right">
         <span class="topbar-page" id="topbar-page">数据大盘</span>
-        <span class="topbar-user" id="topbar-user">--</span>
+        <span class="topbar-user" id="topbar-user" style="cursor:pointer" title="点击进入个人中心" onclick="switchTab('profile')">--</span>
         <span class="role-badge" id="topbar-role">--</span>
       </div>
     </header>
@@ -84,7 +90,7 @@
     <!-- 抽屉导航遮罩 -->
     <div class="drawer-mask" id="drawer-mask" onclick="toggleDrawer(false)"></div>
 
-    <!-- 抽屉式导航 + 应用中心 -->
+    <!-- 抽屉式导航（六大分类，RBAC 按角色显隐） -->
     <aside class="drawer" id="drawer">
       <div class="drawer-head">
         <div class="drawer-logo">S5</div>
@@ -96,18 +102,18 @@
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
         </button>
       </div>
-      <nav class="drawer-nav" id="drawer-nav"><!-- 应用中心菜单由 JS 按角色渲染 --></nav>
+      <nav class="drawer-nav" id="drawer-nav"><!-- 菜单由 JS 按角色渲染 --></nav>
       <div class="drawer-foot">
         <span class="foot-dot"></span>
         <span class="foot-text">服务运行正常</span>
-        <span class="drawer-version">v2.0</span>
+        <span class="drawer-version">v3.0</span>
       </div>
     </aside>
 
     <!-- 内容区 -->
     <main class="console-main">
 
-      <!-- ========== 📊 工作台 · 数据大盘 ========== -->
+      <!-- ========== 工作台 · 数据大盘 ========== -->
       <section class="sub-page active" id="page-dashboard">
         <div class="page-header">
           <div>
@@ -136,7 +142,7 @@
             <div class="stat-foot" id="dash-orders-foot">今日 -- 单</div>
           </div>
           <div class="card stat-card" style="--d:3">
-            <div class="stat-icon icon-amber"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M9 9h6M9 12h6M12 7v10"/><path d="M9.5 15.5L12 18l2.5-2.5"/></svg></div>
+            <div class="stat-icon icon-amber"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5h5M9.5 14.5h5"/></svg></div>
             <div class="stat-title">今日营收</div>
             <div class="stat-value" id="dash-income">...</div>
             <div class="stat-foot" id="dash-income-foot">累计 ¥--</div>
@@ -184,92 +190,65 @@
             <div id="chart-bar" class="chart-box"></div>
           </div>
         </div>
-      </section>
 
-      <!-- ========== 📊 工作台 · 运行日志 ========== -->
-      <section class="sub-page" id="page-logs">
-        <div class="page-header"><div><h2 class="page-title">运行日志</h2><p class="page-sub">系统操作审计与运行记录</p></div></div>
-        <div class="card placeholder-card">
-          <div class="placeholder-icon">📜</div>
-          <h3>运行日志</h3>
-          <p>该模块正在紧张开发中，将提供登录审计、操作记录、异常告警等能力。</p>
-          <button class="btn btn-primary btn-sm" onclick="switchTab('dashboard')">返回工作台</button>
-        </div>
-      </section>
-
-      <!-- ========== 🛒 电商系统 · 商品管理 ========== -->
-      <section class="sub-page" id="page-products">
-        <div class="page-header">
-          <div>
-            <h2 class="page-title">商品管理</h2>
-            <p class="page-sub">在售账号商品 · 实时库存状态</p>
+        <!-- 全域可视化地图（工作台首屏核心位） -->
+        <div class="card map-card" style="--d:10">
+          <div class="dash-map-head">
+            <div>
+              <h3 class="chart-title">全域可视化地图</h3>
+              <p class="page-sub">节点分布 · 卫星影像 · 实时状态</p>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="switchTab('map')">进入全屏地图</button>
           </div>
-          <button class="btn btn-primary btn-sm" onclick="loadAccounts()">刷新列表</button>
-        </div>
-        <div class="product-grid" id="account-list">
-          <div class="empty-tip">加载中...</div>
-        </div>
-      </section>
-
-      <!-- ========== 🛒 电商系统 · 订单管理 ========== -->
-      <section class="sub-page" id="page-orders">
-        <div class="page-header"><div><h2 class="page-title">订单管理</h2><p class="page-sub">全渠道订单 · 支付与退款</p></div></div>
-        <div class="card placeholder-card">
-          <div class="placeholder-icon">🧾</div>
-          <h3>订单管理</h3>
-          <p>该模块正在紧张开发中，将支持订单查询、对账、退款处理与导出。</p>
-          <button class="btn btn-primary btn-sm" onclick="switchTab('dashboard')">返回工作台</button>
+          <div id="dash-map"></div>
+          <div class="map-legend">
+            <span class="legend-item"><i class="dot dot-live"></i>在线节点</span>
+            <span class="legend-item"><i class="dot dot-off"></i>离线节点</span>
+            <span class="legend-item"><i class="dot dot-me"></i>我的位置</span>
+            <span class="legend-item"><i class="dot dot-idc"></i>服务器机房</span>
+            <span class="legend-note">卫星影像 · 实时节点分布</span>
+          </div>
         </div>
       </section>
 
-      <!-- ========== 🛒 电商系统 · 物流跟踪 ========== -->
-      <section class="sub-page" id="page-logistics">
-        <div class="page-header"><div><h2 class="page-title">物流跟踪</h2><p class="page-sub">发货轨迹 · 异常预警</p></div></div>
-        <div class="card placeholder-card">
-          <div class="placeholder-icon">🚚</div>
-          <h3>物流跟踪</h3>
-          <p>该模块正在紧张开发中，将接入物流轨迹查询与异常件预警。</p>
-          <button class="btn btn-primary btn-sm" onclick="switchTab('dashboard')">返回工作台</button>
-        </div>
-      </section>
-
-      <!-- ========== 📦 发卡系统 · TGX 号池 ========== -->
-      <section class="sub-page" id="page-tgx">
-        <div class="page-header"><div><h2 class="page-title">TGX 号池</h2><p class="page-sub">账号库存 · 自动发卡</p></div></div>
-        <div class="card placeholder-card">
-          <div class="placeholder-icon">🗂️</div>
-          <h3>TGX 号池</h3>
-          <p>该模块正在紧张开发中，将支持号池入库、分配、冻结与自动发卡。</p>
-          <button class="btn btn-primary btn-sm" onclick="switchTab('dashboard')">返回工作台</button>
-        </div>
-      </section>
-
-      <!-- ========== 📦 发卡系统 · 接码 ========== -->
-      <section class="sub-page" id="page-sms">
-        <div class="page-header"><div><h2 class="page-title">接码平台</h2><p class="page-sub">验证码接收 · 通道管理</p></div></div>
-        <div class="card placeholder-card">
-          <div class="placeholder-icon">📩</div>
-          <h3>接码平台</h3>
-          <p>该模块正在紧张开发中，将支持接码通道切换、号码分配与收益结算。</p>
-          <button class="btn btn-primary btn-sm" onclick="switchTab('dashboard')">返回工作台</button>
-        </div>
-      </section>
-
-      <!-- ========== 🌐 网络基建 · 节点管理 ========== -->
-      <section class="sub-page" id="page-nodes">
+      <!-- ========== 工作台 · 全域可视化地图（全屏） ========== -->
+      <section class="sub-page" id="page-map">
         <div class="page-header">
           <div>
-            <h2 class="page-title">节点管理</h2>
-            <p class="page-sub">卫星影像 · 实时节点分布</p>
+            <h2 class="page-title">全域可视化地图</h2>
+            <p class="page-sub">节点分布 · 电商物流 · 服务器机房</p>
           </div>
           <div class="map-header-actions">
             <span class="geo-chip" id="geo-chip"><i class="geo-dot"></i><span id="geo-text">定位中...</span></span>
             <button class="btn btn-primary btn-sm" onclick="locateMe(true)">定位我的位置</button>
-            <button class="btn btn-primary btn-sm" onclick="initNodeMap(true)">刷新节点</button>
+            <button class="btn btn-primary btn-sm" onclick="initNodeMap(true)">刷新图层</button>
           </div>
         </div>
         <div class="card map-card">
           <div id="node-map"></div>
+          <!-- 图层切换器 -->
+          <div class="map-layer-switch" role="tablist" aria-label="地图图层切换">
+            <button class="layer-btn active" data-layer="nodes" onclick="switchMapLayer('nodes')" aria-label="节点分布图层">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/></svg>
+              <span class="lb-text">节点分布</span>
+            </button>
+            <button class="layer-btn" data-layer="logistics" onclick="switchMapLayer('logistics')" aria-label="电商物流图层">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 4h13v12H1z"/><path d="M14 9h4l3 3v4h-7"/><circle cx="6" cy="19" r="1.6"/><circle cx="17" cy="19" r="1.6"/></svg>
+              <span class="lb-text">电商物流</span>
+            </button>
+            <button class="layer-btn" data-layer="idc" onclick="switchMapLayer('idc')" aria-label="服务器机房图层">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="7" rx="1.5"/><rect x="3" y="13" width="18" height="7" rx="1.5"/><path d="M7 7.5h.01M7 16.5h.01M11 7.5h4M11 16.5h4"/></svg>
+              <span class="lb-text">服务器机房</span>
+            </button>
+          </div>
+          <!-- 物流图层空态 -->
+          <div class="map-empty-layer" id="map-empty-layer">
+            <div class="mel-icon">
+              <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M1 4h13v12H1z"/><path d="M14 9h4l3 3v4h-7"/><circle cx="6" cy="19" r="1.6"/><circle cx="17" cy="19" r="1.6"/></svg>
+            </div>
+            <b>电商物流图层</b>
+            物流轨迹数据尚未接入，该图层将在订单代发模块上线后自动点亮。
+          </div>
           <div class="map-zoom-ctrl">
             <button class="zoom-btn" onclick="mapZoomIn()" title="放大" aria-label="放大">
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg>
@@ -283,67 +262,250 @@
             <span class="legend-item"><i class="dot dot-live"></i>在线节点</span>
             <span class="legend-item"><i class="dot dot-off"></i>离线节点</span>
             <span class="legend-item"><i class="dot dot-me"></i>我的位置</span>
-            <span class="legend-note">卫星影像 · 实时节点分布</span>
+            <span class="legend-item"><i class="dot dot-idc"></i>服务器机房</span>
+            <span class="legend-note" id="map-layer-note">当前图层：节点分布</span>
           </div>
         </div>
       </section>
 
-      <!-- ========== 🌐 网络基建 · 服务器探针 ========== -->
+      <!-- ========== 工作台 · 系统日志 ========== -->
+      <section class="sub-page" id="page-logs">
+        <div class="page-header"><div><h2 class="page-title">系统日志</h2><p class="page-sub">系统操作审计与运行记录</p></div></div>
+        <div class="card placeholder-card">
+          <div class="placeholder-icon">
+            <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 3h9l4 4v14a1 1 0 01-1 1H6a1 1 0 01-1-1V4a1 1 0 011-1z"/><path d="M14 3v5h5"/><path d="M9 12h7M9 16h7"/></svg>
+          </div>
+          <h3>系统日志</h3>
+          <p>该模块正在紧张开发中，将提供登录审计、操作记录、异常告警等能力，日志将按级别分类并支持全文检索。</p>
+          <button class="btn btn-primary btn-sm" onclick="switchTab('dashboard')">返回工作台</button>
+        </div>
+      </section>
+
+      <!-- ========== 电商业务 · 商品管理 ========== -->
+      <section class="sub-page" id="page-products">
+        <div class="page-header">
+          <div>
+            <h2 class="page-title">商品管理</h2>
+            <p class="page-sub">在售账号商品 · 实时库存状态</p>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="loadAccounts()">刷新列表</button>
+        </div>
+        <div class="product-grid" id="account-list">
+          <div class="empty-tip">加载中...</div>
+        </div>
+      </section>
+
+      <!-- ========== 电商业务 · 订单代发 ========== -->
+      <section class="sub-page" id="page-orders">
+        <div class="page-header"><div><h2 class="page-title">订单代发</h2><p class="page-sub">全渠道订单 · 支付与退款</p></div></div>
+        <div class="card placeholder-card">
+          <div class="placeholder-icon">
+            <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 3h14v18l-2.5-1.5L14 21l-2-1.5L10 21l-2.5-1.5L5 21V3z"/><path d="M9 8h6M9 12h6"/></svg>
+          </div>
+          <h3>订单代发</h3>
+          <p>该模块正在紧张开发中，将支持订单查询、自动代发、对账、退款处理与批量导出。</p>
+          <button class="btn btn-primary btn-sm" onclick="switchTab('dashboard')">返回工作台</button>
+        </div>
+      </section>
+
+      <!-- ========== TGX 业务 · TGX 账号库 ========== -->
+      <section class="sub-page" id="page-tgx">
+        <div class="page-header">
+          <div>
+            <h2 class="page-title">TGX 账号库</h2>
+            <p class="page-sub">账号库存 · 自动发卡 · 统一调度</p>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="loadAccountPool()">刷新库存</button>
+        </div>
+        <div class="card table-card">
+          <div class="table-wrap">
+            <table class="table" id="tgx-pool-table">
+              <thead><tr><th>账号商品</th><th>类型</th><th>价格</th><th>库存</th><th>状态</th></tr></thead>
+              <tbody><tr><td colspan="5" class="empty-tip">加载中...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== TGX 业务 · 节点与订阅 ========== -->
+      <section class="sub-page" id="page-nodes">
+        <div class="page-header">
+          <div>
+            <h2 class="page-title">节点与订阅</h2>
+            <p class="page-sub">TGX 节点售卖 · 订阅链接管理</p>
+          </div>
+          <div class="map-header-actions">
+            <button class="btn btn-primary btn-sm" onclick="switchTab('map')">可视化地图</button>
+            <button class="btn btn-primary btn-sm" onclick="loadNodeCards()">刷新节点</button>
+          </div>
+        </div>
+        <div class="product-grid" id="node-card-list">
+          <div class="empty-tip">加载中...</div>
+        </div>
+      </section>
+
+      <!-- ========== TGX 业务 · 接码池 ========== -->
+      <section class="sub-page" id="page-sms">
+        <div class="page-header"><div><h2 class="page-title">接码池</h2><p class="page-sub">验证码接收 · 通道管理</p></div></div>
+        <div class="card placeholder-card">
+          <div class="placeholder-icon">
+            <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M8 10h8M8 14h5"/></svg>
+          </div>
+          <h3>接码池</h3>
+          <p>接码能力已融合进 TGX 业务模块。该模块将支持接码通道切换、号码分配、验证码自动抓取与收益结算。</p>
+          <button class="btn btn-primary btn-sm" onclick="switchTab('tgx')">前往 TGX 账号库</button>
+        </div>
+      </section>
+
+      <!-- ========== TGX 业务 · API 分发 ========== -->
+      <section class="sub-page" id="page-apikeys">
+        <div class="page-header"><div><h2 class="page-title">API 分发</h2><p class="page-sub">开放接口 · 密钥与额度</p></div></div>
+        <div class="card placeholder-card">
+          <div class="placeholder-icon">
+            <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="15" r="4"/><path d="M10.8 12.2L20 3M17 6l2.5 2.5M14.5 8.5L17 11"/></svg>
+          </div>
+          <h3>API 分发</h3>
+          <p>该模块正在紧张开发中，将支持 API 密钥签发、调用额度分配、频率限制与调用日志审计。</p>
+          <button class="btn btn-primary btn-sm" onclick="switchTab('dashboard')">返回工作台</button>
+        </div>
+      </section>
+
+      <!-- ========== 网络基建 · 节点监控 ========== -->
+      <section class="sub-page" id="page-monitor">
+        <div class="page-header">
+          <div>
+            <h2 class="page-title">节点监控</h2>
+            <p class="page-sub">节点状态 · 实时巡检</p>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="loadMonitor()">刷新状态</button>
+        </div>
+        <div class="card table-card">
+          <div class="table-wrap">
+            <table class="table" id="monitor-table">
+              <thead><tr><th>节点</th><th>IP</th><th>地区</th><th>状态</th><th>坐标</th></tr></thead>
+              <tbody><tr><td colspan="5" class="empty-tip">加载中...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== 网络基建 · 域名管理 ========== -->
+      <section class="sub-page" id="page-dns">
+        <div class="page-header">
+          <div>
+            <h2 class="page-title">域名管理</h2>
+            <p class="page-sub">DNS 记录 · CDN 与证书</p>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="loadDns()">刷新解析</button>
+        </div>
+        <div class="card table-card">
+          <div class="table-wrap">
+            <table class="table" id="dns-table">
+              <thead><tr><th>域名</th><th>指向 IP</th><th>地区</th><th>用途</th></tr></thead>
+              <tbody><tr><td colspan="4" class="empty-tip">加载中...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== 网络基建 · 服务器探针 ========== -->
       <section class="sub-page" id="page-probe">
         <div class="page-header"><div><h2 class="page-title">服务器探针</h2><p class="page-sub">延迟监控 · 负载与带宽</p></div></div>
         <div class="card placeholder-card">
-          <div class="placeholder-icon">📡</div>
+          <div class="placeholder-icon">
+            <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M22 12h-4l-3 8-6-16-3 8H2"/></svg>
+          </div>
           <h3>服务器探针</h3>
-          <p>该模块正在紧张开发中，将提供节点延迟探测、负载监控与掉线告警。</p>
-          <button class="btn btn-primary btn-sm" onclick="switchTab('dashboard')">返回工作台</button>
+          <p>该模块正在紧张开发中，将提供节点延迟探测、负载监控、带宽统计与掉线告警。</p>
+          <button class="btn btn-primary btn-sm" onclick="switchTab('monitor')">前往节点监控</button>
         </div>
       </section>
 
-      <!-- ========== 🌐 网络基建 · 域名解析 ========== -->
-      <section class="sub-page" id="page-dns">
-        <div class="page-header"><div><h2 class="page-title">域名解析</h2><p class="page-sub">DNS 记录 · CDN 与证书</p></div></div>
-        <div class="card placeholder-card">
-          <div class="placeholder-icon">🌍</div>
-          <h3>域名解析</h3>
-          <p>该模块正在紧张开发中，将支持解析记录管理、CDN 状态与 SSL 证书监控。</p>
-          <button class="btn btn-primary btn-sm" onclick="switchTab('dashboard')">返回工作台</button>
-        </div>
-      </section>
-
-      <!-- ========== 🤖 客服与营销 · AI 对话 ========== -->
+      <!-- ========== 营销与客服 · AI 客服 ========== -->
       <section class="sub-page" id="page-ai">
-        <div class="page-header"><div><h2 class="page-title">AI 对话</h2><p class="page-sub">智能客服 · 运营助手</p></div></div>
+        <div class="page-header"><div><h2 class="page-title">AI 客服</h2><p class="page-sub">智能客服 · 运营助手</p></div></div>
         <div class="card placeholder-card">
-          <div class="placeholder-icon">🤖</div>
+          <div class="placeholder-icon">
+            <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="7" width="16" height="12" rx="3"/><path d="M12 7V4M9 4h6"/><circle cx="9" cy="13" r="1.2" fill="currentColor" stroke="none"/><circle cx="15" cy="13" r="1.2" fill="currentColor" stroke="none"/><path d="M9.5 16.5c.8.6 1.6.9 2.5.9s1.7-.3 2.5-.9"/></svg>
+          </div>
           <h3>AI 智能客服</h3>
           <p>AI 对话已升级为全局悬浮窗，点击右下角呼吸气泡即可随时唤起，在任何页面都能对话。</p>
           <button class="btn btn-primary btn-sm" onclick="openAiChat()">立即唤起 AI 客服</button>
         </div>
       </section>
 
-      <!-- ========== 🤖 客服与营销 · 工单系统 ========== -->
+      <!-- ========== 营销与客服 · 工单 ========== -->
       <section class="sub-page" id="page-tickets">
-        <div class="page-header"><div><h2 class="page-title">工单系统</h2><p class="page-sub">客户问题 · 流转与跟进</p></div></div>
+        <div class="page-header"><div><h2 class="page-title">工单</h2><p class="page-sub">客户问题 · 流转与跟进</p></div></div>
         <div class="card placeholder-card">
-          <div class="placeholder-icon">🎫</div>
+          <div class="placeholder-icon">
+            <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 8V6a1 1 0 011-1h16a1 1 0 011 1v2a3 3 0 000 6v2a1 1 0 01-1 1H4a1 1 0 01-1-1v-2a3 3 0 000-6z"/><path d="M12 6v12" stroke-dasharray="2 2"/></svg>
+          </div>
           <h3>工单系统</h3>
           <p>该模块正在紧张开发中，将支持工单分级、流转、SLA 统计与满意度评价。</p>
           <button class="btn btn-primary btn-sm" onclick="switchTab('dashboard')">返回工作台</button>
         </div>
       </section>
 
-      <!-- ========== 🤖 客服与营销 · 机器人控制 ========== -->
-      <section class="sub-page" id="page-bots">
-        <div class="page-header"><div><h2 class="page-title">机器人控制</h2><p class="page-sub">TG 机器人 · 群发与自动回复</p></div></div>
+      <!-- ========== 营销与客服 · 签到分销 ========== -->
+      <section class="sub-page" id="page-distribution">
+        <div class="page-header"><div><h2 class="page-title">签到分销</h2><p class="page-sub">用户增长 · 裂变与返利</p></div></div>
         <div class="card placeholder-card">
-          <div class="placeholder-icon">⚙️</div>
-          <h3>机器人控制</h3>
-          <p>该模块正在紧张开发中，将支持机器人开关、群发任务与自动回复规则配置。</p>
+          <div class="placeholder-icon">
+            <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M3 12h18M12 8v13"/><path d="M12 8S9.5 3 7.5 4.5C5.8 5.8 6.8 8 12 8zM12 8s2.5-5 4.5-3.5C18.2 5.8 17.2 8 12 8z"/></svg>
+          </div>
+          <h3>签到分销</h3>
+          <p>该模块正在紧张开发中，将支持每日签到奖励、分销返利、邀请追踪与提现审核。</p>
           <button class="btn btn-primary btn-sm" onclick="switchTab('dashboard')">返回工作台</button>
         </div>
       </section>
 
-      <!-- ========== ⚙️ 系统与权限 · 个人中心 ========== -->
+      <!-- ========== 系统设置 · 员工账号权限分配 ========== -->
+      <section class="sub-page" id="page-staff">
+        <div class="page-header">
+          <div>
+            <h2 class="page-title">员工账号权限分配</h2>
+            <p class="page-sub">后台成员 · 角色与授权</p>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="loadStaff()">刷新列表</button>
+        </div>
+        <div class="card table-card">
+          <div class="table-wrap">
+            <table class="table" id="staff-table">
+              <thead><tr><th>ID</th><th>账号</th><th>权限</th><th>流量用量</th><th>到期时间</th><th>状态</th></tr></thead>
+              <tbody><tr><td colspan="6" class="empty-tip">加载中...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== 系统设置 · 支付配置 ========== -->
+      <section class="sub-page" id="page-payment">
+        <div class="page-header"><div><h2 class="page-title">支付配置</h2><p class="page-sub">支付通道 · 密钥与费率</p></div></div>
+        <div class="card placeholder-card">
+          <div class="placeholder-icon">
+            <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/><path d="M6 15h4"/></svg>
+          </div>
+          <h3>支付配置</h3>
+          <p>该模块正在紧张开发中，将支持支付通道接入、密钥管理、费率配置与对账文件下载。</p>
+          <button class="btn btn-primary btn-sm" onclick="switchTab('dashboard')">返回工作台</button>
+        </div>
+      </section>
+
+      <!-- ========== 系统设置 · 邮件配置 ========== -->
+      <section class="sub-page" id="page-mail">
+        <div class="page-header"><div><h2 class="page-title">邮件配置</h2><p class="page-sub">SMTP 服务 · 模板管理</p></div></div>
+        <div class="card placeholder-card">
+          <div class="placeholder-icon">
+            <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 7l10 6 10-6"/></svg>
+          </div>
+          <h3>邮件配置</h3>
+          <p>该模块正在紧张开发中，将支持 SMTP 服务配置、发信模板管理与发送记录查询。</p>
+          <button class="btn btn-primary btn-sm" onclick="switchTab('dashboard')">返回工作台</button>
+        </div>
+      </section>
+
+      <!-- ========== 系统设置 · 个人中心 ========== -->
       <section class="sub-page" id="page-profile">
         <div class="page-header">
           <div>
@@ -366,39 +528,6 @@
             <div class="meta-item"><span class="meta-label">最近登录</span><span class="meta-value" id="profile-lastlogin">--</span></div>
           </div>
           <button class="btn btn-danger btn-block" onclick="doLogout()">退出登录</button>
-        </div>
-      </section>
-
-      <!-- ========== ⚙️ 系统与权限 · 员工账号 ========== -->
-      <section class="sub-page" id="page-staff">
-        <div class="page-header"><div><h2 class="page-title">员工账号</h2><p class="page-sub">后台成员 · 登录授权</p></div></div>
-        <div class="card placeholder-card">
-          <div class="placeholder-icon">👥</div>
-          <h3>员工账号</h3>
-          <p>该模块正在紧张开发中，将支持员工新增、禁用、登录授权与操作审计。</p>
-          <button class="btn btn-primary btn-sm" onclick="switchTab('dashboard')">返回工作台</button>
-        </div>
-      </section>
-
-      <!-- ========== ⚙️ 系统与权限 · 角色分配 ========== -->
-      <section class="sub-page" id="page-roles">
-        <div class="page-header"><div><h2 class="page-title">角色分配</h2><p class="page-sub">RBAC 权限 · 菜单与接口</p></div></div>
-        <div class="card placeholder-card">
-          <div class="placeholder-icon">🛡️</div>
-          <h3>角色分配</h3>
-          <p>该模块正在紧张开发中，将支持角色定义、菜单权限与接口级授权配置。</p>
-          <button class="btn btn-primary btn-sm" onclick="switchTab('dashboard')">返回工作台</button>
-        </div>
-      </section>
-
-      <!-- ========== ⚙️ 系统与权限 · 系统设置 ========== -->
-      <section class="sub-page" id="page-settings">
-        <div class="page-header"><div><h2 class="page-title">系统设置</h2><p class="page-sub">支付配置 · 公告与开关</p></div></div>
-        <div class="card placeholder-card">
-          <div class="placeholder-icon">🔧</div>
-          <h3>系统设置</h3>
-          <p>该模块正在紧张开发中，将支持支付通道、站点公告、邮件模板等全局配置。</p>
-          <button class="btn btn-primary btn-sm" onclick="switchTab('dashboard')">返回工作台</button>
         </div>
       </section>
 
@@ -444,8 +573,8 @@
 
   <!-- Leaflet JS（jsdelivr 主源 + cdnjs 容灾） -->
   <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js" onerror="document.write('<script src=\"https:\/\/cdnjs.cloudflare.com\/ajax\/libs\/leaflet\/1.9.4\/leaflet.min.js\"><\/script>')"></script>
-  <script src="./js/app.js?v=20261024h"></script>
-  <script src="./js/map-page.js?v=20261024h"></script>
-  <script src="./js/ai-widget.js?v=20261024h"></script>
+  <script src="./js/app.js?v=20261025a"></script>
+  <script src="./js/map-page.js?v=20261025a"></script>
+  <script src="./js/ai-widget.js?v=20261025a"></script>
 </body>
 </html>
