@@ -1,5 +1,5 @@
 /* ============================================================
-   LynLi 管理中枢 · 蓝白熊猫主题（v20261026n）
+   LynLi 管理中枢 · 蓝白熊猫主题（v20261026o）
    - 蓝白渐变背景 + 缓慢漂浮熊猫（Lottie / CSS 剪影）
    - 白色半透明毛玻璃卡片 rgba(255,255,255,.85)
    - 滑动修复：min-height:100dvh + 底部 padding 100px
@@ -924,7 +924,7 @@ body:not(.logged-in) .ai-fab { display: none; }
 }
 
 /* ============================================================
-   阶段三/四新增样式（v20261026n）
+   阶段三/四新增样式（v20261026o）
    电商自动化 / 极客工具箱占位页 · 海报生成器 · AI 弹窗
    ============================================================ */
 
@@ -1230,3 +1230,5 @@ select.biz-input { cursor: pointer; }
 .bot-chat-send .input { height: 36px; font-size: 13px; }
 .bot-chat-send .input:first-child { width: 130px; flex-shrink: 0; }
 .bot-chat-input { flex: 1; }
+.bot-avatar-wrap { width: 36px; height: 36px; flex-shrink: 0; }
+.bot-avatar-img { object-fit: cover; }

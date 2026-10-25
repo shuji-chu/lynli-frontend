@@ -95,15 +95,20 @@ window.BotMX = {
         if (kw) rows = rows.filter(u => String(u.tg_id).includes(kw) || (u.nickname || '').toLowerCase().includes(kw) || (u.suser || '').toLowerCase().includes(kw));
         if (!rows.length) { box.innerHTML = `<div class="empty-tip">${kw ? '没有匹配的用户' : '暂无用户数据'}</div>`; return; }
         box.innerHTML = rows.map(u => {
-            const name = (u.nickname || u.tg_id).slice(0, 1).toUpperCase();
+            const name = (u.nickname || u.username || u.tg_id).slice(0, 1).toUpperCase();
             const expire = u.expire > 0 ? fmtTime(u.expire) : '未开通';
             const banned = Number(u.banned) === 1;
+            const sub = `${u.username ? '@' + escapeHtml(u.username) + ' · ' : ''}ID ${escapeHtml(u.tg_id)}`;
+            const avatar = u.avatar
+                ? `<img class="staff-avatar bot-avatar-sm bot-avatar-img" src="${escapeHtml(u.avatar)}" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+                   <span class="staff-avatar bot-avatar-sm" style="display:none">${escapeHtml(name)}</span>`
+                : `<span class="staff-avatar bot-avatar-sm">${escapeHtml(name)}</span>`;
             return `
             <div class="bot-user-item ${banned ? 'bot-user-banned' : ''}">
-              <div class="staff-avatar bot-avatar-sm">${escapeHtml(name)}</div>
+              <div class="bot-avatar-wrap">${avatar}</div>
               <div class="staff-main">
-                <div class="staff-nick">${escapeHtml(u.nickname || '--')}${banned ? '<span class="bot-ban-badge">已封禁</span>' : ''}</div>
-                <div class="staff-mail">ID ${escapeHtml(u.tg_id)} · ${fmtBytes(u.traffic_mb)} · 到期 ${expire}${u.suser ? ' · ' + escapeHtml(u.suser) : ''}</div>
+                <div class="staff-nick">${escapeHtml(u.nickname || u.username || u.tg_id)}${banned ? '<span class="bot-ban-badge">已封禁</span>' : ''}</div>
+                <div class="staff-mail">${sub} · ${fmtBytes(u.traffic_mb)} · 到期 ${expire}${u.suser ? ' · ' + escapeHtml(u.suser) : ''}</div>
               </div>
               <button class="btn btn-ghost btn-xs" onclick="BotMX.openAction('${escapeHtml(u.tg_id)}')">操作</button>
             </div>`;
