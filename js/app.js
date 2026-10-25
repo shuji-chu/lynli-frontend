@@ -858,45 +858,6 @@ function renderStockChart(products) {
     setTimeout(() => chart.resize(), 60);
 }
 
-// ---------- 电商业务 · 商品管理：卡片式列表 + 状态指示灯 ----------
-async function loadAccounts() {
-    const grid = document.getElementById('account-list');
-    if (!grid) return;
-    grid.innerHTML = '<div class="empty-tip">加载中...</div>';
-    try {
-        const res = await fetch(`${API_BASE}/account/products`);
-        const json = await res.json();
-        const list = (json.code === 1 && json.data) ? json.data : [];
-        window.__products = list;   // 供 AI 按钮弹窗取商品数据
-        if (!list.length) {
-            grid.innerHTML = '<div class="empty-tip">暂无在售商品</div>';
-            return;
-        }
-        grid.innerHTML = list.map((p, i) => {
-            const inStock = Number(p.stock) > 0;
-            return `
-            <div class="product-card" style="--d:${i}">
-              <div class="pc-head">
-                <div class="pc-title">${escapeHtml(p.title || '未命名商品')}</div>
-              </div>
-              <p class="pc-desc">${escapeHtml((p.desc || '暂无描述').slice(0, 60))}</p>
-              <div class="pc-foot">
-                <span class="pc-price">¥${Number(p.price || 0).toFixed(2)}<small> /件</small></span>
-                <span class="stock-light ${inStock ? 'live' : 'out'}"><i></i>${inStock ? '有货 ' + p.stock : '已售罄'}</span>
-              </div>
-              <div class="pc-ai">
-                <span class="pc-ai-label"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3z"/></svg>AI 工具箱</span>
-                <button class="btn btn-ghost btn-xs" onclick="aiSceneOpen(${i})">生成场景图</button>
-                <button class="btn btn-ghost btn-xs" onclick="aiVideoOpen(${i})">图转视频</button>
-              </div>
-            </div>`;
-        }).join('');
-    } catch (e) {
-        grid.innerHTML = '<div class="empty-tip">加载失败，请重试</div>';
-        showToast('商品列表加载失败', 'error');
-    }
-}
-
 // ---------- TGX 业务 · TGX 账号库：真实库存表格 ----------
 async function loadAccountPool() {
     const tbody = document.querySelector('#tgx-pool-table tbody');
