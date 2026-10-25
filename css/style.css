@@ -1,5 +1,5 @@
 /* ============================================================
-   LynLi 管理中枢 · 蓝白熊猫主题（v20261026f）
+   LynLi 管理中枢 · 蓝白熊猫主题（v20261026g）
    - 蓝白渐变背景 + 缓慢漂浮熊猫（Lottie / CSS 剪影）
    - 白色半透明毛玻璃卡片 rgba(255,255,255,.85)
    - 滑动修复：min-height:100dvh + 底部 padding 100px
@@ -61,16 +61,17 @@ body {
 @keyframes pandaDrift3 { from { transform: translate(0,0) scale(.95); } to { transform: translate(70px,-90px) scale(1.2); } }
 
 /* ---------- 纯 CSS 黑白熊猫剪影（最稳妥方案，始终渲染，缓慢上下漂浮） ---------- */
-.panda-silhouette { position: absolute; opacity: .27; will-change: transform; }
-.panda-silhouette-1 { width: 150px; height: 150px; top: 11%; left: 5%; animation: pandaFloat 7.5s ease-in-out infinite alternate; }
-.panda-silhouette-2 { width: 104px; height: 104px; bottom: 15%; right: 7%; animation: pandaFloat 9.5s ease-in-out infinite alternate-reverse; }
+.panda-silhouette { position: absolute; opacity: .42; will-change: transform; }
+.panda-silhouette-1 { width: 118px; height: 118px; top: 5.5%; left: 4.5%; animation: pandaFloat 7.5s ease-in-out infinite alternate; }
+.panda-silhouette-2 { width: 84px; height: 84px; bottom: 6.5%; right: 6%; animation: pandaFloat 9.5s ease-in-out infinite alternate-reverse; }
 @keyframes pandaFloat { from { transform: translateY(0); } to { transform: translateY(-42px); } }
 
-/* 熊猫本体：白色头身 + 黑色耳 / 眼斑 / 鼻（黑白圆块组合） */
+/* 熊猫本体：白色头身（描边防隐身）+ 黑色耳 / 眼斑 / 鼻（黑白圆块组合） */
 .panda { position: relative; width: 100%; height: 100%; }
 .panda .p-head {
   position: absolute; inset: 0; border-radius: 50% 50% 48% 48%;
-  background: #ffffff; box-shadow: inset 0 -8px 16px rgba(0,0,0,.06), 0 12px 30px -10px rgba(30,64,175,.22);
+  background: #ffffff; border: 3px solid rgba(31,41,55,.18);
+  box-shadow: inset 0 -8px 16px rgba(0,0,0,.05), 0 12px 30px -10px rgba(30,64,175,.22);
 }
 .panda .p-ear { position: absolute; top: -3%; width: 34%; height: 34%; background: #1f2937; border-radius: 50%; }
 .panda .p-ear-l { left: 5%; }
@@ -861,7 +862,7 @@ body:not(.logged-in) .ai-fab { display: none; }
 }
 
 /* ============================================================
-   阶段三/四新增样式（v20261026f）
+   阶段三/四新增样式（v20261026g）
    电商自动化 / 极客工具箱占位页 · 海报生成器 · AI 弹窗
    ============================================================ */
 
