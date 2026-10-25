@@ -81,48 +81,120 @@
     },
   };
 
-  /* ================= 通用：探测后端空壳接口 ================= */
+  /* ================= 通用：探测后端真实接口，渲染联调状态 ================= */
   function _isCatchAll(json) {
     return !!json && json.message === "ok" && json.data === null
       && json.status === "success" && !("code" in json);
   }
+  // 后端预留空壳（api_stubs.py）：code 0 + message "待开发" + data.module
+  function _isPlanned(json) {
+    return !!json && json.message === "待开发" && json.data && json.data.module;
+  }
 
-  function _setEpState(tab, state, raw) {
-    // state: ready(接口已就绪) / offline(未部署) / error(异常)
+  const EP_ICONS = {
+    clock: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+    check: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12.5l4.5 4.5L19 7"/></svg>',
+    cloud: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 18a4 4 0 010-8 5 5 0 019.6-1.4A3.5 3.5 0 0117 18z"/></svg>',
+    warn:  '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l9 16H3z"/><path d="M12 10v4M12 17h.01"/></svg>',
+  };
+
+  function _renderBanner(tab, state, meta) {
+    const st = document.getElementById("ep-status-" + tab);
+    const box = st && st.closest(".biz-api");
+    if (!box) return;
+    let banner = document.getElementById("ep-banner-" + tab);
+    if (!banner) {
+      banner = document.createElement("div");
+      banner.id = "ep-banner-" + tab;
+      banner.className = "ep-state-banner";
+      box.insertBefore(banner, box.firstChild);
+    }
+    const MAP = {
+      pending: { cls: "pending", ico: "clock", title: "功能联调中 · 敬请期待",
+        desc: "后端接口已成功联通，模块能力正在紧锣密鼓联调中。当前为预留接口返回的状态码，正式能力上线后将自动点亮。" },
+      ready:   { cls: "ready", ico: "check", title: "接口已就绪",
+        desc: "后端已返回真实业务数据，模块能力已上线可用。" },
+      offline: { cls: "offline", ico: "cloud", title: "接口尚未部署",
+        desc: "后端尚未部署该接口（命中兜底响应），部署后自动可用，无需前端改动。" },
+      error:   { cls: "error", ico: "warn", title: "接口异常",
+        desc: "请求过程出现错误，请检查网络或后端服务状态后重试。" },
+    };
+    const c = MAP[state] || MAP.offline;
+    const metaRows = _metaRows(meta);
+    banner.className = "ep-state-banner " + c.cls;
+    banner.innerHTML =
+      '<div class="esb-ico">' + EP_ICONS[c.ico] + '</div>' +
+      '<div class="esb-body"><div class="esb-title">' + c.title + '</div>' +
+      '<div class="esb-desc">' + c.desc + '</div>' + metaRows + '</div>';
+  }
+
+  function _metaRows(d) {
+    if (!d) return "";
+    const rows = [
+      ["模块名称", d.name || d.module || "-"],
+      ["模块代码", d.module || "-"],
+      ["后端端点", d.endpoint || "-"],
+      ["接口状态", (d.status || "").toUpperCase() || "-"],
+      ["返回时间", d.ts ? new Date(d.ts * 1000).toLocaleString("zh-CN") : "-"],
+    ];
+    return '<div class="esb-meta">' + rows.map(function (r) {
+      return '<span class="esb-meta-row"><i>' + r[0] + '</i><b>' + String(r[1]).replace(/[<>&]/g, function (m) { return { "<": "&lt;", ">": "&gt;", "&": "&amp;" }[m]; }) + '</b></span>';
+    }).join("") + '</div>';
+  }
+
+  // state: pending(功能联调中) / ready(已就绪) / offline(未部署) / error(异常)
+  const EP_LABEL = {
+    pending: ["功能联调中", "warn"], ready: ["已就绪", "ok"],
+    offline: ["未部署", "warn"], error: ["异常", "err"],
+  };
+
+  function _setEpState(tab, state, raw, meta) {
     const badge = document.getElementById("ep-badge-" + tab);
     const st = document.getElementById("ep-status-" + tab);
     const box = document.getElementById("ep-raw-" + tab);
-    const label = { ready: ["已就绪", "ok"], offline: ["未部署", "warn"], error: ["异常", "err"] }[state] || ["--", ""];
-    if (badge) {
-      badge.textContent = label[0];
-      badge.className = "ep-badge " + label[1];
-    }
+    const label = EP_LABEL[state] || ["--", ""];
+    if (badge) { badge.textContent = label[0]; badge.className = "ep-badge " + label[1]; }
     if (st) st.textContent = label[0];
-    if (box && raw != null) {
-      box.textContent = typeof raw === "string" ? raw : JSON.stringify(raw, null, 2);
-    }
+    if (box != null) box.textContent = typeof raw === "string" ? raw : JSON.stringify(raw, null, 2);
+    _renderBanner(tab, state, meta);
   }
 
   async function loadBizPage(tab) {
     const mod = BIZ[tab];
     if (!mod) return;
-    _setEpState(tab, "offline", "探测中...");
+    _setEpState(tab, "pending", "探测中...", null);
     try {
-      const res = await fetch(API_BASE + mod.ep, { method: mod.method });
+      const res = await fetch(API_BASE + mod.ep, {
+        method: mod.method,
+        headers: mod.method === "POST" ? { "Content-Type": "application/json" } : undefined,
+      });
       const json = await res.json().catch(() => null);
-      if (json && json.message === "待开发" && json.data && json.data.module) {
-        _setEpState(tab, "ready", json);
-        showToast(mod.title + "：后端接口已就绪（待开发）", "success");
+      if (_isPlanned(json)) {
+        // 后端已联通但模块能力尚在联调 → 高质感「功能联调中 · 敬请期待」空状态卡片
+        _setEpState(tab, "pending", json, json.data);
+        showToast(mod.title + "：接口已联通，模块联调中", "info");
+      } else if (json && json.code === 1) {
+        _setEpState(tab, "ready", json, json.data);
+        showToast(mod.title + "：接口已就绪", "success");
       } else if (_isCatchAll(json)) {
-        _setEpState(tab, "offline", json);
+        _setEpState(tab, "offline", json, null);
         showToast(mod.title + "：后端尚未部署该接口", "warn");
       } else {
-        _setEpState(tab, "error", json || ("HTTP " + res.status));
+        _setEpState(tab, "error", json || ("HTTP " + res.status), null);
       }
     } catch (e) {
-      _setEpState(tab, "error", String(e));
+      _setEpState(tab, "error", String(e), null);
     }
   }
+
+  // 进入业务页即真实探测；左卡按钮文案统一为「重新探测接口」
+  function _initBizLabels() {
+    document.querySelectorAll('.biz-feature button[onclick^="loadBizPage"]').forEach(function (b) {
+      if (b.textContent.indexOf("重新探测") === -1) b.textContent = "重新探测接口";
+    });
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", _initBizLabels);
+  else _initBizLabels();
 
   /* ================= 弹窗基础（与全站深色弹窗风格一致） ================= */
   function _openModal(title, bodyHtml, footerHtml) {

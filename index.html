@@ -5,32 +5,39 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>LynLi · 超级管理中枢</title>
   <!-- 品牌图标 -->
-  <link rel="icon" type="image/png" href="./favicon.png?v=20261026e">
-  <link rel="apple-touch-icon" href="./apple-touch-icon.png?v=20261026e">
+  <link rel="icon" type="image/png" href="./favicon.png?v=20261026f">
+  <link rel="apple-touch-icon" href="./apple-touch-icon.png?v=20261026f">
   <!-- 蓝白主题（相对路径，解决 GitHub Pages 白屏） -->
-  <link rel="stylesheet" href="./css/style.css?v=20261026e">
+  <link rel="stylesheet" href="./css/style.css?v=20261026f">
   <!-- Leaflet 地图库（jsdelivr 主源 + cdnjs 容灾） -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" onerror="this.onerror=null;this.href='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css'">
   <!-- Anime.js 丝滑动画 -->
   <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.2/lib/anime.min.js" onerror="document.write('<script src=\"https:\/\/cdnjs.cloudflare.com\/ajax\/libs\/animejs\/3.2.2\/anime.min.js\"><\/script>')"></script>
-  <!-- Lottie-Web（熊猫动画，失败时自动降级为 CSS 剪影动画） -->
-  <script src="https://cdn.jsdelivr.net/npm/lottie-web@5.12.2/build/player/lottie.min.js" onerror="window.__lottieFailed=true"></script>
 </head>
 <body>
 
-  <!-- ======================= 蓝白渐变背景 + 漂浮熊猫（Lottie/CSS 剪影双保险） ======================= -->
+  <!-- ======================= 清爽浅蓝→白渐变背景 + 纯 CSS 熊猫（黑白剪影，缓慢上下漂浮） ======================= -->
   <div class="bg-panda" aria-hidden="true">
     <span class="panda-glow panda-glow-1"></span>
     <span class="panda-glow panda-glow-2"></span>
     <span class="panda-glow panda-glow-3"></span>
-    <div class="panda-float panda-float-1" id="panda-lottie-1"></div>
-    <div class="panda-float panda-float-2" id="panda-lottie-2"></div>
-    <!-- Lottie 加载失败时的 CSS 剪影熊猫兜底 -->
-    <div class="panda-silhouette panda-silhouette-1" id="panda-css-1">
-      <div class="ps-body"><div class="ps-ear ps-ear-l"></div><div class="ps-ear ps-ear-r"></div><div class="ps-eye ps-eye-l"></div><div class="ps-eye ps-eye-r"></div><div class="ps-belly"></div></div>
+    <div class="panda-silhouette panda-silhouette-1">
+      <div class="panda">
+        <span class="p-head"></span>
+        <span class="p-ear p-ear-l"></span><span class="p-ear p-ear-r"></span>
+        <span class="p-patch p-patch-l"><span class="p-eye"></span></span>
+        <span class="p-patch p-patch-r"><span class="p-eye"></span></span>
+        <span class="p-nose"></span><span class="p-mouth"></span>
+      </div>
     </div>
-    <div class="panda-silhouette panda-silhouette-2" id="panda-css-2">
-      <div class="ps-body"><div class="ps-ear ps-ear-l"></div><div class="ps-ear ps-ear-r"></div><div class="ps-eye ps-eye-l"></div><div class="ps-eye ps-eye-r"></div><div class="ps-belly"></div></div>
+    <div class="panda-silhouette panda-silhouette-2">
+      <div class="panda">
+        <span class="p-head"></span>
+        <span class="p-ear p-ear-l"></span><span class="p-ear p-ear-r"></span>
+        <span class="p-patch p-patch-l"><span class="p-eye"></span></span>
+        <span class="p-patch p-patch-r"><span class="p-eye"></span></span>
+        <span class="p-nose"></span><span class="p-mouth"></span>
+      </div>
     </div>
   </div>
 
@@ -249,11 +256,11 @@
             <div class="map-search-panel" id="map-search-panel"></div>
           </div>
 
-          <!-- 右上：底图切换（毛玻璃自定义控件） -->
+          <!-- 右上：底图切换（毛玻璃自定义控件 · 全部免费开源无需 Key） -->
           <div class="map-base-switch" role="tablist" aria-label="底图切换">
-            <button class="base-btn active" data-base="light" onclick="switchBase('light')" title="矢量浅色">浅色</button>
-            <button class="base-btn" data-base="dark" onclick="switchBase('dark')" title="矢量深色">深色</button>
-            <button class="base-btn" data-base="sat" onclick="switchBase('sat')" title="卫星影像">卫星</button>
+            <button class="base-btn active" data-base="light" onclick="switchBase('light')" title="OpenStreetMap 矢量浅色路网">浅色</button>
+            <button class="base-btn" data-base="terrain" onclick="switchBase('terrain')" title="OpenTopoMap 地形图">地形</button>
+            <button class="base-btn" data-base="sat" onclick="switchBase('sat')" title="Esri 真实卫星影像">卫星</button>
           </div>
 
           <!-- 右上：自定义缩放控件（替代 Leaflet 默认 UI） -->
@@ -1036,84 +1043,11 @@
   <!-- Leaflet JS（jsdelivr 主源 + cdnjs 容灾） -->
   <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js" onerror="document.write('<script src=\"https:\/\/cdnjs.cloudflare.com\/ajax\/libs\/leaflet\/1.9.4\/leaflet.min.js\"><\/script>')"></script>
   <!-- 全局用户信息同步中心（所有子站复用）：必须先于业务脚本加载 -->
-  <script src="./js/user-store.js?v=20261026e"></script>
-  <script src="./js/app.js?v=20261026e"></script>
-  <script src="./js/map-page.js?v=20261026e"></script>
-  <script src="./js/profile-page.js?v=20261026e"></script>
-  <script src="./js/ai-widget.js?v=20261026e"></script>
-  <script src="./js/biz-pages.js?v=20261026e"></script>
-  <script>
-    /* ---------- 蓝白熊猫漂浮动画 ----------
-       Lottie-Web 播放熊猫动画；无源/加载失败时自动降级为 CSS 剪影动画 */
-    (function () {
-      function initPanda() {
-        var css1 = document.getElementById('panda-css-1');
-        var css2 = document.getElementById('panda-css-2');
-        var hasLottie = (typeof lottie !== 'undefined') && !window.__lottieFailed;
-        if (hasLottie) {
-          // 用轻量内置动画数据（漂浮的圆形气泡+摆动），模拟熊猫呼吸漂浮
-          var pandaData = {
-            v: "5.7.4", fr: 30, ip: 0, op: 90, w: 100, h: 100, nm: "panda-float",
-            ddd: 0, assets: [], layers: [
-              { ddd: 0, ind: 1, ty: 4, nm: "body", sr: 1,
-                ks: { o: { a: 0, k: 60 }, r: { a: 1, k: [{ t: 0, s: [-6], e: [6], i: { x: [0.4], y: [1] }, o: { x: [0.6], y: [0] } }, { t: 90, s: [6] }] },
-                  p: { a: 1, k: [{ t: 0, s: [50, 58, 0], e: [50, 46, 0], i: { x: [0.4], y: [1] }, o: { x: [0.6], y: [0] } }, { t: 90, s: [50, 46, 0] }] },
-                  a: { a: 0, k: [0, 0, 0] }, s: { a: 0, k: [100, 100, 100] } },
-                shapes: [ { ty: "gr", it: [
-                  { d: 1, ty: "el", s: { a: 0, k: [46, 40] }, p: { a: 0, k: [0, 0] } },
-                  { ty: "fl", c: { a: 0, k: [1, 1, 1, 1] }, o: { a: 0, k: 100 } },
-                  { ty: "tr", p: { a: 0, k: [0, 0] }, a: { a: 0, k: [0, 0] }, s: { a: 0, k: [100, 100] }, r: { a: 0, k: 0 }, o: { a: 0, k: 100 } }
-                ] } ] },
-              { ddd: 0, ind: 2, ty: 4, nm: "belly", sr: 1,
-                ks: { o: { a: 0, k: 90 }, r: { a: 0, k: 0 }, p: { a: 0, k: [50, 62, 0] }, a: { a: 0, k: [0, 0, 0] }, s: { a: 0, k: [100, 100, 100] } },
-                shapes: [ { ty: "gr", it: [
-                  { d: 1, ty: "el", s: { a: 0, k: [26, 22] }, p: { a: 0, k: [0, 0] } },
-                  { ty: "fl", c: { a: 0, k: [0.86, 0.91, 1, 1] }, o: { a: 0, k: 100 } },
-                  { ty: "tr", p: { a: 0, k: [0, 0] }, a: { a: 0, k: [0, 0] }, s: { a: 0, k: [100, 100] }, r: { a: 0, k: 0 }, o: { a: 0, k: 100 } }
-                ] } ] },
-              { ddd: 0, ind: 3, ty: 4, nm: "ear-l", sr: 1,
-                ks: { o: { a: 0, k: 100 }, r: { a: 0, k: 0 }, p: { a: 0, k: [38, 42, 0] }, a: { a: 0, k: [0, 0, 0] }, s: { a: 0, k: [100, 100, 100] } },
-                shapes: [ { ty: "gr", it: [
-                  { d: 1, ty: "el", s: { a: 0, k: [12, 12] }, p: { a: 0, k: [0, 0] } },
-                  { ty: "fl", c: { a: 0, k: [0.23, 0.27, 0.42, 1] }, o: { a: 0, k: 100 } },
-                  { ty: "tr", p: { a: 0, k: [0, 0] }, a: { a: 0, k: [0, 0] }, s: { a: 0, k: [100, 100] }, r: { a: 0, k: 0 }, o: { a: 0, k: 100 } }
-                ] } ] },
-              { ddd: 0, ind: 4, ty: 4, nm: "ear-r", sr: 1,
-                ks: { o: { a: 0, k: 100 }, r: { a: 0, k: 0 }, p: { a: 0, k: [62, 42, 0] }, a: { a: 0, k: [0, 0, 0] }, s: { a: 0, k: [100, 100, 100] } },
-                shapes: [ { ty: "gr", it: [
-                  { d: 1, ty: "el", s: { a: 0, k: [12, 12] }, p: { a: 0, k: [0, 0] } },
-                  { ty: "fl", c: { a: 0, k: [0.23, 0.27, 0.42, 1] }, o: { a: 0, k: 100 } },
-                  { ty: "tr", p: { a: 0, k: [0, 0] }, a: { a: 0, k: [0, 0] }, s: { a: 0, k: [100, 100] }, r: { a: 0, k: 0 }, o: { a: 0, k: 100 } }
-                ] } ] },
-              { ddd: 0, ind: 5, ty: 4, nm: "eye-l", sr: 1,
-                ks: { o: { a: 0, k: 100 }, r: { a: 0, k: 0 }, p: { a: 0, k: [43, 55, 0] }, a: { a: 0, k: [0, 0, 0] }, s: { a: 0, k: [100, 100, 100] } },
-                shapes: [ { ty: "gr", it: [
-                  { d: 1, ty: "el", s: { a: 0, k: [5, 6] }, p: { a: 0, k: [0, 0] } },
-                  { ty: "fl", c: { a: 0, k: [0.23, 0.27, 0.42, 1] }, o: { a: 0, k: 100 } },
-                  { ty: "tr", p: { a: 0, k: [0, 0] }, a: { a: 0, k: [0, 0] }, s: { a: 0, k: [100, 100] }, r: { a: 0, k: 0 }, o: { a: 0, k: 100 } }
-                ] } ] },
-              { ddd: 0, ind: 6, ty: 4, nm: "eye-r", sr: 1,
-                ks: { o: { a: 0, k: 100 }, r: { a: 0, k: 0 }, p: { a: 0, k: [57, 55, 0] }, a: { a: 0, k: [0, 0, 0] }, s: { a: 0, k: [100, 100, 100] } },
-                shapes: [ { ty: "gr", it: [
-                  { d: 1, ty: "el", s: { a: 0, k: [5, 6] }, p: { a: 0, k: [0, 0] } },
-                  { ty: "fl", c: { a: 0, k: [0.23, 0.27, 0.42, 1] }, o: { a: 0, k: 100 } },
-                  { ty: "tr", p: { a: 0, k: [0, 0] }, a: { a: 0, k: [0, 0] }, s: { a: 0, k: [100, 100] }, r: { a: 0, k: 0 }, o: { a: 0, k: 100 } }
-                ] } ] }
-            ]
-          };
-          try {
-            lottie.loadAnimation({ container: document.getElementById('panda-lottie-1'), renderer: 'svg', loop: true, autoplay: true, animationData: JSON.parse(JSON.stringify(pandaData)) });
-            lottie.loadAnimation({ container: document.getElementById('panda-lottie-2'), renderer: 'svg', loop: true, autoplay: true, animationData: JSON.parse(JSON.stringify(pandaData)) });
-            return;
-          } catch (e) { /* 降级 CSS */ }
-        }
-        // CSS 剪影兜底
-        if (css1) css1.style.display = 'block';
-        if (css2) css2.style.display = 'block';
-      }
-      if (document.readyState === 'complete' || document.readyState === 'interactive') setTimeout(initPanda, 60);
-      else document.addEventListener('DOMContentLoaded', () => setTimeout(initPanda, 60));
-    })();
-  </script>
+  <script src="./js/user-store.js?v=20261026f"></script>
+  <script src="./js/app.js?v=20261026f"></script>
+  <script src="./js/map-page.js?v=20261026f"></script>
+  <script src="./js/profile-page.js?v=20261026f"></script>
+  <script src="./js/ai-widget.js?v=20261026f"></script>
+  <script src="./js/biz-pages.js?v=20261026f"></script>
 </body>
 </html>

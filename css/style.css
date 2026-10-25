@@ -1,5 +1,5 @@
 /* ============================================================
-   LynLi 管理中枢 · 蓝白熊猫主题（v20261026a）
+   LynLi 管理中枢 · 蓝白熊猫主题（v20261026f）
    - 蓝白渐变背景 + 缓慢漂浮熊猫（Lottie / CSS 剪影）
    - 白色半透明毛玻璃卡片 rgba(255,255,255,.85)
    - 滑动修复：min-height:100dvh + 底部 padding 100px
@@ -36,54 +36,52 @@
 }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-html, body { min-height: 100%; }
+html { min-height: 100%; background: linear-gradient(160deg, #e0eafc 0%, #ffffff 100%); }
 body {
   margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  background: linear-gradient(160deg, #f6f9ff 0%, #e8effc 38%, #dfe9fa 70%, #eaf1fd 100%);
+  background: transparent;
   color: var(--text-primary); overflow-x: hidden;
 }
 
-/* ======================= 蓝白渐变背景 + 漂浮熊猫 ======================= */
+/* ======================= 清爽浅蓝→白渐变背景 + 漂浮熊猫（纯 CSS，z-index:-1） ======================= */
 .bg-panda {
-  position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
-  background:
-    radial-gradient(1100px 700px at 82% -8%, rgba(147, 197, 253, 0.5), transparent 62%),
-    radial-gradient(900px 640px at -8% 108%, rgba(191, 219, 254, 0.55), transparent 60%),
-    radial-gradient(700px 500px at 55% 45%, rgba(255, 255, 255, 0.65), transparent 70%),
-    linear-gradient(160deg, #f7faff 0%, #e9f0fd 45%, #dde8fa 100%);
+  position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden;
 }
-/* 缓慢流动的蓝白光斑 */
+
+/* 缓慢流动的蓝白光斑（点缀氛围，不参与熊猫形态） */
 .bg-panda .panda-glow {
   position: absolute; border-radius: 50%; filter: blur(90px);
-  mix-blend-mode: screen; opacity: .5; will-change: transform;
+  mix-blend-mode: screen; opacity: .45; will-change: transform;
 }
-.bg-panda .panda-glow-1 { width: 520px; height: 520px; top: -8%; left: 10%; background: radial-gradient(circle, rgba(96,165,250,.5), transparent 65%); animation: pandaDrift1 26s ease-in-out infinite alternate; }
-.bg-panda .panda-glow-2 { width: 460px; height: 460px; top: 32%; right: -6%; background: radial-gradient(circle, rgba(59,130,246,.35), transparent 65%); animation: pandaDrift2 32s ease-in-out infinite alternate; }
-.bg-panda .panda-glow-3 { width: 420px; height: 420px; bottom: -10%; left: 32%; background: radial-gradient(circle, rgba(129,140,248,.28), transparent 65%); animation: pandaDrift3 38s ease-in-out infinite alternate; }
+.bg-panda .panda-glow-1 { width: 520px; height: 520px; top: -8%; left: 8%; background: radial-gradient(circle, rgba(96,165,250,.5), transparent 65%); animation: pandaDrift1 26s ease-in-out infinite alternate; }
+.bg-panda .panda-glow-2 { width: 460px; height: 460px; top: 32%; right: -6%; background: radial-gradient(circle, rgba(59,130,246,.32), transparent 65%); animation: pandaDrift2 32s ease-in-out infinite alternate; }
+.bg-panda .panda-glow-3 { width: 420px; height: 420px; bottom: -10%; left: 32%; background: radial-gradient(circle, rgba(129,140,248,.26), transparent 65%); animation: pandaDrift3 38s ease-in-out infinite alternate; }
 @keyframes pandaDrift1 { from { transform: translate(0,0) scale(1); } to { transform: translate(90px,60px) scale(1.15); } }
 @keyframes pandaDrift2 { from { transform: translate(0,0) scale(1.05); } to { transform: translate(-110px,80px) scale(.9); } }
 @keyframes pandaDrift3 { from { transform: translate(0,0) scale(.95); } to { transform: translate(70px,-90px) scale(1.2); } }
 
-/* 漂浮熊猫容器（Lottie 注入 svg） */
-.panda-float { position: absolute; opacity: .16; will-change: transform; filter: drop-shadow(0 8px 24px rgba(37,99,235,.18)); }
-.panda-float-1 { width: 130px; height: 130px; top: 12%; left: 6%; animation: pandaFloatY 9s ease-in-out infinite alternate, pandaSpin 40s linear infinite; }
-.panda-float-2 { width: 96px; height: 96px; bottom: 16%; right: 8%; animation: pandaFloatY 11s ease-in-out infinite alternate-reverse, pandaSpin 52s linear infinite reverse; }
-@keyframes pandaFloatY { from { transform: translateY(0); } to { transform: translateY(-46px); } }
-@keyframes pandaSpin { to { transform: rotate(360deg); } }
+/* ---------- 纯 CSS 黑白熊猫剪影（最稳妥方案，始终渲染，缓慢上下漂浮） ---------- */
+.panda-silhouette { position: absolute; opacity: .27; will-change: transform; }
+.panda-silhouette-1 { width: 150px; height: 150px; top: 11%; left: 5%; animation: pandaFloat 7.5s ease-in-out infinite alternate; }
+.panda-silhouette-2 { width: 104px; height: 104px; bottom: 15%; right: 7%; animation: pandaFloat 9.5s ease-in-out infinite alternate-reverse; }
+@keyframes pandaFloat { from { transform: translateY(0); } to { transform: translateY(-42px); } }
 
-/* CSS 剪影熊猫（Lottie 失败兜底，默认隐藏，JS 按需显示） */
-.panda-silhouette { display: none; position: absolute; opacity: .15; will-change: transform; }
-.panda-silhouette-1 { width: 120px; height: 120px; top: 12%; left: 6%; animation: pandaFloatY 9s ease-in-out infinite alternate, pandaSpin 40s linear infinite; }
-.panda-silhouette-2 { width: 92px; height: 92px; bottom: 16%; right: 8%; animation: pandaFloatY 11s ease-in-out infinite alternate-reverse, pandaSpin 52s linear infinite reverse; }
-.panda-silhouette .ps-body { position: relative; width: 100%; height: 100%; background: #3b5bdb; border-radius: 46% 46% 48% 48%; box-shadow: inset 0 -8px 18px rgba(0,0,0,.12); }
-.panda-silhouette .ps-ear { position: absolute; top: -6%; width: 30%; height: 30%; background: #1e293b; border-radius: 50%; }
-.panda-silhouette .ps-ear-l { left: 2%; }
-.panda-silhouette .ps-ear-r { right: 2%; }
-.panda-silhouette .ps-eye { position: absolute; top: 34%; width: 13%; height: 15%; background: #fff; border-radius: 50%; }
-.panda-silhouette .ps-eye::after { content: ""; position: absolute; inset: 22% 18%; background: #1e293b; border-radius: 50%; }
-.panda-silhouette .ps-eye-l { left: 22%; }
-.panda-silhouette .ps-eye-r { right: 22%; }
-.panda-silhouette .ps-belly { position: absolute; bottom: 8%; left: 50%; transform: translateX(-50%); width: 62%; height: 52%; background: #fff; border-radius: 48% 48% 52% 52%; }
+/* 熊猫本体：白色头身 + 黑色耳 / 眼斑 / 鼻（黑白圆块组合） */
+.panda { position: relative; width: 100%; height: 100%; }
+.panda .p-head {
+  position: absolute; inset: 0; border-radius: 50% 50% 48% 48%;
+  background: #ffffff; box-shadow: inset 0 -8px 16px rgba(0,0,0,.06), 0 12px 30px -10px rgba(30,64,175,.22);
+}
+.panda .p-ear { position: absolute; top: -3%; width: 34%; height: 34%; background: #1f2937; border-radius: 50%; }
+.panda .p-ear-l { left: 5%; }
+.panda .p-ear-r { right: 5%; }
+.panda .p-patch { position: absolute; top: 33%; width: 27%; height: 31%; background: #1f2937; border-radius: 50%; }
+.panda .p-patch-l { left: 15%; transform: rotate(-12deg); }
+.panda .p-patch-r { right: 15%; transform: rotate(12deg); }
+.panda .p-eye { position: absolute; top: 26%; left: 24%; width: 52%; height: 52%; background: #fff; border-radius: 50%; }
+.panda .p-eye::after { content: ""; position: absolute; inset: 30% 26%; background: #1f2937; border-radius: 50%; }
+.panda .p-nose { position: absolute; top: 60%; left: 50%; transform: translateX(-50%); width: 15%; height: 11%; background: #1f2937; border-radius: 50%; }
+.panda .p-mouth { position: absolute; top: 72%; left: 50%; transform: translateX(-50%); width: 20%; height: 11%; border: 2px solid #1f2937; border-top: none; border-radius: 0 0 60% 60%; }
 
 /* 内容层级高于背景 */
 #login-page, .console-shell, .toast, .ai-fab, .ai-window, .drawer, .drawer-mask, .topbar, .modal-layer { position: relative; z-index: 1; }
@@ -487,15 +485,15 @@ body {
 /* ---------- 左上：Nominatim 搜索框（毛玻璃） ---------- */
 .map-search { position: absolute; top: 14px; left: 14px; z-index: 500; width: min(320px, calc(100% - 180px)); }
 .map-search-box {
-  display: flex; align-items: center; gap: 9px; height: 42px; padding: 0 14px;
-  background: rgba(255,255,255,.92); border: 1px solid var(--stroke-bright); border-radius: 12px;
-  backdrop-filter: blur(18px) saturate(1.4); -webkit-backdrop-filter: blur(18px) saturate(1.4);
-  box-shadow: 0 8px 24px -8px rgba(30,64,175,.3); color: var(--text-tertiary);
-  transition: border-color .2s ease, box-shadow .2s ease;
+  display: flex; align-items: center; gap: 9px; height: 44px; padding: 0 14px;
+  background: #ffffff; border: 1.5px solid var(--blue-primary); border-radius: 12px;
+  box-shadow: 0 10px 26px -8px rgba(30,64,175,.4), 0 0 0 4px rgba(37,99,235,.08);
+  color: var(--blue-deep);
+  transition: border-color .2s ease, box-shadow .2s ease, transform .15s ease;
 }
-.map-search-box:focus-within { border-color: var(--blue-primary); box-shadow: 0 8px 24px -6px rgba(37,99,235,.4); }
-.map-search-box input { flex: 1; border: none; outline: none; background: transparent; font-size: 13.5px; color: var(--text-primary); min-width: 0; }
-.map-search-box input::placeholder { color: var(--text-muted); }
+.map-search-box:focus-within { border-color: var(--blue-deep); box-shadow: 0 10px 26px -6px rgba(37,99,235,.5), 0 0 0 5px rgba(37,99,235,.14); }
+.map-search-box input { flex: 1; border: none; outline: none; background: transparent; font-size: 13.5px; color: var(--text-primary); min-width: 0; font-weight: 500; }
+.map-search-box input::placeholder { color: var(--text-secondary); font-weight: 400; }
 .map-search-panel {
   display: none; margin-top: 8px; max-height: 300px; overflow-y: auto;
   background: rgba(255,255,255,.96); border: 1px solid var(--stroke-bright); border-radius: 14px;
@@ -863,7 +861,7 @@ body:not(.logged-in) .ai-fab { display: none; }
 }
 
 /* ============================================================
-   阶段三/四新增样式（v20261026e）
+   阶段三/四新增样式（v20261026f）
    电商自动化 / 极客工具箱占位页 · 海报生成器 · AI 弹窗
    ============================================================ */
 
@@ -911,6 +909,34 @@ body:not(.logged-in) .ai-fab { display: none; }
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11.5px; line-height: 1.65;
   color: var(--text-secondary); white-space: pre-wrap; word-break: break-all;
 }
+
+/* 接口联调状态横幅（高质感空状态卡片：功能联调中 / 已就绪 / 未部署 / 异常） */
+.ep-state-banner {
+  display: flex; gap: 13px; align-items: flex-start; padding: 15px 16px; border-radius: 14px;
+  margin-bottom: 16px; border: 1px solid; animation: staggerIn .35s cubic-bezier(.22,1,.36,1) both;
+}
+.ep-state-banner .esb-ico {
+  flex-shrink: 0; width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #fff;
+}
+.ep-state-banner .esb-body { flex: 1; min-width: 0; }
+.ep-state-banner .esb-title { font-size: 15px; font-weight: 700; margin-bottom: 3px; }
+.ep-state-banner .esb-desc { font-size: 12.5px; line-height: 1.65; color: var(--text-secondary); }
+.ep-state-banner .esb-meta { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 11px; }
+.ep-state-banner .esb-meta-row { display: inline-flex; flex-direction: column; gap: 2px; }
+.ep-state-banner .esb-meta-row i { font-style: normal; font-size: 10.5px; color: var(--text-muted); }
+.ep-state-banner .esb-meta-row b { font-size: 12.5px; color: var(--text-primary); font-weight: 600; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; word-break: break-all; }
+.ep-state-banner.pending { background: linear-gradient(135deg, rgba(37,99,235,.08), rgba(99,102,241,.05)); border-color: rgba(37,99,235,.22); }
+.ep-state-banner.pending .esb-ico { background: linear-gradient(135deg, var(--blue-primary), var(--blue-primary2)); }
+.ep-state-banner.pending .esb-title { color: var(--blue-deep); }
+.ep-state-banner.ready { background: rgba(22,163,74,.08); border-color: rgba(22,163,74,.22); }
+.ep-state-banner.ready .esb-ico { background: linear-gradient(135deg, #34d399, #16a34a); }
+.ep-state-banner.ready .esb-title { color: #15803d; }
+.ep-state-banner.offline { background: rgba(217,165,32,.1); border-color: rgba(217,165,32,.3); }
+.ep-state-banner.offline .esb-ico { background: linear-gradient(135deg, #f5c451, #e0a81c); }
+.ep-state-banner.offline .esb-title { color: var(--gold-deep); }
+.ep-state-banner.error { background: var(--danger-soft); border-color: rgba(229,72,77,.25); }
+.ep-state-banner.error .esb-ico { background: linear-gradient(135deg, #f87171, #e5484d); }
+.ep-state-banner.error .esb-title { color: var(--danger); }
 
 /* ---- 阶段四：海报生成器 ---- */
 .poster-layout { display: grid; grid-template-columns: 400px 1fr; gap: 16px; align-items: start; }

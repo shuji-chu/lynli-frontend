@@ -1,7 +1,10 @@
 /* ============================================================
    全域可视化地图 —— Leaflet 开源能力全功能版
    ------------------------------------------------------------
-   底图：矢量浅色（CARTO Positron）/ 矢量深色（CARTO Dark）/ 卫星影像（Esri）
+   底图（均无需 API Key 的免费开源图源）：
+     · 矢量浅色   → OpenStreetMap 标准瓦片
+     · 地形图     → OpenTopoMap（CC-BY-SA）
+     · 卫星影像   → Esri ArcGIS World Imagery
    搜索：Nominatim 开源地理编码（左上搜索框，防抖 + 结果列表）
    定位：navigator.geolocation 真实 GPS
    路线：OSRM 开源路线引擎（router.project-osrm.org），蓝线轨迹
@@ -27,11 +30,14 @@ let _poiMarkers = [];      // 周边 POI marker
 let _searchMarker = null;  // 搜索结果 marker
 let _pickMode = null;      // 'start' | 'end' | null（地图点选模式）
 
+/* ---------- 免费开源底图（全部无需 API Key） ---------- */
+const OSM_TILES = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
+const TOPO_TILES = "https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png";
 const SAT_TILES = "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
 const BASEMAPS = {
-  light: { name: "矢量浅色", url: "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", sub: "abcd", attr: "&copy; OpenStreetMap &copy; CARTO" },
-  dark: { name: "矢量深色", url: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", sub: "abcd", attr: "&copy; OpenStreetMap &copy; CARTO" },
-  sat: { name: "卫星影像", url: SAT_TILES, sub: "abc", attr: "Imagery &copy; Esri" },
+  light:   { name: "矢量浅色", url: OSM_TILES,  sub: "abc", attr: "&copy; OpenStreetMap 贡献者" },
+  terrain: { name: "地形图",   url: TOPO_TILES, sub: "abc", attr: "© OpenTopoMap (CC-BY-SA)" },
+  sat:     { name: "卫星影像", url: SAT_TILES,  sub: "abc", attr: "Imagery &copy; Esri" },
 };
 const LAYER_LABELS = { nodes: "节点分布", logistics: "电商物流", idc: "服务器机房" };
 const NOMINATIM = "https://nominatim.openstreetmap.org";
