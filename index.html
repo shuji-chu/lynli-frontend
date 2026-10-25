@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>LynLi · 超级管理中枢</title>
   <!-- 品牌图标 -->
-  <link rel="icon" type="image/png" href="./favicon.png?v=20261026d">
-  <link rel="apple-touch-icon" href="./apple-touch-icon.png?v=20261026d">
+  <link rel="icon" type="image/png" href="./favicon.png?v=20261026e">
+  <link rel="apple-touch-icon" href="./apple-touch-icon.png?v=20261026e">
   <!-- 蓝白主题（相对路径，解决 GitHub Pages 白屏） -->
-  <link rel="stylesheet" href="./css/style.css?v=20261026d">
+  <link rel="stylesheet" href="./css/style.css?v=20261026e">
   <!-- Leaflet 地图库（jsdelivr 主源 + cdnjs 容灾） -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" onerror="this.onerror=null;this.href='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css'">
   <!-- Anime.js 丝滑动画 -->
@@ -547,6 +547,372 @@
         </div>
       </section>
 
+      <!-- ========== 营销与客服 · 海报生成器（阶段四 · 智谱 CogView 真实接口） ========== -->
+      <section class="sub-page" id="page-poster">
+        <div class="page-header">
+          <div>
+            <h2 class="page-title">海报生成器</h2>
+            <p class="page-sub">智谱 CogView 文生图 · 营销物料秒级产出</p>
+          </div>
+          <span class="ep-badge ok">AI 已接入</span>
+        </div>
+        <div class="poster-layout">
+          <div class="card poster-form">
+            <label class="biz-label">海报描述 <span class="req">*</span></label>
+            <textarea class="biz-input" id="poster-prompt" rows="4" maxlength="400"
+              placeholder="例如：电商大促海报，蓝色渐变背景，中央悬浮着一只卡通熊猫拿着手机，霓虹灯质感的「年中大促」四个大字，四周有礼盒和星星元素"></textarea>
+            <label class="biz-label">画面比例</label>
+            <div class="size-opts">
+              <button type="button" class="size-opt active" onclick="pickPosterSize('1024x1024',this)">
+                <b>方形 1:1</b><small>朋友圈 / 商品图</small>
+              </button>
+              <button type="button" class="size-opt" onclick="pickPosterSize('768x1344',this)">
+                <b>竖版 9:16</b><small>短视频封面</small>
+              </button>
+              <button type="button" class="size-opt" onclick="pickPosterSize('1344x768',this)">
+                <b>横版 16:9</b><small>Banner 头图</small>
+              </button>
+              <button type="button" class="size-opt" onclick="pickPosterSize('720x1280',this)">
+                <b>全屏 9:16</b><small>手机全屏海报</small>
+              </button>
+              <button type="button" class="size-opt" onclick="pickPosterSize('1280x720',this)">
+                <b>宽屏 16:9</b><small>桌面端主视觉</small>
+              </button>
+            </div>
+            <label class="biz-label">生成模型</label>
+            <select class="biz-input" id="poster-model">
+              <option value="cogview-4">CogView-4（高质推荐）</option>
+              <option value="cogview-3-flash">CogView-3-Flash（免费极速）</option>
+            </select>
+            <button class="btn btn-primary" id="poster-gen-btn" onclick="genPoster()">生成海报</button>
+          </div>
+          <div class="card poster-result" id="poster-result">
+            <div class="poster-empty">
+              <div class="placeholder-icon">
+                <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="1.6"/><path d="M21 15l-5-5-9 9"/></svg>
+              </div>
+              <h3>等待创作</h3>
+              <p>输入海报描述并选择比例，点击「生成海报」，智谱大模型将为你实时绘制营销物料。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== 电商自动化 · 上游挂机拉单（阶段三占位） ========== -->
+      <section class="sub-page" id="page-ecom-pull">
+        <div class="page-header">
+          <div>
+            <h2 class="page-title">上游挂机拉单</h2>
+            <p class="page-sub">上游商家开放 API · 定时自动拉单</p>
+          </div>
+          <span class="ep-badge" id="ep-badge-ecom-pull">探测中</span>
+        </div>
+        <div class="biz-grid">
+          <div class="card biz-feature">
+            <div class="placeholder-icon">
+              <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3v12"/><path d="M8 11l4 4 4-4"/><path d="M4 19h16"/><path d="M4 19v2M20 19v2"/></svg>
+            </div>
+            <h3>上游挂机拉单</h3>
+            <p>对接上游供货商开放 API，7×24 挂机定时拉取新订单，自动入库并触发发货流水线。</p>
+            <ul class="biz-points">
+              <li>多上游账号轮询挂机</li>
+              <li>订单增量拉取 + 去重</li>
+              <li>自动入库与库存扣减</li>
+              <li>拉单异常实时告警</li>
+            </ul>
+            <button class="btn btn-primary btn-sm" onclick="loadBizPage('ecom-pull')">立即探测接口</button>
+          </div>
+          <div class="card biz-api">
+            <h4>接口联调状态</h4>
+            <div class="api-line"><span>请求方法</span><code>POST</code></div>
+            <div class="api-line"><span>后端端点</span><code>/api/v1/ecom/pull-orders</code></div>
+            <div class="api-line"><span>当前状态</span><b id="ep-status-ecom-pull">未探测</b></div>
+            <p class="api-hint">该页面进入时会自动向后端发起真实请求；下方为后端原始返回。</p>
+            <pre class="api-raw" id="ep-raw-ecom-pull">等待探测…</pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== 电商自动化 · 快递追踪（阶段三占位） ========== -->
+      <section class="sub-page" id="page-ecom-express">
+        <div class="page-header">
+          <div>
+            <h2 class="page-title">快递追踪</h2>
+            <p class="page-sub">物流轨迹聚合 · 签收自动确认</p>
+          </div>
+          <span class="ep-badge" id="ep-badge-ecom-express">探测中</span>
+        </div>
+        <div class="biz-grid">
+          <div class="card biz-feature">
+            <div class="placeholder-icon">
+              <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 7h11v9H2z"/><path d="M13 10h4l3 3v3h-7"/><circle cx="6" cy="18" r="1.8"/><circle cx="17" cy="18" r="1.8"/></svg>
+            </div>
+            <h3>快递追踪</h3>
+            <p>聚合快递公司轨迹查询接口，订单发货后自动追踪物流状态，签收后自动确认完成。</p>
+            <ul class="biz-points">
+              <li>主流快递公司轨迹聚合</li>
+              <li>关键节点推送通知</li>
+              <li>超时未签收自动标红</li>
+              <li>退货件逆向物流跟踪</li>
+            </ul>
+            <button class="btn btn-primary btn-sm" onclick="loadBizPage('ecom-express')">立即探测接口</button>
+          </div>
+          <div class="card biz-api">
+            <h4>接口联调状态</h4>
+            <div class="api-line"><span>请求方法</span><code>POST</code></div>
+            <div class="api-line"><span>后端端点</span><code>/api/v1/ecom/express</code></div>
+            <div class="api-line"><span>当前状态</span><b id="ep-status-ecom-express">未探测</b></div>
+            <p class="api-hint">该页面进入时会自动向后端发起真实请求；下方为后端原始返回。</p>
+            <pre class="api-raw" id="ep-raw-ecom-express">等待探测…</pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== 电商自动化 · 全网比价（阶段三占位） ========== -->
+      <section class="sub-page" id="page-ecom-price">
+        <div class="page-header">
+          <div>
+            <h2 class="page-title">全网比价</h2>
+            <p class="page-sub">多平台价格监控 · 智能定价建议</p>
+          </div>
+          <span class="ep-badge" id="ep-badge-ecom-price">探测中</span>
+        </div>
+        <div class="biz-grid">
+          <div class="card biz-feature">
+            <div class="placeholder-icon">
+              <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M20.6 13.4L11 3.8V2H9v2L2.6 8.4"/><path d="M6 8l8 8"/><circle cx="17.5" cy="17.5" r="3.5"/></svg>
+            </div>
+            <h3>全网比价</h3>
+            <p>定时抓取各平台同款商品价格，归一化对比后给出智能定价建议，掌握市场主动权。</p>
+            <ul class="biz-points">
+              <li>多平台同款商品匹配</li>
+              <li>价格历史趋势曲线</li>
+              <li>智能定价建议</li>
+              <li>竞品降价实时提醒</li>
+            </ul>
+            <button class="btn btn-primary btn-sm" onclick="loadBizPage('ecom-price')">立即探测接口</button>
+          </div>
+          <div class="card biz-api">
+            <h4>接口联调状态</h4>
+            <div class="api-line"><span>请求方法</span><code>POST</code></div>
+            <div class="api-line"><span>后端端点</span><code>/api/v1/ecom/price</code></div>
+            <div class="api-line"><span>当前状态</span><b id="ep-status-ecom-price">未探测</b></div>
+            <p class="api-hint">该页面进入时会自动向后端发起真实请求；下方为后端原始返回。</p>
+            <pre class="api-raw" id="ep-raw-ecom-price">等待探测…</pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== 电商自动化 · 哨兵监控（阶段三占位） ========== -->
+      <section class="sub-page" id="page-ecom-sentinel">
+        <div class="page-header">
+          <div>
+            <h2 class="page-title">哨兵监控</h2>
+            <p class="page-sub">价格库存巡检 · 异常秒级推送</p>
+          </div>
+          <span class="ep-badge" id="ep-badge-ecom-sentinel">探测中</span>
+        </div>
+        <div class="biz-grid">
+          <div class="card biz-feature">
+            <div class="placeholder-icon">
+              <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/><path d="M12 12l6-4"/></svg>
+            </div>
+            <h3>哨兵监控</h3>
+            <p>像哨兵一样定时巡检商品价格、库存、节点可用性，任何异常第一时间推送告警。</p>
+            <ul class="biz-points">
+              <li>多维度巡检任务编排</li>
+              <li>异常规则自定义</li>
+              <li>秒级推送（邮件/Webhook）</li>
+              <li>巡检报告自动生成</li>
+            </ul>
+            <button class="btn btn-primary btn-sm" onclick="loadBizPage('ecom-sentinel')">立即探测接口</button>
+          </div>
+          <div class="card biz-api">
+            <h4>接口联调状态</h4>
+            <div class="api-line"><span>请求方法</span><code>POST</code></div>
+            <div class="api-line"><span>后端端点</span><code>/api/v1/ecom/sentinel</code></div>
+            <div class="api-line"><span>当前状态</span><b id="ep-status-ecom-sentinel">未探测</b></div>
+            <p class="api-hint">该页面进入时会自动向后端发起真实请求；下方为后端原始返回。</p>
+            <pre class="api-raw" id="ep-raw-ecom-sentinel">等待探测…</pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== 电商自动化 · 财务OCR对账（阶段三占位） ========== -->
+      <section class="sub-page" id="page-ecom-ocr">
+        <div class="page-header">
+          <div>
+            <h2 class="page-title">财务OCR对账</h2>
+            <p class="page-sub">票据识别 · 订单流自动对账</p>
+          </div>
+          <span class="ep-badge" id="ep-badge-ecom-ocr">探测中</span>
+        </div>
+        <div class="biz-grid">
+          <div class="card biz-feature">
+            <div class="placeholder-icon">
+              <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/><rect x="8" y="8" width="8" height="5" rx="1"/></svg>
+            </div>
+            <h3>财务 OCR 对账</h3>
+            <p>上传支付票据与流水截图，OCR 识别金额后与订单流自动对账，账实不符自动标出。</p>
+            <ul class="biz-points">
+              <li>票据/截图 OCR 识别</li>
+              <li>订单流自动匹配</li>
+              <li>账实差异一键定位</li>
+              <li>对账报告导出</li>
+            </ul>
+            <button class="btn btn-primary btn-sm" onclick="loadBizPage('ecom-ocr')">立即探测接口</button>
+          </div>
+          <div class="card biz-api">
+            <h4>接口联调状态</h4>
+            <div class="api-line"><span>请求方法</span><code>POST</code></div>
+            <div class="api-line"><span>后端端点</span><code>/api/v1/ecom/ocr</code></div>
+            <div class="api-line"><span>当前状态</span><b id="ep-status-ecom-ocr">未探测</b></div>
+            <p class="api-hint">该页面进入时会自动向后端发起真实请求；下方为后端原始返回。</p>
+            <pre class="api-raw" id="ep-raw-ecom-ocr">等待探测…</pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== 极客工具箱 · IP归属地查询（阶段三占位） ========== -->
+      <section class="sub-page" id="page-geek-ip">
+        <div class="page-header">
+          <div>
+            <h2 class="page-title">IP归属地查询</h2>
+            <p class="page-sub">IP 地理定位 · ASN 网络画像</p>
+          </div>
+          <span class="ep-badge" id="ep-badge-geek-ip">探测中</span>
+        </div>
+        <div class="biz-grid">
+          <div class="card biz-feature">
+            <div class="placeholder-icon">
+              <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.8 2.6 4 5.6 4 9s-1.2 6.4-4 9c-2.8-2.6-4-5.6-4-9s1.2-6.4 4-9z"/></svg>
+            </div>
+            <h3>IP 归属地查询</h3>
+            <p>输入任意 IP 或域名，秒级返回国家地区、运营商、ASN 与网络类型画像。</p>
+            <ul class="biz-points">
+              <li>IPv4 / IPv6 双栈查询</li>
+              <li>国家/城市/邮编定位</li>
+              <li>运营商与 ASN 画像</li>
+              <li>代理/VPN 风险识别</li>
+            </ul>
+            <button class="btn btn-primary btn-sm" onclick="loadBizPage('geek-ip')">立即探测接口</button>
+          </div>
+          <div class="card biz-api">
+            <h4>接口联调状态</h4>
+            <div class="api-line"><span>请求方法</span><code>GET</code></div>
+            <div class="api-line"><span>后端端点</span><code>/api/v1/geek/ip</code></div>
+            <div class="api-line"><span>当前状态</span><b id="ep-status-geek-ip">未探测</b></div>
+            <p class="api-hint">该页面进入时会自动向后端发起真实请求；下方为后端原始返回。</p>
+            <pre class="api-raw" id="ep-raw-geek-ip">等待探测…</pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== 极客工具箱 · 网络测速（阶段三占位） ========== -->
+      <section class="sub-page" id="page-geek-speed">
+        <div class="page-header">
+          <div>
+            <h2 class="page-title">网络测速</h2>
+            <p class="page-sub">服务端探针 · 延迟丢包抖动</p>
+          </div>
+          <span class="ep-badge" id="ep-badge-geek-speed">探测中</span>
+        </div>
+        <div class="biz-grid">
+          <div class="card biz-feature">
+            <div class="placeholder-icon">
+              <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 18a8 8 0 1116 0"/><path d="M12 14l4-4"/><circle cx="12" cy="14" r="1.4" fill="currentColor" stroke="none"/></svg>
+            </div>
+            <h3>网络测速</h3>
+            <p>服务端探针聚合多点测速数据，实时掌握各节点延迟、丢包与抖动表现。</p>
+            <ul class="biz-points">
+              <li>多探针节点同时测速</li>
+              <li>延迟/丢包/抖动三指标</li>
+              <li>测速历史曲线</li>
+              <li>劣化节点自动排名</li>
+            </ul>
+            <button class="btn btn-primary btn-sm" onclick="loadBizPage('geek-speed')">立即探测接口</button>
+          </div>
+          <div class="card biz-api">
+            <h4>接口联调状态</h4>
+            <div class="api-line"><span>请求方法</span><code>GET</code></div>
+            <div class="api-line"><span>后端端点</span><code>/api/v1/geek/speed</code></div>
+            <div class="api-line"><span>当前状态</span><b id="ep-status-geek-speed">未探测</b></div>
+            <p class="api-hint">该页面进入时会自动向后端发起真实请求；下方为后端原始返回。</p>
+            <pre class="api-raw" id="ep-raw-geek-speed">等待探测…</pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== 极客工具箱 · 天气/汇率（阶段三占位） ========== -->
+      <section class="sub-page" id="page-geek-forex">
+        <div class="page-header">
+          <div>
+            <h2 class="page-title">天气/汇率</h2>
+            <p class="page-sub">实时天气 · 汇率换算</p>
+          </div>
+          <span class="ep-badge" id="ep-badge-geek-forex">探测中</span>
+        </div>
+        <div class="biz-grid">
+          <div class="card biz-feature">
+            <div class="placeholder-icon">
+              <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M17 18a4 4 0 000-8 6 6 0 00-11.6 1.6A3.5 3.5 0 006 18z"/><path d="M8 21l1-2M12 21l1-2M16 21l1-2"/></svg>
+            </div>
+            <h3>天气 / 汇率</h3>
+            <p>全球城市实时天气与多币种汇率换算，出海业务随手查。</p>
+            <ul class="biz-points">
+              <li>全球城市实时天气</li>
+              <li>多币种实时汇率</li>
+              <li>常用货币对速查</li>
+              <li>离线缓存最近查询</li>
+            </ul>
+            <button class="btn btn-primary btn-sm" onclick="loadBizPage('geek-forex')">立即探测接口</button>
+          </div>
+          <div class="card biz-api">
+            <h4>接口联调状态</h4>
+            <div class="api-line"><span>请求方法</span><code>GET</code></div>
+            <div class="api-line"><span>后端端点</span><code>/api/v1/geek/forex</code></div>
+            <div class="api-line"><span>当前状态</span><b id="ep-status-geek-forex">未探测</b></div>
+            <p class="api-hint">该页面进入时会自动向后端发起真实请求；下方为后端原始返回。</p>
+            <pre class="api-raw" id="ep-raw-geek-forex">等待探测…</pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== 极客工具箱 · 二维码生成（阶段三占位） ========== -->
+      <section class="sub-page" id="page-geek-qrcode">
+        <div class="page-header">
+          <div>
+            <h2 class="page-title">二维码生成</h2>
+            <p class="page-sub">本地生成 · 即贴即用</p>
+          </div>
+          <span class="ep-badge" id="ep-badge-geek-qrcode">探测中</span>
+        </div>
+        <div class="biz-grid">
+          <div class="card biz-feature">
+            <div class="placeholder-icon">
+              <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM19 19h2v2h-2z"/></svg>
+            </div>
+            <h3>二维码生成</h3>
+            <p>文本/链接一键生成高清二维码，支持 Logo 嵌入与容错级别调节。</p>
+            <ul class="biz-points">
+              <li>文本/链接/WiFi 生成</li>
+              <li>容错级别可调</li>
+              <li>Logo 中心嵌入</li>
+              <li>PNG/SVG 导出</li>
+            </ul>
+            <button class="btn btn-primary btn-sm" onclick="loadBizPage('geek-qrcode')">立即探测接口</button>
+          </div>
+          <div class="card biz-api">
+            <h4>接口联调状态</h4>
+            <div class="api-line"><span>请求方法</span><code>POST</code></div>
+            <div class="api-line"><span>后端端点</span><code>/api/v1/geek/qrcode</code></div>
+            <div class="api-line"><span>当前状态</span><b id="ep-status-geek-qrcode">未探测</b></div>
+            <p class="api-hint">该页面进入时会自动向后端发起真实请求；下方为后端原始返回。</p>
+            <pre class="api-raw" id="ep-raw-geek-qrcode">等待探测…</pre>
+          </div>
+        </div>
+      </section>
+
       <!-- ========== 系统设置 · 员工账号权限分配 ========== -->
       <section class="sub-page" id="page-staff">
         <div class="page-header">
@@ -670,11 +1036,12 @@
   <!-- Leaflet JS（jsdelivr 主源 + cdnjs 容灾） -->
   <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js" onerror="document.write('<script src=\"https:\/\/cdnjs.cloudflare.com\/ajax\/libs\/leaflet\/1.9.4\/leaflet.min.js\"><\/script>')"></script>
   <!-- 全局用户信息同步中心（所有子站复用）：必须先于业务脚本加载 -->
-  <script src="./js/user-store.js?v=20261026d"></script>
-  <script src="./js/app.js?v=20261026d"></script>
-  <script src="./js/map-page.js?v=20261026d"></script>
-  <script src="./js/profile-page.js?v=20261026d"></script>
-  <script src="./js/ai-widget.js?v=20261026d"></script>
+  <script src="./js/user-store.js?v=20261026e"></script>
+  <script src="./js/app.js?v=20261026e"></script>
+  <script src="./js/map-page.js?v=20261026e"></script>
+  <script src="./js/profile-page.js?v=20261026e"></script>
+  <script src="./js/ai-widget.js?v=20261026e"></script>
+  <script src="./js/biz-pages.js?v=20261026e"></script>
   <script>
     /* ---------- 蓝白熊猫漂浮动画 ----------
        Lottie-Web 播放熊猫动画；无源/加载失败时自动降级为 CSS 剪影动画 */

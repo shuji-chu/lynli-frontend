@@ -108,6 +108,18 @@ const ICONS = {
   megaphone: '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11v3a1 1 0 001 1h2l5 4V6L6 10H4a1 1 0 00-1 1z"/><path d="M15 8a5 5 0 010 8M18 5.5a8.5 8.5 0 010 13"/></svg>',
   server: '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="7" rx="1.5"/><rect x="3" y="13" width="18" height="7" rx="1.5"/><path d="M7 7.5h.01M7 16.5h.01M11 7.5h4M11 16.5h4"/></svg>',
   user: '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6"/></svg>',
+  // ---- 阶段三：电商自动化 / 极客工具箱 / AI 营销 ----
+  download: '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v12"/><path d="M8 11l4 4 4-4"/><path d="M4 19h16"/><path d="M4 19v2M20 19v2"/></svg>',
+  truck: '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 7h11v9H2z"/><path d="M13 10h4l3 3v3h-7"/><circle cx="6" cy="18" r="1.8"/><circle cx="17" cy="18" r="1.8"/></svg>',
+  pricetag: '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.6 13.4L11 3.8V2H9v2L2.6 8.4"/><path d="M6 8l8 8"/><circle cx="17.5" cy="17.5" r="3.5"/></svg>',
+  scan: '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7V4h3M20 7V4h-3M4 17v3h3M20 17v3h-3"/><rect x="8" y="8" width="8" height="8" rx="1"/></svg>',
+  ip: '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.8 2.6 4 5.6 4 9s-1.2 6.4-4 9c-2.8-2.6-4-5.6-4-9s1.2-6.4 4-9z"/></svg>',
+  gauge: '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 18a8 8 0 1116 0"/><path d="M12 14l4-4"/><circle cx="12" cy="14" r="1.4" fill="currentColor" stroke="none"/></svg>',
+  cloud: '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 18a4 4 0 000-8 6 6 0 00-11.6 1.6A3.5 3.5 0 006 18z"/><path d="M8 21l1-2M12 21l1-2M16 21l1-2"/></svg>',
+  qrcode: '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM19 19h2v2h-2z"/></svg>',
+  poster: '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="1.6"/><path d="M21 15l-5-5-9 9"/></svg>',
+  sparkles: '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3z"/><path d="M18.5 15.5l.9 2.4 2.4.9-2.4.9-.9 2.4-.9-2.4-2.4-.9 2.4-.9.9-2.4z"/></svg>',
+  film: '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M3 15h18M8 4v16M16 4v16"/></svg>',
 };
 
 // ---------- 六大分类菜单（roles 为空 = 全员可见） ----------
@@ -133,9 +145,23 @@ const MENU_GROUPS = [
     { id: "probe", label: "服务器探针", icon: ICONS.radar, roles: ["super", "operator"] },
   ]},
   { label: "营销与客服", icon: ICONS.megaphone, items: [
+    { id: "poster", label: "海报生成器", icon: ICONS.poster },
     { id: "ai", label: "AI 客服", icon: ICONS.robot },
     { id: "tickets", label: "工单", icon: ICONS.ticket, roles: ["super", "operator", "support"] },
     { id: "distribution", label: "签到分销", icon: ICONS.gift, roles: ["super", "operator"] },
+  ]},
+  { label: "电商自动化", icon: ICONS.download, items: [
+    { id: "ecom-pull", label: "上游挂机拉单", icon: ICONS.download, roles: ["super", "operator"] },
+    { id: "ecom-express", label: "快递追踪", icon: ICONS.truck, roles: ["super", "operator"] },
+    { id: "ecom-price", label: "全网比价", icon: ICONS.pricetag, roles: ["super", "operator"] },
+    { id: "ecom-sentinel", label: "哨兵监控", icon: ICONS.radar, roles: ["super", "operator"] },
+    { id: "ecom-ocr", label: "财务OCR对账", icon: ICONS.scan, roles: ["super", "operator"] },
+  ]},
+  { label: "极客工具箱", icon: ICONS.gauge, items: [
+    { id: "geek-ip", label: "IP归属地查询", icon: ICONS.ip },
+    { id: "geek-speed", label: "网络测速", icon: ICONS.gauge },
+    { id: "geek-forex", label: "天气/汇率", icon: ICONS.cloud },
+    { id: "geek-qrcode", label: "二维码生成", icon: ICONS.qrcode },
   ]},
   { label: "系统设置", icon: ICONS.gear, items: [
     { id: "staff", label: "员工账号权限分配", icon: ICONS.users, roles: ["super"] },
@@ -150,7 +176,10 @@ const PAGE_TITLES = {
   products: "商品管理", orders: "订单代发",
   tgx: "TGX 账号库", nodes: "节点与订阅", sms: "接码池", apikeys: "API 分发",
   monitor: "节点监控", dns: "域名管理", probe: "服务器探针",
-  ai: "AI 客服", tickets: "工单", distribution: "签到分销",
+  ai: "AI 客服", tickets: "工单", distribution: "签到分销", poster: "海报生成器",
+  "ecom-pull": "上游挂机拉单", "ecom-express": "快递追踪", "ecom-price": "全网比价",
+  "ecom-sentinel": "哨兵监控", "ecom-ocr": "财务OCR对账",
+  "geek-ip": "IP归属地查询", "geek-speed": "网络测速", "geek-forex": "天气/汇率", "geek-qrcode": "二维码生成",
   staff: "员工账号权限分配", payment: "支付配置", mail: "邮件配置",
   profile: "个人中心",
 };
@@ -426,7 +455,15 @@ function switchTab(tab, el) {
     if (tab === 'staff' && typeof loadStaff === 'function') loadStaff();
     if (tab === 'profile' && typeof loadProfile === 'function') loadProfile();
     if (tab === 'dashboard' && typeof fetchDashboardData === 'function') fetchDashboardData();
+    // 阶段三：业务占位页进入即真实探测后端空壳接口
+    if (typeof loadBizPage === 'function' && BIZ_TABS.indexOf(tab) >= 0) {
+        setTimeout(() => loadBizPage(tab), 60);
+    }
 }
+
+// 阶段三业务占位页签（进入时探测后端接口联调状态）
+const BIZ_TABS = ['ecom-pull', 'ecom-express', 'ecom-price', 'ecom-sentinel', 'ecom-ocr',
+                  'geek-ip', 'geek-speed', 'geek-forex', 'geek-qrcode'];
 
 // ---------- 按钮涟漪微动效（事件委托） ----------
 document.addEventListener('click', (e) => {
@@ -777,6 +814,7 @@ async function loadAccounts() {
         const res = await fetch(`${API_BASE}/account/products`);
         const json = await res.json();
         const list = (json.code === 1 && json.data) ? json.data : [];
+        window.__products = list;   // 供 AI 按钮弹窗取商品数据
         if (!list.length) {
             grid.innerHTML = '<div class="empty-tip">暂无在售商品</div>';
             return;
@@ -792,6 +830,11 @@ async function loadAccounts() {
               <div class="pc-foot">
                 <span class="pc-price">¥${Number(p.price || 0).toFixed(2)}<small> /件</small></span>
                 <span class="stock-light ${inStock ? 'live' : 'out'}"><i></i>${inStock ? '有货 ' + p.stock : '已售罄'}</span>
+              </div>
+              <div class="pc-ai">
+                <span class="pc-ai-label"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3z"/></svg>AI 工具箱</span>
+                <button class="btn btn-ghost btn-xs" onclick="aiSceneOpen(${i})">生成场景图</button>
+                <button class="btn btn-ghost btn-xs" onclick="aiVideoOpen(${i})">图转视频</button>
               </div>
             </div>`;
         }).join('');
