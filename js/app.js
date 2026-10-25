@@ -459,6 +459,9 @@ function switchTab(tab, el) {
     if (typeof loadBizPage === 'function' && BIZ_TABS.indexOf(tab) >= 0) {
         setTimeout(() => loadBizPage(tab), 60);
     }
+    // 系统配置中枢：邮件/支付配置页进入即真实拉取后端配置（非假数据）
+    if (tab === 'mail' && typeof MailCfg === 'object') MailCfg.load();
+    if (tab === 'payment' && typeof PayCfg === 'object') PayCfg.load();
 }
 
 // 阶段三业务占位页签（进入时探测后端接口联调状态）

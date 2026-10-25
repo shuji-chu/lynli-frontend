@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>LynLi · 超级管理中枢</title>
   <!-- 品牌图标 -->
-  <link rel="icon" type="image/png" href="./favicon.png?v=20261026g">
-  <link rel="apple-touch-icon" href="./apple-touch-icon.png?v=20261026g">
+  <link rel="icon" type="image/png" href="./favicon.png?v=20261026i">
+  <link rel="apple-touch-icon" href="./apple-touch-icon.png?v=20261026i">
   <!-- 蓝白主题（相对路径，解决 GitHub Pages 白屏） -->
-  <link rel="stylesheet" href="./css/style.css?v=20261026g">
+  <link rel="stylesheet" href="./css/style.css?v=20261026i">
   <!-- Leaflet 地图库（jsdelivr 主源 + cdnjs 容灾） -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" onerror="this.onerror=null;this.href='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css'">
   <!-- Anime.js 丝滑动画 -->
@@ -942,26 +942,128 @@
       <!-- ========== 系统设置 · 支付配置 ========== -->
       <section class="sub-page" id="page-payment">
         <div class="page-header"><div><h2 class="page-title">支付配置</h2><p class="page-sub">支付通道 · 密钥与费率</p></div></div>
-        <div class="card placeholder-card">
-          <div class="placeholder-icon">
-            <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/><path d="M6 15h4"/></svg>
+
+        <div class="card pay-card">
+          <h3 class="card-title">支付宝配置</h3>
+          <p class="card-sub">官方支付宝（RSA2）收款，填写 APPID 与密钥对</p>
+          <div class="field">
+            <label class="field-label">APPID</label>
+            <input class="input" id="pay-alipay-appid" placeholder="支付宝开放平台应用 APPID" />
           </div>
-          <h3>支付配置</h3>
-          <p>该模块正在紧张开发中，将支持支付通道接入、密钥管理、费率配置与对账文件下载。</p>
-          <button class="btn btn-primary btn-sm" onclick="switchTab('dashboard')">返回工作台</button>
+          <div class="field">
+            <label class="field-label">应用私钥</label>
+            <textarea class="input pay-key" id="pay-alipay-private" placeholder="-----BEGIN PRIVATE KEY-----"></textarea>
+          </div>
+          <div class="field">
+            <label class="field-label">支付宝公钥</label>
+            <textarea class="input pay-key" id="pay-alipay-public" placeholder="-----BEGIN PUBLIC KEY-----"></textarea>
+          </div>
+          <div class="switch-row">
+            <div>
+              <div class="switch-label">启用支付宝通道</div>
+              <div class="switch-desc">关闭后前台不再展示该支付方式</div>
+            </div>
+            <label class="switch"><input type="checkbox" id="pay-alipay-enabled" /><span class="slider"></span></label>
+          </div>
+        </div>
+
+        <div class="card pay-card">
+          <h3 class="card-title">USDT 配置</h3>
+          <p class="card-sub">TRC20 链上收款，配合 Trongrid API 自动回调</p>
+          <div class="field">
+            <label class="field-label">TRC20 收款地址</label>
+            <input class="input" id="pay-usdt-address" placeholder="TRC20 钱包地址（T 开头）" />
+          </div>
+          <div class="field">
+            <label class="field-label">API Key</label>
+            <input class="input" id="pay-usdt-key" placeholder="Trongrid Pro API Key（选填）" />
+          </div>
+          <div class="switch-row">
+            <div>
+              <div class="switch-label">启用 USDT 通道</div>
+              <div class="switch-desc">关闭后前台不再展示该支付方式</div>
+            </div>
+            <label class="switch"><input type="checkbox" id="pay-usdt-enabled" /><span class="slider"></span></label>
+          </div>
+        </div>
+
+        <div class="card pay-actions">
+          <button class="btn btn-primary btn-block" id="pay-save-btn" onclick="PayCfg.save()">保存支付配置</button>
         </div>
       </section>
 
       <!-- ========== 系统设置 · 邮件配置 ========== -->
       <section class="sub-page" id="page-mail">
         <div class="page-header"><div><h2 class="page-title">邮件配置</h2><p class="page-sub">SMTP 服务 · 模板管理</p></div></div>
-        <div class="card placeholder-card">
-          <div class="placeholder-icon">
-            <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 7l10 6 10-6"/></svg>
+
+        <div class="card mail-card">
+          <h3 class="card-title">SMTP 发信配置</h3>
+          <p class="card-sub">配置发信账号，保存后立即生效，无需重启</p>
+          <div class="input-group">
+            <div class="field" style="flex:2">
+              <label class="field-label">SMTP 服务器</label>
+              <input class="input" id="mail-smtp-host" placeholder="smtp.example.com" />
+            </div>
+            <div class="field" style="flex:1">
+              <label class="field-label">端口</label>
+              <input class="input" id="mail-smtp-port" placeholder="465" inputmode="numeric" />
+            </div>
           </div>
-          <h3>邮件配置</h3>
-          <p>该模块正在紧张开发中，将支持 SMTP 服务配置、发信模板管理与发送记录查询。</p>
-          <button class="btn btn-primary btn-sm" onclick="switchTab('dashboard')">返回工作台</button>
+          <div class="field">
+            <label class="field-label">SMTP 账号</label>
+            <input class="input" id="mail-smtp-user" placeholder="noreply@example.com" />
+          </div>
+          <div class="field">
+            <label class="field-label">SMTP 密码</label>
+            <input class="input" id="mail-smtp-pass" type="password" placeholder="发信授权码 / 密码" />
+          </div>
+          <div class="input-group">
+            <div class="field" style="flex:1">
+              <label class="field-label">发件人邮箱</label>
+              <input class="input" id="mail-sender-email" placeholder="noreply@example.com" />
+            </div>
+            <div class="field" style="flex:1">
+              <label class="field-label">发件人名称</label>
+              <input class="input" id="mail-sender-name" placeholder="品牌名" />
+            </div>
+          </div>
+          <button class="btn btn-primary" id="mail-save-btn" onclick="MailCfg.saveMail()">保存邮件配置</button>
+        </div>
+
+        <div class="card mail-card">
+          <h3 class="card-title">全站邮件群发</h3>
+          <p class="card-sub">向全站注册用户批量发送真实邮件</p>
+          <div class="field">
+            <label class="field-label">邮件标题</label>
+            <input class="input" id="mail-bc-subject" placeholder="例如：五一特惠活动开启" />
+          </div>
+          <div class="field">
+            <label class="field-label">AI 提示词</label>
+            <div class="input-group">
+              <input class="input" id="mail-ai-prompt" placeholder="描述想要的邮件，如：双十一促销邀请函" />
+              <button class="btn btn-ghost btn-sm" id="mail-ai-btn" onclick="MailCfg.genAITemplate()">AI 生成模板</button>
+            </div>
+          </div>
+          <div class="field">
+            <label class="field-label">邮件内容（HTML）</label>
+            <textarea class="input mail-content" id="mail-bc-body" placeholder="支持 HTML，或将上方提示词交给 AI 生成"></textarea>
+          </div>
+          <button class="btn btn-primary btn-block" id="mail-bc-btn" onclick="MailCfg.sendBroadcast()">一键全站发送</button>
+          <div class="mail-queue" id="mail-queue-tip"></div>
+        </div>
+
+        <div class="card mail-card">
+          <h3 class="card-title">触发邮件文案</h3>
+          <p class="card-sub">自定义系统触发类邮件正文</p>
+          <div class="field">
+            <label class="field-label">注册验证码邮件</label>
+            <textarea class="input mail-content" id="mail-tpl-register" placeholder="注册验证码邮件正文（支持 HTML）"></textarea>
+          </div>
+          <div class="field">
+            <label class="field-label">支付成功通知</label>
+            <textarea class="input mail-content" id="mail-tpl-pay" placeholder="支付成功通知邮件正文（支持 HTML）"></textarea>
+          </div>
+          <button class="btn btn-primary" id="mail-tpl-btn" onclick="MailCfg.saveTemplates()">保存触发文案</button>
         </div>
       </section>
 
@@ -1043,11 +1145,12 @@
   <!-- Leaflet JS（jsdelivr 主源 + cdnjs 容灾） -->
   <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js" onerror="document.write('<script src=\"https:\/\/cdnjs.cloudflare.com\/ajax\/libs\/leaflet\/1.9.4\/leaflet.min.js\"><\/script>')"></script>
   <!-- 全局用户信息同步中心（所有子站复用）：必须先于业务脚本加载 -->
-  <script src="./js/user-store.js?v=20261026g"></script>
-  <script src="./js/app.js?v=20261026g"></script>
-  <script src="./js/map-page.js?v=20261026g"></script>
-  <script src="./js/profile-page.js?v=20261026g"></script>
-  <script src="./js/ai-widget.js?v=20261026g"></script>
-  <script src="./js/biz-pages.js?v=20261026g"></script>
+  <script src="./js/user-store.js?v=20261026i"></script>
+  <script src="./js/app.js?v=20261026i"></script>
+  <script src="./js/map-page.js?v=20261026i"></script>
+  <script src="./js/profile-page.js?v=20261026i"></script>
+  <script src="./js/ai-widget.js?v=20261026i"></script>
+  <script src="./js/biz-pages.js?v=20261026i"></script>
+  <script src="./js/sysconfig.js?v=20261026i"></script>
 </body>
 </html>

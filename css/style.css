@@ -1,5 +1,5 @@
 /* ============================================================
-   LynLi 管理中枢 · 蓝白熊猫主题（v20261026g）
+   LynLi 管理中枢 · 蓝白熊猫主题（v20261026i）
    - 蓝白渐变背景 + 缓慢漂浮熊猫（Lottie / CSS 剪影）
    - 白色半透明毛玻璃卡片 rgba(255,255,255,.85)
    - 滑动修复：min-height:100dvh + 底部 padding 100px
@@ -468,6 +468,44 @@ body {
 .toast.t-warn .toast-dot { background: var(--gold); box-shadow: 0 0 10px rgba(217,165,32,.6); }
 .toast.t-warn { border-color: rgba(217,165,32,.4); }
 
+/* ======================= 系统配置中枢（邮件 / 支付） ======================= */
+.card-title { margin: 0 0 4px; font-size: 17px; font-weight: 700; color: var(--text-primary); }
+.card-sub { margin: 0 0 18px; font-size: 12.5px; color: var(--text-secondary); line-height: 1.6; }
+.pay-card, .mail-card { max-width: 720px; }
+.pay-actions, .mail-card .btn { margin-top: 4px; }
+
+/* 多行输入框（私钥 / 公钥 / HTML 内容）：覆盖 .input 的固定高度 */
+.pay-key, .mail-content {
+  height: auto; min-height: 96px; padding: 12px 14px;
+  resize: vertical; line-height: 1.55; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 13px; white-space: pre-wrap; word-break: break-all;
+}
+.mail-content { min-height: 160px; }
+
+/* 高级滑动 Toggle 开关 */
+.switch-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 16px 0 2px; margin-top: 8px; border-top: 1px dashed var(--stroke-soft);
+}
+.switch-label { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+.switch-desc { font-size: 11.5px; color: var(--text-muted); margin-top: 3px; }
+.switch { position: relative; display: inline-block; width: 50px; height: 28px; flex-shrink: 0; }
+.switch input { position: absolute; opacity: 0; width: 0; height: 0; }
+.switch .slider {
+  position: absolute; cursor: pointer; inset: 0; background: rgba(120,130,160,.35);
+  border-radius: 999px; transition: background .25s ease;
+}
+.switch .slider::before {
+  content: ""; position: absolute; height: 22px; width: 22px; left: 3px; top: 3px;
+  background: #fff; border-radius: 50%; box-shadow: 0 2px 6px rgba(0,0,0,.22);
+  transition: transform .25s cubic-bezier(.22,1,.36,1);
+}
+.switch input:checked + .slider { background: linear-gradient(135deg, var(--blue-primary), var(--blue-primary2)); }
+.switch input:checked + .slider::before { transform: translateX(22px); }
+.switch input:focus-visible + .slider { box-shadow: 0 0 0 3px rgba(37,99,235,.25); }
+
+.mail-queue { margin-top: 12px; font-size: 12.5px; color: var(--blue-primary); line-height: 1.5; }
+
 /* ======================= 节点地图（蓝白浅色极客） ======================= */
 .map-card { padding: 0; overflow: hidden; border-radius: var(--radius-lg); position: relative; }
 #node-map { width: 100%; height: calc(100dvh - 300px); min-height: 460px; background: #e8eff9; z-index: 1; }
@@ -862,7 +900,7 @@ body:not(.logged-in) .ai-fab { display: none; }
 }
 
 /* ============================================================
-   阶段三/四新增样式（v20261026g）
+   阶段三/四新增样式（v20261026i）
    电商自动化 / 极客工具箱占位页 · 海报生成器 · AI 弹窗
    ============================================================ */
 
