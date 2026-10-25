@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>LynLi · 超级管理中枢</title>
   <!-- 品牌图标 -->
-  <link rel="icon" type="image/png" href="./favicon.png?v=20261026r">
-  <link rel="apple-touch-icon" href="./apple-touch-icon.png?v=20261026r">
+  <link rel="icon" type="image/png" href="./favicon.png?v=20261026t">
+  <link rel="apple-touch-icon" href="./apple-touch-icon.png?v=20261026t">
   <!-- 蓝白主题（相对路径，解决 GitHub Pages 白屏） -->
-  <link rel="stylesheet" href="./css/style.css?v=20261026r">
+  <link rel="stylesheet" href="./css/style.css?v=20261026t">
   <!-- Leaflet 地图库（jsdelivr 主源 + cdnjs 容灾） -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" onerror="this.onerror=null;this.href='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css'">
   <!-- Anime.js 丝滑动画 -->
@@ -731,44 +731,75 @@
         </div>
       </section>
 
-      <!-- ========== 营销与客服 · 海报生成器（阶段四 · 智谱 CogView 真实接口） ========== -->
+      <!-- ========== 营销与客服 · 海报生成器（GLM-4-Plus HTML 海报 / CogView 绘图海报） ========== -->
       <section class="sub-page" id="page-poster">
         <div class="page-header">
           <div>
             <h2 class="page-title">海报生成器</h2>
-            <p class="page-sub">智谱 CogView 文生图 · 营销物料秒级产出</p>
+            <p class="page-sub">智谱 GLM-4-Plus 生成 S5 品牌 HTML 海报 · CogView 绘图成图</p>
           </div>
           <span class="ep-badge ok">AI 已接入</span>
         </div>
         <div class="poster-layout">
           <div class="card poster-form">
-            <label class="biz-label">海报描述 <span class="req">*</span></label>
-            <textarea class="biz-input" id="poster-prompt" rows="4" maxlength="400"
-              placeholder="例如：电商大促海报，蓝色渐变背景，中央悬浮着一只卡通熊猫拿着手机，霓虹灯质感的「年中大促」四个大字，四周有礼盒和星星元素"></textarea>
-            <label class="biz-label">画面比例</label>
-            <div class="size-opts">
-              <button type="button" class="size-opt active" onclick="pickPosterSize('1024x1024',this)">
-                <b>方形 1:1</b><small>朋友圈 / 商品图</small>
-              </button>
-              <button type="button" class="size-opt" onclick="pickPosterSize('768x1344',this)">
-                <b>竖版 9:16</b><small>短视频封面</small>
-              </button>
-              <button type="button" class="size-opt" onclick="pickPosterSize('1344x768',this)">
-                <b>横版 16:9</b><small>Banner 头图</small>
-              </button>
-              <button type="button" class="size-opt" onclick="pickPosterSize('720x1280',this)">
-                <b>全屏 9:16</b><small>手机全屏海报</small>
-              </button>
-              <button type="button" class="size-opt" onclick="pickPosterSize('1280x720',this)">
-                <b>宽屏 16:9</b><small>桌面端主视觉</small>
-              </button>
+            <div class="poster-modes">
+              <button type="button" class="poster-mode active" id="pm-html" onclick="switchPosterMode('html')">HTML 排版海报</button>
+              <button type="button" class="poster-mode" id="pm-image" onclick="switchPosterMode('image')">AI 绘图海报</button>
             </div>
-            <label class="biz-label">生成模型</label>
-            <select class="biz-input" id="poster-model">
-              <option value="cogview-4">CogView-4（高质推荐）</option>
-              <option value="cogview-3-flash">CogView-3-Flash（免费极速）</option>
-            </select>
-            <button class="btn btn-primary" id="poster-gen-btn" onclick="genPoster()">生成海报</button>
+
+            <!-- HTML 模式：glm-4-plus 生成带 S5 品牌元素的海报 -->
+            <div id="poster-form-html">
+              <label class="biz-label">促销文案 <span class="req">*</span></label>
+              <input class="biz-input" id="poster-copy" maxlength="60" placeholder="例如：周末节点8折">
+              <label class="biz-label">主标题（可选）</label>
+              <input class="biz-input" id="poster-htitle" maxlength="20" placeholder="例如：周末狂欢（留空由 AI 自拟）">
+              <label class="biz-label">副标题（可选）</label>
+              <input class="biz-input" id="poster-hsub" maxlength="40" placeholder="例如：全场低至5折起（留空由 AI 自拟）">
+              <label class="biz-label">海报比例</label>
+              <div class="size-opts">
+                <button type="button" class="size-opt active" onclick="pickPosterRatio('1:1',this)">
+                  <b>方形 1:1</b><small>朋友圈 / 商品图</small>
+                </button>
+                <button type="button" class="size-opt" onclick="pickPosterRatio('9:16',this)">
+                  <b>竖版 9:16</b><small>手机海报</small>
+                </button>
+                <button type="button" class="size-opt" onclick="pickPosterRatio('16:9',this)">
+                  <b>横版 16:9</b><small>Banner 头图</small>
+                </button>
+              </div>
+              <button class="btn btn-primary" id="poster-html-btn" onclick="genPosterHtml()">生成 HTML 海报</button>
+            </div>
+
+            <!-- 绘图模式：CogView 文生图 -->
+            <div id="poster-form-image" style="display:none">
+              <label class="biz-label">海报描述 <span class="req">*</span></label>
+              <textarea class="biz-input" id="poster-prompt" rows="4" maxlength="400"
+                placeholder="例如：电商大促海报，蓝色渐变背景，中央悬浮着一只卡通熊猫拿着手机，霓虹灯质感的「年中大促」四个大字，四周有礼盒和星星元素"></textarea>
+              <label class="biz-label">画面比例</label>
+              <div class="size-opts">
+                <button type="button" class="size-opt active" onclick="pickPosterSize('1024x1024',this)">
+                  <b>方形 1:1</b><small>朋友圈 / 商品图</small>
+                </button>
+                <button type="button" class="size-opt" onclick="pickPosterSize('768x1344',this)">
+                  <b>竖版 9:16</b><small>短视频封面</small>
+                </button>
+                <button type="button" class="size-opt" onclick="pickPosterSize('1344x768',this)">
+                  <b>横版 16:9</b><small> Banner 头图</small>
+                </button>
+                <button type="button" class="size-opt" onclick="pickPosterSize('720x1280',this)">
+                  <b>全屏 9:16</b><small>手机全屏海报</small>
+                </button>
+                <button type="button" class="size-opt" onclick="pickPosterSize('1280x720',this)">
+                  <b>宽屏 16:9</b><small>桌面端主视觉</small>
+                </button>
+              </div>
+              <label class="biz-label">生成模型</label>
+              <select class="biz-input" id="poster-model">
+                <option value="cogview-3-flash" selected>CogView-3-Flash（免费档）</option>
+                <option value="cogview-4">CogView-4（高质 · 付费）</option>
+              </select>
+              <button class="btn btn-primary" id="poster-gen-btn" onclick="genPoster()">生成海报</button>
+            </div>
           </div>
           <div class="card poster-result" id="poster-result">
             <div class="poster-empty">
@@ -776,7 +807,7 @@
                 <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="1.6"/><path d="M21 15l-5-5-9 9"/></svg>
               </div>
               <h3>等待创作</h3>
-              <p>输入海报描述并选择比例，点击「生成海报」，智谱大模型将为你实时绘制营销物料。</p>
+              <p>输入促销文案，点击「生成 HTML 海报」，GLM-4-Plus 将实时排版出带 S5 品牌元素的营销海报，可一键截图下载。</p>
             </div>
           </div>
         </div>
@@ -957,12 +988,12 @@
         </div>
       </section>
 
-      <!-- ========== 极客工具箱 · IP归属地查询（阶段三占位） ========== -->
+      <!-- ========== 极客工具箱 · IP归属地查询（真实接口） ========== -->
       <section class="sub-page" id="page-geek-ip">
         <div class="page-header">
           <div>
             <h2 class="page-title">IP归属地查询</h2>
-            <p class="page-sub">IP 地理定位 · ASN 网络画像</p>
+            <p class="page-sub">IP 地理定位 · ASN 网络画像 · 实时查询</p>
           </div>
           <span class="ep-badge" id="ep-badge-geek-ip">探测中</span>
         </div>
@@ -972,14 +1003,30 @@
               <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.8 2.6 4 5.6 4 9s-1.2 6.4-4 9c-2.8-2.6-4-5.6-4-9s1.2-6.4 4-9z"/></svg>
             </div>
             <h3>IP 归属地查询</h3>
-            <p>输入任意 IP 或域名，秒级返回国家地区、运营商、ASN 与网络类型画像。</p>
-            <ul class="biz-points">
-              <li>IPv4 / IPv6 双栈查询</li>
-              <li>国家/城市/邮编定位</li>
-              <li>运营商与 ASN 画像</li>
-              <li>代理/VPN 风险识别</li>
-            </ul>
-            <button class="btn btn-primary btn-sm" onclick="loadBizPage('geek-ip')">立即探测接口</button>
+            <p>输入任意 IPv4 / IPv6 地址，秒级返回国家地区、城市、运营商与 ASN 画像；留空则查询本机出口 IP。</p>
+            <div class="geek-form">
+              <input id="geek-ip-input" class="input" placeholder="如 8.8.8.8（留空查本机出口 IP）" maxlength="45">
+              <button class="btn btn-primary btn-sm" id="geek-ip-btn">查询</button>
+              <button class="btn btn-ghost btn-sm" id="geek-ip-self">本机 IP</button>
+            </div>
+            <div class="geek-result" id="geek-ip-result" style="display:none">
+              <div class="gir-head">
+                <div class="gir-ip" id="gir-ip">--</div>
+                <span class="gir-cc" id="gir-cc">--</span>
+              </div>
+              <div class="gir-grid">
+                <div class="gir-item"><span>国家 / 地区</span><b id="gir-country">--</b></div>
+                <div class="gir-item"><span>省 / 州</span><b id="gir-region">--</b></div>
+                <div class="gir-item"><span>城市</span><b id="gir-city">--</b></div>
+                <div class="gir-item"><span>邮编</span><b id="gir-zip">--</b></div>
+                <div class="gir-item"><span>时区</span><b id="gir-tz">--</b></div>
+                <div class="gir-item"><span>经纬度</span><b id="gir-geo">--</b></div>
+                <div class="gir-item gir-wide"><span>运营商 ISP</span><b id="gir-isp">--</b></div>
+                <div class="gir-item gir-wide"><span>组织 ORG</span><b id="gir-org">--</b></div>
+                <div class="gir-item gir-wide"><span>ASN</span><b id="gir-as">--</b></div>
+              </div>
+            </div>
+            <div class="geek-empty" id="geek-ip-empty">输入 IP 后点击查询，结果由 ip-api.com 实时返回</div>
           </div>
           <div class="card biz-api">
             <h4>接口联调状态</h4>
@@ -992,12 +1039,12 @@
         </div>
       </section>
 
-      <!-- ========== 极客工具箱 · 网络测速（阶段三占位） ========== -->
+      <!-- ========== 极客工具箱 · 网络测速（真实测速文件） ========== -->
       <section class="sub-page" id="page-geek-speed">
         <div class="page-header">
           <div>
             <h2 class="page-title">网络测速</h2>
-            <p class="page-sub">服务端探针 · 延迟丢包抖动</p>
+            <p class="page-sub">真实带宽测量 · 延迟 + 10MB 下载测速</p>
           </div>
           <span class="ep-badge" id="ep-badge-geek-speed">探测中</span>
         </div>
@@ -1007,32 +1054,53 @@
               <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 18a8 8 0 1116 0"/><path d="M12 14l4-4"/><circle cx="12" cy="14" r="1.4" fill="currentColor" stroke="none"/></svg>
             </div>
             <h3>网络测速</h3>
-            <p>服务端探针聚合多点测速数据，实时掌握各节点延迟、丢包与抖动表现。</p>
-            <ul class="biz-points">
-              <li>多探针节点同时测速</li>
-              <li>延迟/丢包/抖动三指标</li>
-              <li>测速历史曲线</li>
-              <li>劣化节点自动排名</li>
-            </ul>
-            <button class="btn btn-primary btn-sm" onclick="loadBizPage('geek-speed')">立即探测接口</button>
+            <p>先测量服务端延迟，再从服务端下载 10MB 测速文件，按真实耗时计算下行带宽。</p>
+            <div class="gauge-wrap">
+              <svg viewBox="0 0 300 178" class="gauge-svg">
+                <path d="M 72.2 72.2 A 110 110 0 1 1 227.8 72.2" fill="none" stroke="rgba(22,35,63,.10)" stroke-width="14" stroke-linecap="round"/>
+                <path id="gs-arc" d="M 72.2 72.2 A 110 110 0 1 1 227.8 72.2" fill="none" stroke="url(#gsGrad)" stroke-width="14" stroke-linecap="round" stroke-dasharray="518.4" stroke-dashoffset="518.4"/>
+                <defs>
+                  <linearGradient id="gsGrad" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stop-color="#3b7ddd"/>
+                    <stop offset="100%" stop-color="#6aa8ff"/>
+                  </linearGradient>
+                </defs>
+                <g id="gs-needle" transform="rotate(-135 150 150)">
+                  <line x1="150" y1="150" x2="150" y2="52" stroke="#16233f" stroke-width="3" stroke-linecap="round"/>
+                  <circle cx="150" cy="150" r="7" fill="#16233f"/>
+                </g>
+              </svg>
+              <div class="gauge-readout"><b id="gs-value">0.0</b><span>Mbps</span></div>
+            </div>
+            <div class="geek-form">
+              <button class="btn btn-primary btn-sm" id="gs-start">开始测速</button>
+              <button class="btn btn-ghost btn-sm" id="gs-stop" style="display:none">测速中…</button>
+            </div>
+            <div class="gs-stats">
+              <div class="gs-stat"><span>平均延迟</span><b id="gs-latency">--</b></div>
+              <div class="gs-stat"><span>下载速度</span><b id="gs-speed">--</b></div>
+              <div class="gs-stat"><span>测试流量</span><b id="gs-size">10 MB</b></div>
+              <div class="gs-stat"><span>下载用时</span><b id="gs-duration">--</b></div>
+            </div>
+            <div class="geek-empty" id="gs-tip">点击开始测速：先测 3 次延迟取平均，再下载 10MB 文件计算真实带宽</div>
           </div>
           <div class="card biz-api">
             <h4>接口联调状态</h4>
             <div class="api-line"><span>请求方法</span><code>GET</code></div>
-            <div class="api-line"><span>后端端点</span><code>/api/v1/geek/speed</code></div>
+            <div class="api-line"><span>后端端点</span><code>/api/v1/geek/speed/ping</code></div>
             <div class="api-line"><span>当前状态</span><b id="ep-status-geek-speed">未探测</b></div>
-            <p class="api-hint">该页面进入时会自动向后端发起真实请求；下方为后端原始返回。</p>
+            <p class="api-hint">延迟探针已上线；测速文件由 <code>/api/v1/geek/speed/file</code> 提供（10MB 随机字节流）。下方为探针原始返回。</p>
             <pre class="api-raw" id="ep-raw-geek-speed">等待探测…</pre>
           </div>
         </div>
       </section>
 
-      <!-- ========== 极客工具箱 · 天气/汇率（阶段三占位） ========== -->
+      <!-- ========== 极客工具箱 · 天气/汇率（真实接口） ========== -->
       <section class="sub-page" id="page-geek-forex">
         <div class="page-header">
           <div>
             <h2 class="page-title">天气/汇率</h2>
-            <p class="page-sub">实时天气 · 汇率换算</p>
+            <p class="page-sub">全球城市实时天气 · 多币种实时汇率</p>
           </div>
           <span class="ep-badge" id="ep-badge-geek-forex">探测中</span>
         </div>
@@ -1042,32 +1110,65 @@
               <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M17 18a4 4 0 000-8 6 6 0 00-11.6 1.6A3.5 3.5 0 006 18z"/><path d="M8 21l1-2M12 21l1-2M16 21l1-2"/></svg>
             </div>
             <h3>天气 / 汇率</h3>
-            <p>全球城市实时天气与多币种汇率换算，出海业务随手查。</p>
-            <ul class="biz-points">
-              <li>全球城市实时天气</li>
-              <li>多币种实时汇率</li>
-              <li>常用货币对速查</li>
-              <li>离线缓存最近查询</li>
-            </ul>
-            <button class="btn btn-primary btn-sm" onclick="loadBizPage('geek-forex')">立即探测接口</button>
+            <p>天气数据来自 wttr.in，汇率来自 open.er-api.com，均为实时真实数据，进入页面自动加载。</p>
+            <div class="geek-split">
+              <div class="geek-panel">
+                <h4 class="gp-title">天气查询</h4>
+                <div class="geek-form">
+                  <input id="gf-city" class="input" placeholder="城市名，如 上海 / Tokyo" maxlength="60">
+                  <button class="btn btn-primary btn-sm" id="gf-wbtn">查询</button>
+                </div>
+                <div class="wx-card" id="wx-card" style="display:none">
+                  <div class="wx-head">
+                    <div class="wx-place"><b id="wx-city">--</b><span id="wx-country">--</span></div>
+                    <div class="wx-temp"><b id="wx-temp">--</b><i>°C</i></div>
+                  </div>
+                  <div class="wx-desc" id="wx-desc">--</div>
+                  <div class="wx-grid">
+                    <div class="wx-item"><span>体感</span><b id="wx-feels">--</b></div>
+                    <div class="wx-item"><span>湿度</span><b id="wx-humidity">--</b></div>
+                    <div class="wx-item"><span>风速</span><b id="wx-wind">--</b></div>
+                    <div class="wx-item"><span>云量</span><b id="wx-cloud">--</b></div>
+                  </div>
+                  <div class="wx-forecast" id="wx-forecast"></div>
+                </div>
+                <div class="geek-empty" id="wx-empty">输入城市名查询实时天气</div>
+              </div>
+              <div class="geek-panel">
+                <h4 class="gp-title">汇率换算</h4>
+                <div class="geek-form">
+                  <input id="fx-amount" class="input" type="number" min="0" step="any" value="100" style="max-width:110px">
+                  <select id="fx-base" class="input" style="max-width:110px">
+                    <option value="CNY">CNY 人民币</option>
+                    <option value="USD">USD 美元</option>
+                    <option value="EUR">EUR 欧元</option>
+                    <option value="JPY">JPY 日元</option>
+                    <option value="HKD">HKD 港元</option>
+                  </select>
+                </div>
+                <div class="fx-table" id="fx-table"></div>
+                <div class="fx-time" id="fx-time">--</div>
+                <div class="geek-empty" id="fx-empty">汇率加载中…</div>
+              </div>
+            </div>
           </div>
           <div class="card biz-api">
             <h4>接口联调状态</h4>
             <div class="api-line"><span>请求方法</span><code>GET</code></div>
             <div class="api-line"><span>后端端点</span><code>/api/v1/geek/forex</code></div>
             <div class="api-line"><span>当前状态</span><b id="ep-status-geek-forex">未探测</b></div>
-            <p class="api-hint">该页面进入时会自动向后端发起真实请求；下方为后端原始返回。</p>
+            <p class="api-hint">天气经 <code>/api/v1/geek/weather</code>、汇率经 <code>/api/v1/geek/forex</code> 实时代理；下方为探针原始返回。</p>
             <pre class="api-raw" id="ep-raw-geek-forex">等待探测…</pre>
           </div>
         </div>
       </section>
 
-      <!-- ========== 极客工具箱 · 二维码生成（阶段三占位） ========== -->
+      <!-- ========== 极客工具箱 · 二维码生成（真实接口） ========== -->
       <section class="sub-page" id="page-geek-qrcode">
         <div class="page-header">
           <div>
             <h2 class="page-title">二维码生成</h2>
-            <p class="page-sub">本地生成 · 即贴即用</p>
+            <p class="page-sub">服务端实时生成 · 即贴即用</p>
           </div>
           <span class="ep-badge" id="ep-badge-geek-qrcode">探测中</span>
         </div>
@@ -1077,14 +1178,18 @@
               <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM19 19h2v2h-2z"/></svg>
             </div>
             <h3>二维码生成</h3>
-            <p>文本/链接一键生成高清二维码，支持 Logo 嵌入与容错级别调节。</p>
-            <ul class="biz-points">
-              <li>文本/链接/WiFi 生成</li>
-              <li>容错级别可调</li>
-              <li>Logo 中心嵌入</li>
-              <li>PNG/SVG 导出</li>
-            </ul>
-            <button class="btn btn-primary btn-sm" onclick="loadBizPage('geek-qrcode')">立即探测接口</button>
+            <p>文本 / 链接一键生成高清二维码，由服务端实时渲染，支持下载 PNG。</p>
+            <div class="geek-form geek-form-col">
+              <textarea id="qr-text" class="input" rows="3" maxlength="2000" placeholder="输入文本或链接，如 https://web.lynli.me"></textarea>
+              <button class="btn btn-primary btn-sm" id="qr-btn">生成二维码</button>
+            </div>
+            <div class="qr-preview" id="qr-preview" style="display:none">
+              <img id="qr-img" alt="生成的二维码">
+              <div class="qr-ops">
+                <a id="qr-download" class="btn btn-ghost btn-sm" download="lynli-qrcode.png">下载 PNG</a>
+              </div>
+            </div>
+            <div class="geek-empty" id="qr-empty">输入内容后点击生成，二维码由服务端实时生成（非本地绘制）</div>
           </div>
           <div class="card biz-api">
             <h4>接口联调状态</h4>
@@ -1506,15 +1611,17 @@
   <!-- Leaflet JS（jsdelivr 主源 + cdnjs 容灾） -->
   <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js" onerror="document.write('<script src=\"https:\/\/cdnjs.cloudflare.com\/ajax\/libs\/leaflet\/1.9.4\/leaflet.min.js\"><\/script>')"></script>
   <!-- 全局用户信息同步中心（所有子站复用）：必须先于业务脚本加载 -->
-  <script src="./js/user-store.js?v=20261026r"></script>
-  <script src="./js/app.js?v=20261026r"></script>
-  <script src="./js/map-page.js?v=20261026r"></script>
-  <script src="./js/profile-page.js?v=20261026r"></script>
-  <script src="./js/ai-widget.js?v=20261026r"></script>
-  <script src="./js/biz-pages.js?v=20261026r"></script>
-  <script src="./js/sysconfig.js?v=20261026r"></script>
-  <script src="./js/staff.js?v=20261026r"></script>
-  <script src="./js/bots_matrix.js?v=20261026r"></script>
-  <script src="./js/shop_admin.js?v=20261026r"></script>
+  <script src="./js/user-store.js?v=20261026t"></script>
+  <script src="./js/app.js?v=20261026t"></script>
+  <script src="./js/map-page.js?v=20261026t"></script>
+  <script src="./js/profile-page.js?v=20261026t"></script>
+  <script src="./js/geek-tools.js?v=20261026t"></script>
+  <script src="./js/ai-widget.js?v=20261026t"></script>
+  <script src="./js/html2canvas.min.js?v=20261026t"></script>
+  <script src="./js/biz-pages.js?v=20261026t"></script>
+  <script src="./js/sysconfig.js?v=20261026t"></script>
+  <script src="./js/staff.js?v=20261026t"></script>
+  <script src="./js/bots_matrix.js?v=20261026t"></script>
+  <script src="./js/shop_admin.js?v=20261026t"></script>
 </body>
 </html>

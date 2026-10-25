@@ -505,6 +505,8 @@ function switchTab(tab, el) {
     if (tab === 'bots-matrix' && typeof BotMX !== 'undefined') BotMX.load();
     if (tab === 'profile' && typeof loadProfile === 'function') loadProfile();
     if (tab === 'dashboard' && typeof fetchDashboardData === 'function') fetchDashboardData();
+    // 极客工具箱：真实交互页进入即加载默认数据（天气/汇率自动加载）
+    if (tab.indexOf('geek-') === 0 && typeof Geek !== 'undefined') Geek.enter(tab);
     // 阶段三：业务占位页进入即真实探测后端空壳接口
     if (typeof loadBizPage === 'function' && BIZ_TABS.indexOf(tab) >= 0) {
         setTimeout(() => loadBizPage(tab), 60);
