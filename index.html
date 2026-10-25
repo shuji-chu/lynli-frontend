@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>LynLi · 超级管理中枢</title>
   <!-- 品牌图标 -->
-  <link rel="icon" type="image/png" href="./favicon.png?v=20261026k">
-  <link rel="apple-touch-icon" href="./apple-touch-icon.png?v=20261026k">
+  <link rel="icon" type="image/png" href="./favicon.png?v=20261026m">
+  <link rel="apple-touch-icon" href="./apple-touch-icon.png?v=20261026m">
   <!-- 蓝白主题（相对路径，解决 GitHub Pages 白屏） -->
-  <link rel="stylesheet" href="./css/style.css?v=20261026k">
+  <link rel="stylesheet" href="./css/style.css?v=20261026m">
   <!-- Leaflet 地图库（jsdelivr 主源 + cdnjs 容灾） -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" onerror="this.onerror=null;this.href='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css'">
   <!-- Anime.js 丝滑动画 -->
@@ -920,24 +920,90 @@
         </div>
       </section>
 
-      <!-- ========== 系统设置 · 员工账号权限分配 ========== -->
+      <!-- ========== 系统设置 · 员工权限 ========== -->
       <section class="sub-page" id="page-staff">
         <div class="page-header">
           <div>
-            <h2 class="page-title">员工账号权限分配</h2>
-            <p class="page-sub">后台成员 · 角色与授权</p>
+            <h2 class="page-title">员工权限</h2>
+            <p class="page-sub">后台成员 · 角色与授权管理</p>
           </div>
-          <button class="btn btn-primary btn-sm" onclick="loadStaff()">刷新列表</button>
+          <div class="staff-toolbar">
+            <div class="staff-search">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+              <input class="input" id="staff-search-input" placeholder="搜索邮箱或昵称" oninput="Staff.search()" />
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="Staff.openAdd()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+              添加员工
+            </button>
+          </div>
         </div>
-        <div class="card table-card">
-          <div class="table-wrap">
-            <table class="table" id="staff-table">
-              <thead><tr><th>ID</th><th>账号</th><th>权限</th><th>流量用量</th><th>到期时间</th><th>状态</th></tr></thead>
-              <tbody><tr><td colspan="6" class="empty-tip">加载中...</td></tr></tbody>
-            </table>
+        <div class="card staff-card">
+          <div class="staff-list" id="staff-list">
+            <div class="empty-tip">加载中...</div>
           </div>
         </div>
       </section>
+
+      <!-- 员工详情弹窗（毛玻璃） -->
+      <div class="modal-mask" id="staff-detail-mask" style="display:none" onclick="Staff.maskClose(event,'staff-detail-mask')">
+        <div class="modal glass-modal staff-modal">
+          <div class="staff-detail-head">
+            <div class="staff-avatar staff-avatar-lg" id="sd-avatar">--</div>
+            <div>
+              <div class="sd-nickname" id="sd-nickname">--</div>
+              <div class="sd-email" id="sd-email">--</div>
+            </div>
+          </div>
+          <div class="sd-rows">
+            <div class="sd-row"><span class="sd-label">员工短ID</span><span class="sd-value" id="sd-sid">--</span></div>
+            <div class="sd-row"><span class="sd-label">所属角色</span><span class="sd-value" id="sd-role">--</span></div>
+            <div class="sd-row"><span class="sd-label">所属平台</span><span class="sd-value">Lynli 全站</span></div>
+            <div class="sd-row"><span class="sd-label">账号状态</span><span class="sd-value" id="sd-status">--</span></div>
+            <div class="sd-row"><span class="sd-label">创建时间</span><span class="sd-value" id="sd-created">--</span></div>
+          </div>
+          <div class="modal-actions">
+            <button class="btn btn-ghost btn-sm" onclick="Staff.closeDetail()">关闭</button>
+            <button class="btn btn-primary btn-sm" onclick="Staff.openEditFromDetail()">编辑权限</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 删除确认弹窗 -->
+      <div class="modal-mask" id="staff-confirm-mask" style="display:none">
+        <div class="modal glass-modal staff-modal staff-modal-sm">
+          <h3 class="card-title">删除员工</h3>
+          <p class="card-sub" id="staff-confirm-text">确认删除该员工？将从 admins 表物理删除，不可恢复。</p>
+          <div class="modal-actions">
+            <button class="btn btn-ghost btn-sm" onclick="Staff.confirmCancel()">取消</button>
+            <button class="btn btn-danger btn-sm" id="staff-confirm-ok" onclick="Staff.confirmOk()">删除</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 添加/编辑员工弹窗 -->
+      <div class="modal-mask" id="staff-form-mask" style="display:none" onclick="Staff.maskClose(event,'staff-form-mask')">
+        <div class="modal glass-modal staff-modal">
+          <h3 class="card-title" id="staff-form-title">添加员工</h3>
+          <p class="card-sub" id="staff-form-sub">新成员将写入 admins 表并可登录后台</p>
+          <input type="hidden" id="sf-id" value="" />
+          <div class="field"><label class="field-label">邮箱</label><input class="input" id="sf-email" placeholder="member@lynli.me" /></div>
+          <div class="field"><label class="field-label">昵称</label><input class="input" id="sf-nickname" placeholder="成员昵称（可留空）" /></div>
+          <div class="field"><label class="field-label">初始密码</label><input class="input" id="sf-password" type="password" placeholder="编辑时留空表示不修改密码" /></div>
+          <div class="field">
+            <label class="field-label">角色</label>
+            <select class="input" id="sf-role">
+              <option value="super">super · 超级管理员</option>
+              <option value="operator">operator · 运营</option>
+              <option value="support">support · 客服</option>
+            </select>
+          </div>
+          <div class="modal-actions">
+            <button class="btn btn-ghost btn-sm" onclick="Staff.closeForm()">取消</button>
+            <button class="btn btn-primary btn-sm" id="staff-form-submit" onclick="Staff.submit()">保存</button>
+          </div>
+        </div>
+      </div>
 
       <!-- ========== 系统设置 · 支付配置 ========== -->
       <section class="sub-page" id="page-payment">
@@ -1145,12 +1211,13 @@
   <!-- Leaflet JS（jsdelivr 主源 + cdnjs 容灾） -->
   <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js" onerror="document.write('<script src=\"https:\/\/cdnjs.cloudflare.com\/ajax\/libs\/leaflet\/1.9.4\/leaflet.min.js\"><\/script>')"></script>
   <!-- 全局用户信息同步中心（所有子站复用）：必须先于业务脚本加载 -->
-  <script src="./js/user-store.js?v=20261026k"></script>
-  <script src="./js/app.js?v=20261026k"></script>
-  <script src="./js/map-page.js?v=20261026k"></script>
-  <script src="./js/profile-page.js?v=20261026k"></script>
-  <script src="./js/ai-widget.js?v=20261026k"></script>
-  <script src="./js/biz-pages.js?v=20261026k"></script>
-  <script src="./js/sysconfig.js?v=20261026k"></script>
+  <script src="./js/user-store.js?v=20261026m"></script>
+  <script src="./js/app.js?v=20261026m"></script>
+  <script src="./js/map-page.js?v=20261026m"></script>
+  <script src="./js/profile-page.js?v=20261026m"></script>
+  <script src="./js/ai-widget.js?v=20261026m"></script>
+  <script src="./js/biz-pages.js?v=20261026m"></script>
+  <script src="./js/sysconfig.js?v=20261026m"></script>
+  <script src="./js/staff.js?v=20261026m"></script>
 </body>
 </html>

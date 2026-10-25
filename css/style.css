@@ -1,5 +1,5 @@
 /* ============================================================
-   LynLi 管理中枢 · 蓝白熊猫主题（v20261026k）
+   LynLi 管理中枢 · 蓝白熊猫主题（v20261026m）
    - 蓝白渐变背景 + 缓慢漂浮熊猫（Lottie / CSS 剪影）
    - 白色半透明毛玻璃卡片 rgba(255,255,255,.85)
    - 滑动修复：min-height:100dvh + 底部 padding 100px
@@ -924,7 +924,7 @@ body:not(.logged-in) .ai-fab { display: none; }
 }
 
 /* ============================================================
-   阶段三/四新增样式（v20261026k）
+   阶段三/四新增样式（v20261026m）
    电商自动化 / 极客工具箱占位页 · 海报生成器 · AI 弹窗
    ============================================================ */
 
@@ -1097,3 +1097,66 @@ select.biz-input { cursor: pointer; }
   border: 1px solid var(--stroke-bright); box-shadow: var(--shadow-card);
   background: #0b1530; margin-bottom: 12px;
 }
+
+/* ========== 系统设置 · 员工权限（staff） ========== */
+.staff-toolbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.staff-search { position: relative; display: flex; align-items: center; }
+.staff-search svg { position: absolute; left: 10px; width: 15px; height: 15px; color: var(--text-tertiary); pointer-events: none; }
+.staff-search .input { padding-left: 32px; height: 34px; width: 220px; font-size: 13px; }
+
+.staff-card { padding: 14px; }
+.staff-list { display: flex; flex-direction: column; gap: 10px; }
+.staff-item {
+  display: flex; align-items: center; gap: 14px;
+  padding: 12px 14px; border-radius: var(--radius-md);
+  background: rgba(255,255,255,.65); border: 1px solid var(--stroke);
+  cursor: pointer; transition: box-shadow .18s ease, transform .18s ease, background .18s ease;
+}
+.staff-item:hover { background: #fff; box-shadow: var(--shadow-card); transform: translateY(-1px); }
+.staff-avatar {
+  width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 16px; color: #fff; letter-spacing: .5px;
+  background: linear-gradient(135deg, #2f7bff, #67a6ff);
+  box-shadow: 0 4px 12px -4px rgba(47,123,255,.5);
+}
+.staff-avatar-lg { width: 58px; height: 58px; font-size: 21px; }
+.staff-avatar-off { background: linear-gradient(135deg, #94a3b8, #b8c4d4); box-shadow: none; }
+.staff-main { flex: 1; min-width: 0; }
+.staff-nick { font-weight: 700; font-size: 14px; color: var(--text-primary); display: flex; align-items: center; gap: 8px; }
+.staff-me { font-size: 11px; color: var(--gold); font-weight: 600; }
+.staff-mail { font-size: 12px; color: var(--text-tertiary); margin-top: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.staff-side { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; flex-shrink: 0; }
+.staff-role {
+  font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 999px;
+  background: rgba(47,123,255,.1); color: var(--blue-primary); border: 1px solid rgba(47,123,255,.2);
+}
+.staff-role-super { background: rgba(146,109,20,.1); color: var(--gold); border-color: rgba(146,109,20,.22); }
+.staff-role-operator { background: rgba(16,150,110,.1); color: var(--green); border-color: rgba(16,150,110,.2); }
+.staff-state { font-size: 11px; color: var(--green); font-weight: 600; }
+.staff-state-off { color: var(--danger); }
+.staff-ops { display: flex; gap: 6px; flex-shrink: 0; }
+.staff-del { color: var(--danger); border-color: rgba(229,72,77,.22); }
+.staff-del:hover { color: var(--danger); background: var(--danger-soft); }
+
+/* 弹窗（毛玻璃） */
+.glass-modal {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%);
+  width: min(420px, calc(100% - 40px));
+  background: rgba(255,255,255,.82); backdrop-filter: blur(18px) saturate(1.4);
+  -webkit-backdrop-filter: blur(18px) saturate(1.4);
+  border: 1px solid var(--stroke-bright); border-radius: var(--radius-lg);
+  box-shadow: 0 24px 60px -18px rgba(15,40,90,.35);
+  padding: 22px;
+}
+.staff-modal-sm { width: min(360px, calc(100% - 40px)); }
+.staff-detail-head { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+.sd-nickname { font-size: 16px; font-weight: 800; color: var(--text-primary); }
+.sd-email { font-size: 12px; color: var(--text-tertiary); margin-top: 2px; }
+.sd-rows { display: flex; flex-direction: column; border-top: 1px solid var(--stroke); }
+.sd-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 2px; border-bottom: 1px solid var(--stroke); font-size: 13px; }
+.sd-label { color: var(--text-tertiary); }
+.sd-value { color: var(--text-primary); font-weight: 600; }
+.sd-status-on { color: var(--green); }
+.sd-status-off { color: var(--danger); }
+.modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; }
