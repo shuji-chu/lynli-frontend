@@ -1,5 +1,5 @@
 /* ============================================================
-   LynLi 管理中枢 · 蓝白熊猫主题（v20261026o）
+   LynLi 管理中枢 · 蓝白熊猫主题（v20261026p）
    - 蓝白渐变背景 + 缓慢漂浮熊猫（Lottie / CSS 剪影）
    - 白色半透明毛玻璃卡片 rgba(255,255,255,.85)
    - 滑动修复：min-height:100dvh + 底部 padding 100px
@@ -924,7 +924,7 @@ body:not(.logged-in) .ai-fab { display: none; }
 }
 
 /* ============================================================
-   阶段三/四新增样式（v20261026o）
+   阶段三/四新增样式（v20261026p）
    电商自动化 / 极客工具箱占位页 · 海报生成器 · AI 弹窗
    ============================================================ */
 
@@ -1232,3 +1232,42 @@ select.biz-input { cursor: pointer; }
 .bot-chat-input { flex: 1; }
 .bot-avatar-wrap { width: 36px; height: 36px; flex-shrink: 0; }
 .bot-avatar-img { object-fit: cover; }
+
+/* ========== 沉浸式客服聊天系统 ========== */
+.bot-im-body { display: grid; grid-template-columns: 260px 1fr; gap: 0; height: 520px; border: 1px solid var(--stroke); border-radius: var(--radius-md); overflow: hidden; background: rgba(255,255,255,.5); }
+.bot-im-list { border-right: 1px solid var(--stroke); overflow-y: auto; background: rgba(255,255,255,.55); backdrop-filter: blur(10px); }
+.bot-im-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; cursor: pointer; border-bottom: 1px solid var(--stroke); position: relative; animation: imFade .25s ease; }
+.bot-im-item:hover { background: rgba(47,123,255,.06); }
+.bot-im-item.active { background: rgba(47,123,255,.12); }
+.bot-im-item-main { flex: 1; min-width: 0; }
+.bot-im-item-top { display: flex; justify-content: space-between; gap: 6px; }
+.bot-im-item-name { font-size: 13px; font-weight: 700; color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bot-im-item-time { font-size: 10px; color: var(--text-tertiary); flex-shrink: 0; }
+.bot-im-item-last { font-size: 11px; color: var(--text-tertiary); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bot-im-unread { min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--danger); color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+@keyframes imFade { from { opacity: 0; transform: translateY(4px);} to { opacity: 1; transform: none;} }
+
+.bot-im-main { display: flex; flex-direction: column; min-width: 0; }
+.bot-im-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-bottom: 1px solid var(--stroke); background: rgba(255,255,255,.7); backdrop-filter: blur(10px); }
+.bot-im-header-info { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.im-name { font-size: 14px; font-weight: 700; color: var(--text-primary); }
+.im-uid { font-size: 11px; color: var(--text-tertiary); }
+.bot-im-stream { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; background: rgba(240,246,255,.55); }
+.bot-im-row { display: flex; gap: 8px; align-items: flex-start; animation: imFade .2s ease; }
+.bot-im-row.mine { flex-direction: row-reverse; }
+.bot-im-row-avatar { width: 30px; height: 30px; }
+.bot-avatar-xs { width: 30px; height: 30px; font-size: 12px; }
+.bot-im-col { display: flex; flex-direction: column; max-width: 68%; }
+.bot-im-row.mine .bot-im-col { align-items: flex-end; }
+.bot-im-stream .bot-msg-bubble { font-size: 13px; padding: 9px 13px; border-radius: 14px; line-height: 1.5; word-break: break-word;
+  background: #fff; border: 1px solid var(--stroke); box-shadow: 0 2px 8px -4px rgba(15,40,90,.15); }
+.bot-im-row.mine .bot-msg-bubble { background: linear-gradient(135deg, #2f7bff, #5d9bff); color: #fff; border: none; }
+.bot-msg-bubble.pending { opacity: .65; }
+.bot-im-composer { display: flex; gap: 8px; padding: 10px; border-top: 1px solid var(--stroke); background: rgba(255,255,255,.75); backdrop-filter: blur(10px); }
+.bot-im-input { flex: 1; height: 38px; font-size: 13px; }
+
+@media (max-width: 900px) {
+  .bot-im-body { grid-template-columns: 1fr; height: auto; }
+  .bot-im-list { max-height: 220px; border-right: none; border-bottom: 1px solid var(--stroke); }
+  .bot-im-main { min-height: 420px; }
+}

@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>LynLi · 超级管理中枢</title>
   <!-- 品牌图标 -->
-  <link rel="icon" type="image/png" href="./favicon.png?v=20261026o">
-  <link rel="apple-touch-icon" href="./apple-touch-icon.png?v=20261026o">
+  <link rel="icon" type="image/png" href="./favicon.png?v=20261026p">
+  <link rel="apple-touch-icon" href="./apple-touch-icon.png?v=20261026p">
   <!-- 蓝白主题（相对路径，解决 GitHub Pages 白屏） -->
-  <link rel="stylesheet" href="./css/style.css?v=20261026o">
+  <link rel="stylesheet" href="./css/style.css?v=20261026p">
   <!-- Leaflet 地图库（jsdelivr 主源 + cdnjs 容灾） -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" onerror="this.onerror=null;this.href='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css'">
   <!-- Anime.js 丝滑动画 -->
@@ -955,20 +955,39 @@
           <div class="bot-user-list" id="bot-user-list"><div class="empty-tip">加载中...</div></div>
         </div>
 
-        <!-- 实时对话面板（默认隐藏） -->
-        <div class="card bot-chat-card" id="bot-chat-card" style="display:none">
+        <!-- 实时对话面板 · 沉浸式客服系统（默认隐藏） -->
+        <div class="card bot-chat-card bot-im" id="bot-chat-card" style="display:none">
           <div class="bot-chat-head">
             <h3 class="card-title">实时对话监控</h3>
             <div class="bot-chat-meta">
-              <span class="bot-live-dot"></span><span id="bot-chat-status">轮询中 · 每 3 秒刷新</span>
+              <span class="bot-live-dot"></span><span id="bot-chat-status">待选择会话</span>
             </div>
           </div>
-          <div class="bot-chat-uids" id="bot-chat-uids"></div>
-          <div class="bot-chat-window" id="bot-chat-window"></div>
-          <div class="bot-chat-send">
-            <input class="input" id="bot-chat-uid" placeholder="对方 TG ID" />
-            <input class="input bot-chat-input" id="bot-chat-text" placeholder="人工接管发送消息..." onkeydown="if(event.key==='Enter')BotMX.sendChat()" />
-            <button class="btn btn-primary btn-sm" onclick="BotMX.sendChat()">发送</button>
+          <div class="bot-im-body">
+            <!-- 左栏：会话列表 -->
+            <div class="bot-im-list" id="bot-im-list">
+              <div class="empty-tip">加载会话中...</div>
+            </div>
+            <!-- 右栏：聊天窗口 -->
+            <div class="bot-im-main">
+              <div class="bot-im-header" id="bot-im-header">
+                <div class="bot-im-header-info">
+                  <div class="bot-avatar-wrap" id="im-avatar"><span class="staff-avatar bot-avatar-sm">--</span></div>
+                  <div>
+                    <div class="im-name" id="im-name">请选择会话</div>
+                    <div class="im-uid" id="im-uid">--</div>
+                  </div>
+                </div>
+                <span class="bot-live-dot" id="im-live" style="display:none"></span>
+              </div>
+              <div class="bot-im-stream" id="bot-im-stream">
+                <div class="empty-tip">从左侧选择一个客户开始会话</div>
+              </div>
+              <div class="bot-im-composer">
+                <input class="input bot-im-input" id="bot-chat-text" placeholder="输入消息，回车发送" onkeydown="if(event.key==='Enter')BotMX.sendChat()" />
+                <button class="btn btn-primary btn-sm" id="bot-im-send" onclick="BotMX.sendChat()">发送</button>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -1310,14 +1329,14 @@
   <!-- Leaflet JS（jsdelivr 主源 + cdnjs 容灾） -->
   <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js" onerror="document.write('<script src=\"https:\/\/cdnjs.cloudflare.com\/ajax\/libs\/leaflet\/1.9.4\/leaflet.min.js\"><\/script>')"></script>
   <!-- 全局用户信息同步中心（所有子站复用）：必须先于业务脚本加载 -->
-  <script src="./js/user-store.js?v=20261026o"></script>
-  <script src="./js/app.js?v=20261026o"></script>
-  <script src="./js/map-page.js?v=20261026o"></script>
-  <script src="./js/profile-page.js?v=20261026o"></script>
-  <script src="./js/ai-widget.js?v=20261026o"></script>
-  <script src="./js/biz-pages.js?v=20261026o"></script>
-  <script src="./js/sysconfig.js?v=20261026o"></script>
-  <script src="./js/staff.js?v=20261026o"></script>
-  <script src="./js/bots_matrix.js?v=20261026o"></script>
+  <script src="./js/user-store.js?v=20261026p"></script>
+  <script src="./js/app.js?v=20261026p"></script>
+  <script src="./js/map-page.js?v=20261026p"></script>
+  <script src="./js/profile-page.js?v=20261026p"></script>
+  <script src="./js/ai-widget.js?v=20261026p"></script>
+  <script src="./js/biz-pages.js?v=20261026p"></script>
+  <script src="./js/sysconfig.js?v=20261026p"></script>
+  <script src="./js/staff.js?v=20261026p"></script>
+  <script src="./js/bots_matrix.js?v=20261026p"></script>
 </body>
 </html>

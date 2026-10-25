@@ -193,47 +193,124 @@ window.BotMX = {
         finally { btn.disabled = false; btn.textContent = old; }
     },
 
-    // ---------- 实时对话（3 秒轮询） ----------
-    async pollChat() {
-        const win = document.getElementById('bot-chat-window');
+    // ---------- 沉浸式客服系统（会话列表 + 气泡流 + 2 秒轮询） ----------
+    _conv: [],
+    _pending: new Set(),     // 本地"发送中"的临时消息文本去重
+
+    // 进入「实时对话」Tab
+    pollChat() { this.refreshConversations(); if (this._chatUid) this.pollHistory(); },
+
+    // 左栏会话列表
+    async refreshConversations() {
         try {
-            const q = this._chatUid ? `&uid=${encodeURIComponent(this._chatUid)}` : '';
-            const msgs = await this._get(`/admin/bots/matrix/chat?bot=${this._bot}${q}`);
-            document.getElementById('bot-chat-status').textContent = `轮询中 · 每 3 秒刷新 · ${msgs.length} 条记录`;
-            if (!msgs.length) { win.innerHTML = '<div class="empty-tip">暂无对话记录（机器人上报后自动出现）</div>'; }
-            else {
-                win.innerHTML = msgs.map(mm => `
-                  <div class="bot-msg ${Number(mm.is_admin) === 1 ? 'bot-msg-right' : 'bot-msg-left'}">
-                    <div class="bot-msg-bubble">${escapeHtml(mm.text || '')}</div>
-                    <div class="bot-msg-meta">${Number(mm.is_admin) === 1 ? '机器人/客服' : '用户 ' + escapeHtml(mm.uid)} · ${fmtTime(mm.ts)}</div>
-                  </div>`).join('');
-                win.scrollTop = win.scrollHeight;
-            }
-            if (!this._chatUid) {
-                const us = await this._get(`/admin/bots/matrix/chat/users?bot=${this._bot}`);
-                document.getElementById('bot-chat-uids').innerHTML =
-                    '<span class="bot-uid-chip active" onclick="BotMX.pickUid(\'\')">全部</span>' +
-                    us.map(x => `<span class="bot-uid-chip" onclick="BotMX.pickUid('${escapeHtml(x.uid)}')">${escapeHtml(x.uid)} (${x.count})</span>`).join('');
-            }
-        } catch (e) { /* 轮询失败静默，下一轮重试 */ }
+            this._conv = await this._get(`/admin/bots/matrix/chat/users?bot=${this._bot}`);
+            this.renderConversations();
+        } catch (e) { /* 静默重试 */ }
     },
 
+    avatarHtml(u, cls) {
+        const name = (u.nickname || u.username || u.uid || '?').slice(0, 1).toUpperCase();
+        return u.avatar
+            ? `<img class="staff-avatar ${cls}" src="${escapeHtml(u.avatar)}" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><span class="staff-avatar ${cls}" style="display:none">${escapeHtml(name)}</span>`
+            : `<span class="staff-avatar ${cls}">${escapeHtml(name)}</span>`;
+    },
+
+    renderConversations() {
+        const box = document.getElementById('bot-im-list');
+        if (!box) return;
+        if (!this._conv.length) { box.innerHTML = '<div class="empty-tip">暂无会话（机器人上报消息后自动出现）</div>'; return; }
+        box.innerHTML = this._conv.map(u => `
+          <div class="bot-im-item ${String(u.uid) === String(this._chatUid) ? 'active' : ''}" onclick="BotMX.pickUid('${escapeHtml(u.uid)}')">
+            <div class="bot-avatar-wrap">${this.avatarHtml(u, 'bot-avatar-sm')}</div>
+            <div class="bot-im-item-main">
+              <div class="bot-im-item-top">
+                <span class="bot-im-item-name">${escapeHtml(u.nickname || u.uid)}</span>
+                <span class="bot-im-item-time">${u.last_ts ? fmtTime(u.last_ts) : ''}</span>
+              </div>
+              <div class="bot-im-item-last">${escapeHtml(u.last_text || '(无消息)')}</div>
+            </div>
+            ${Number(u.unread) > 0 ? `<span class="bot-im-unread">${u.unread}</span>` : ''}
+          </div>`).join('');
+    },
+
+    // 选择客户 → 清理上一轮轮询，开启 2 秒轮询
     pickUid(uid) {
+        this.stopChatPoll();
         this._chatUid = uid;
-        document.querySelectorAll('.bot-uid-chip').forEach(c => c.classList.toggle('active', c.textContent.startsWith(uid ? uid + ' ' : '全部')));
-        this.pollChat();
+        const u = this._conv.find(x => String(x.uid) === String(uid)) || {};
+        document.getElementById('im-avatar').innerHTML = this.avatarHtml(u, 'bot-avatar-sm');
+        document.getElementById('im-name').textContent = u.nickname || uid;
+        document.getElementById('im-uid').textContent = (u.username ? '@' + u.username + ' · ' : '') + 'ID ' + uid;
+        document.getElementById('im-live').style.display = '';
+        document.getElementById('bot-im-stream').innerHTML = '<div class="empty-tip">加载中...</div>';
+        this.renderConversations();
+        this.pollHistory();
+        this._chatTimer = setInterval(() => this.pollHistory(), 2000);
     },
 
+    // 2 秒轮询：只拉当前用户的记录
+    async pollHistory() {
+        if (!this._chatUid) return;
+        const uid = this._chatUid;
+        try {
+            const msgs = await this._get(`/admin/bots/matrix/chat/history?bot=${this._bot}&user_id=${encodeURIComponent(uid)}`);
+            document.getElementById('bot-chat-status').textContent = `2 秒轮询中 · ${msgs.length} 条记录`;
+            this.renderBubbles(msgs);
+            this.refreshConversations();
+        } catch (e) { /* 静默重试 */ }
+    },
+
+    renderBubbles(msgs) {
+        const win = document.getElementById('bot-im-stream');
+        const self = this;
+        const atBottom = win.scrollHeight - win.scrollTop - win.clientHeight < 80;
+        if (!msgs.length) { win.innerHTML = '<div class="empty-tip">暂无消息，发一条试试</div>'; return; }
+        const u = this._conv.find(x => String(x.uid) === String(this._chatUid)) || {};
+        const myAvatar = this.avatarHtml({ nickname: '客服', avatar: '' }, 'bot-avatar-xs');
+        const peerAvatar = this.avatarHtml({ nickname: u.nickname || u.uid, avatar: u.avatar }, 'bot-avatar-xs');
+        win.innerHTML = msgs.map(mm => {
+            const mine = mm.role === 'bot';
+            const pending = self._pending.has(mm.text);
+            return `
+            <div class="bot-im-row ${mine ? 'mine' : 'theirs'}">
+              <div class="bot-avatar-wrap bot-im-row-avatar">${mine ? myAvatar : peerAvatar}</div>
+              <div class="bot-im-col">
+                <div class="bot-msg-bubble ${pending ? 'pending' : ''}">${escapeHtml(mm.text || '')}</div>
+                <div class="bot-msg-meta">${escapeHtml(mm.time || '')}${mm.from_admin ? ' · 人工客服' : ''}${pending ? ' · 发送中' : ''}</div>
+              </div>
+            </div>`;
+        }).join('');
+        if (atBottom) win.scrollTop = win.scrollHeight;
+    },
+
+    // 发送：先插"发送中"气泡 → 调用后端 → 成功即刷新
     async sendChat() {
-        const uid = (document.getElementById('bot-chat-uid').value || '').trim();
-        const text = (document.getElementById('bot-chat-text').value || '').trim();
-        if (!uid || !text) { showToast('请填写对方 TG ID 与消息内容', 'error'); return; }
+        const uid = this._chatUid || (document.getElementById('bot-chat-uid')?.value || '').trim();
+        const input = document.getElementById('bot-chat-text');
+        const text = (input.value || '').trim();
+        if (!uid) { showToast('请先在左侧选择一个客户', 'error'); return; }
+        if (!text) { showToast('消息不能为空', 'error'); return; }
+        const btn = document.getElementById('bot-im-send');
+        btn.disabled = true; btn.textContent = '发送中';
+        this._pending.add(text);
+        input.value = '';
+        // 立即插入发送中气泡
+        const win = document.getElementById('bot-im-stream');
+        const tmp = document.createElement('div');
+        tmp.className = 'bot-im-row mine';
+        tmp.innerHTML = `<div class="bot-avatar-wrap bot-im-row-avatar"><span class="staff-avatar bot-avatar-xs">客</span></div>
+          <div class="bot-im-col"><div class="bot-msg-bubble pending">${escapeHtml(text)}</div><div class="bot-msg-meta">发送中</div></div>`;
+        win.appendChild(tmp); win.scrollTop = win.scrollHeight;
         try {
             const r = await this._post('/admin/bots/matrix/action', { bot: this._bot, action: 'send_msg', uid, text });
-            showToast(r.msg || '发送成功', 'success');
-            document.getElementById('bot-chat-text').value = '';
-            this.pollChat();
+            if (r.code === 1) showToast('已发送', 'success');
+            else showToast(r.msg || '发送失败', 'error');
         } catch (e) { showToast(e.message, 'error'); }
+        finally {
+            this._pending.delete(text);
+            btn.disabled = false; btn.textContent = '发送';
+            this.pollHistory();
+        }
     }
 };
 
