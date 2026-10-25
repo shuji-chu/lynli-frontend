@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>LynLi · 超级管理中枢</title>
   <!-- 品牌图标 -->
-  <link rel="icon" type="image/png" href="./favicon.png?v=20261026p">
-  <link rel="apple-touch-icon" href="./apple-touch-icon.png?v=20261026p">
+  <link rel="icon" type="image/png" href="./favicon.png?v=20261026q">
+  <link rel="apple-touch-icon" href="./apple-touch-icon.png?v=20261026q">
   <!-- 蓝白主题（相对路径，解决 GitHub Pages 白屏） -->
-  <link rel="stylesheet" href="./css/style.css?v=20261026p">
+  <link rel="stylesheet" href="./css/style.css?v=20261026q">
   <!-- Leaflet 地图库（jsdelivr 主源 + cdnjs 容灾） -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" onerror="this.onerror=null;this.href='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css'">
   <!-- Anime.js 丝滑动画 -->
@@ -380,25 +380,202 @@
         <div class="page-header">
           <div>
             <h2 class="page-title">商品管理</h2>
-            <p class="page-sub">在售账号商品 · 实时库存状态</p>
+            <p class="page-sub">真实商品库 · 上架后售卖站立即可见</p>
           </div>
-          <button class="btn btn-primary btn-sm" onclick="loadAccounts()">刷新列表</button>
+          <div class="page-actions">
+            <button class="btn btn-ghost btn-sm" onclick="ShopAdmin.load()">刷新</button>
+            <button class="btn btn-primary btn-sm" onclick="ShopAdmin.openForm(0)">上架商品</button>
+          </div>
         </div>
-        <div class="product-grid" id="account-list">
+
+        <div class="shop-kpis" id="shop-kpis"></div>
+
+        <div class="card shop-card-toolbar">
+          <div class="shop-toolbar">
+            <select class="input select-inline" id="shop-cat" onchange="ShopAdmin.loadProducts()">
+              <option value="">全部分类</option>
+            </select>
+            <div class="shop-search">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+              <input class="input" id="shop-kw" placeholder="搜索商品标题 / 卖点" onkeydown="if(event.key==='Enter')ShopAdmin.loadProducts()">
+            </div>
+            <select class="input select-inline" id="shop-status" onchange="ShopAdmin.loadProducts()">
+              <option value="">全部状态</option>
+              <option value="1">在售</option>
+              <option value="0">已下架</option>
+            </select>
+            <button class="btn btn-primary btn-sm" onclick="ShopAdmin.loadProducts()">查询</button>
+          </div>
+        </div>
+
+        <div class="shop-grid" id="shop-products">
           <div class="empty-tip">加载中...</div>
+        </div>
+
+        <!-- 商品上架 / 编辑弹窗 -->
+        <div class="shop-modal" id="shop-form">
+          <div class="shop-mask" onclick="ShopAdmin.closeForm()"></div>
+          <div class="shop-dialog">
+            <div class="shop-dialog-head">
+              <h3 id="shop-form-title">上架商品</h3>
+              <button class="shop-x" onclick="ShopAdmin.closeForm()">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 6L6 18M6 6l12 12"/></svg>
+              </button>
+            </div>
+            <div class="shop-dialog-body">
+              <div class="sf-row">
+                <label>商品主图</label>
+                <div class="sf-uploader">
+                  <div class="f-image-preview" id="f-image-preview"></div>
+                  <div class="sf-upload-ops">
+                    <button class="btn btn-ghost btn-sm" id="f-image-btn" onclick="ShopAdmin.pickImage()">选择图片上传 OSS</button>
+                    <input type="file" id="f-image-input" accept="image/*" style="display:none" onchange="ShopAdmin.onImagePicked(this)">
+                    <p class="sf-hint">支持 JPG / PNG，单张不超过 8MB，上传后自动生成 OSS 直链</p>
+                  </div>
+                </div>
+              </div>
+              <div class="sf-row">
+                <label>商品标题</label>
+                <input class="input" id="f-title" placeholder="例如：TG 老号 2020 年注册">
+              </div>
+              <div class="sf-row">
+                <label>卖点</label>
+                <input class="input" id="f-subtitle" placeholder="一句话卖点，展示在商品列表">
+              </div>
+              <div class="sf-grid">
+                <div class="sf-row">
+                  <label>分类</label>
+                  <input class="input" id="f-category" placeholder="TG账号 / 鞋靴 / 数码">
+                </div>
+                <div class="sf-row">
+                  <label>上架状态</label>
+                  <select class="input" id="f-status">
+                    <option value="1">立即上架（售卖站可见）</option>
+                    <option value="0">仅入库（暂不上架）</option>
+                  </select>
+                </div>
+                <div class="sf-row">
+                  <label>成本价</label>
+                  <input class="input" id="f-cost" type="number" step="0.01" placeholder="0.00">
+                </div>
+                <div class="sf-row">
+                  <label>售价</label>
+                  <input class="input" id="f-price" type="number" step="0.01" placeholder="0.00">
+                </div>
+                <div class="sf-row">
+                  <label>库存</label>
+                  <input class="input" id="f-stock" type="number" placeholder="0">
+                </div>
+                <div class="sf-row">
+                  <label>上游货源</label>
+                  <input class="input" id="f-source" placeholder="1688 / 其他平台商品链接">
+                </div>
+              </div>
+              <div class="sf-row">
+                <label>商品详情</label>
+                <textarea class="input sf-textarea" id="f-detail" placeholder="商品描述、规格说明等"></textarea>
+              </div>
+              <input type="hidden" id="f-id" value="0">
+            </div>
+            <div class="shop-dialog-foot">
+              <button class="btn btn-ghost btn-sm" onclick="ShopAdmin.closeForm()">取消</button>
+              <button class="btn btn-primary btn-sm" id="shop-form-save" onclick="ShopAdmin.submitProduct()">保存</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 删除确认 -->
+        <div class="shop-modal" id="shop-confirm">
+          <div class="shop-mask" onclick="ShopAdmin.closeConfirm()"></div>
+          <div class="shop-dialog shop-dialog-sm">
+            <div class="shop-dialog-head"><h3>操作确认</h3></div>
+            <div class="shop-dialog-body"><p id="shop-confirm-text"></p></div>
+            <div class="shop-dialog-foot">
+              <button class="btn btn-ghost btn-sm" onclick="ShopAdmin.closeConfirm()">取消</button>
+              <button class="btn btn-danger btn-sm" id="shop-confirm-ok">确定删除</button>
+            </div>
+          </div>
         </div>
       </section>
 
-      <!-- ========== 电商业务 · 订单代发 ========== -->
+      <!-- ========== 电商业务 · 订单与代发 ========== -->
       <section class="sub-page" id="page-orders">
-        <div class="page-header"><div><h2 class="page-title">订单代发</h2><p class="page-sub">全渠道订单 · 支付与退款</p></div></div>
-        <div class="card placeholder-card">
-          <div class="placeholder-icon">
-            <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 3h14v18l-2.5-1.5L14 21l-2-1.5L10 21l-2.5-1.5L5 21V3z"/><path d="M9 8h6M9 12h6"/></svg>
+        <div class="page-header">
+          <div>
+            <h2 class="page-title">订单与代发</h2>
+            <p class="page-sub">真实订单数据 · 一键复制采购信息去 1688 拍单</p>
           </div>
-          <h3>订单代发</h3>
-          <p>该模块正在紧张开发中，将支持订单查询、自动代发、对账、退款处理与批量导出。</p>
-          <button class="btn btn-primary btn-sm" onclick="switchTab('dashboard')">返回工作台</button>
+          <div class="page-actions">
+            <button class="btn btn-ghost btn-sm" onclick="ShopAdmin.loadOrders()">刷新</button>
+          </div>
+        </div>
+
+        <div class="card shop-card-toolbar">
+          <div class="shop-toolbar">
+            <select class="input select-inline" id="ord-status" onchange="ShopAdmin.loadOrders()">
+              <option value="">全部订单</option>
+              <option value="0">待付款</option>
+              <option value="1">待发货</option>
+              <option value="2">已发货</option>
+              <option value="3">已完结</option>
+              <option value="4">已退款</option>
+            </select>
+            <div class="shop-search">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+              <input class="input" id="ord-no" placeholder="输入订单号或收货手机号" onkeydown="if(event.key==='Enter')ShopAdmin.loadOrders()">
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="ShopAdmin.loadOrders()">查询</button>
+          </div>
+        </div>
+
+        <div class="shop-order-list" id="shop-orders">
+          <div class="empty-tip">加载中...</div>
+        </div>
+
+        <!-- 订单详情 -->
+        <div class="shop-modal" id="shop-order-modal">
+          <div class="shop-mask" onclick="ShopAdmin.closeDetail()"></div>
+          <div class="shop-dialog shop-dialog-lg">
+            <div class="shop-dialog-head">
+              <h3>订单详情</h3>
+              <button class="shop-x" onclick="ShopAdmin.closeDetail()">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 6L6 18M6 6l12 12"/></svg>
+              </button>
+            </div>
+            <div class="shop-dialog-body" id="shop-order-body"></div>
+            <div class="shop-dialog-foot" id="shop-order-foot"></div>
+          </div>
+        </div>
+
+        <!-- 发货 -->
+        <div class="shop-modal" id="shop-ship">
+          <div class="shop-mask" onclick="ShopAdmin.closeShip()"></div>
+          <div class="shop-dialog shop-dialog-sm">
+            <div class="shop-dialog-head"><h3>订单发货</h3></div>
+            <div class="shop-dialog-body">
+              <p class="sf-hint">订单号：<b id="shop-ship-trade"></b></p>
+              <div class="sf-row">
+                <label>快递公司</label>
+                <select class="input" id="shop-ship-company">
+                  <option value="shunfeng">顺丰速运</option>
+                  <option value="yuantong">圆通速递</option>
+                  <option value="zhongtong">中通快递</option>
+                  <option value="yunda">韵达速递</option>
+                  <option value="shentong">申通快递</option>
+                  <option value="jd">京东物流</option>
+                  <option value="ems">邮政 EMS</option>
+                </select>
+              </div>
+              <div class="sf-row">
+                <label>快递单号</label>
+                <input class="input" id="shop-ship-no" placeholder="填写真实运单号">
+              </div>
+            </div>
+            <div class="shop-dialog-foot">
+              <button class="btn btn-ghost btn-sm" onclick="ShopAdmin.closeShip()">取消</button>
+              <button class="btn btn-primary btn-sm" id="shop-ship-save" onclick="ShopAdmin.submitShip()">确认发货</button>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -1329,14 +1506,15 @@
   <!-- Leaflet JS（jsdelivr 主源 + cdnjs 容灾） -->
   <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js" onerror="document.write('<script src=\"https:\/\/cdnjs.cloudflare.com\/ajax\/libs\/leaflet\/1.9.4\/leaflet.min.js\"><\/script>')"></script>
   <!-- 全局用户信息同步中心（所有子站复用）：必须先于业务脚本加载 -->
-  <script src="./js/user-store.js?v=20261026p"></script>
-  <script src="./js/app.js?v=20261026p"></script>
-  <script src="./js/map-page.js?v=20261026p"></script>
-  <script src="./js/profile-page.js?v=20261026p"></script>
-  <script src="./js/ai-widget.js?v=20261026p"></script>
-  <script src="./js/biz-pages.js?v=20261026p"></script>
-  <script src="./js/sysconfig.js?v=20261026p"></script>
-  <script src="./js/staff.js?v=20261026p"></script>
-  <script src="./js/bots_matrix.js?v=20261026p"></script>
+  <script src="./js/user-store.js?v=20261026q"></script>
+  <script src="./js/app.js?v=20261026q"></script>
+  <script src="./js/map-page.js?v=20261026q"></script>
+  <script src="./js/profile-page.js?v=20261026q"></script>
+  <script src="./js/ai-widget.js?v=20261026q"></script>
+  <script src="./js/biz-pages.js?v=20261026q"></script>
+  <script src="./js/sysconfig.js?v=20261026q"></script>
+  <script src="./js/staff.js?v=20261026q"></script>
+  <script src="./js/bots_matrix.js?v=20261026q"></script>
+  <script src="./js/shop_admin.js?v=20261026q"></script>
 </body>
 </html>

@@ -495,7 +495,8 @@ function switchTab(tab, el) {
     if (tab === 'map') {
         setTimeout(() => { if (typeof initNodeMap === 'function') initNodeMap(); }, 80);
     }
-    if (tab === 'products' && typeof loadAccounts === 'function') loadAccounts();
+    if (tab === 'products' && typeof ShopAdmin !== 'undefined') ShopAdmin.load();
+    if (tab === 'orders' && typeof ShopAdmin !== 'undefined') ShopAdmin.loadOrders();
     if (tab === 'tgx' && typeof loadAccountPool === 'function') loadAccountPool();
     if (tab === 'nodes' && typeof loadNodeCards === 'function') loadNodeCards();
     if (tab === 'monitor' && typeof loadMonitor === 'function') loadMonitor();
