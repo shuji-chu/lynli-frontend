@@ -164,6 +164,7 @@ const MENU_GROUPS = [
     { id: "distribution", label: "签到分销", icon: ICONS.gift, roles: ["super", "operator"] },
   ]},
   { label: "系统设置", icon: ICONS.gear, items: [
+    { id: "bots-matrix", label: "机器人矩阵", icon: ICONS.robot, roles: ["super"] },
     { id: "staff", label: "员工权限", icon: ICONS.users, roles: ["super"] },
     { id: "payment", label: "支付配置", icon: ICONS.credit, roles: ["super"] },
     { id: "mail", label: "邮件配置", icon: ICONS.mail, roles: ["super"] },
@@ -199,6 +200,7 @@ const PAGE_TITLES = {
   "ecom-sentinel": "哨兵监控", "ecom-ocr": "财务OCR对账",
   "geek-ip": "IP归属地查询", "geek-speed": "网络测速", "geek-forex": "天气/汇率", "geek-qrcode": "二维码生成",
   staff: "员工权限", payment: "支付配置", mail: "邮件配置",
+  "bots-matrix": "机器人矩阵",
   profile: "个人中心",
 };
 
@@ -499,6 +501,7 @@ function switchTab(tab, el) {
     if (tab === 'monitor' && typeof loadMonitor === 'function') loadMonitor();
     if (tab === 'dns' && typeof loadDns === 'function') loadDns();
     if (tab === 'staff' && typeof loadStaff === 'function') loadStaff();
+    if (tab === 'bots-matrix' && typeof BotMX !== 'undefined') BotMX.load();
     if (tab === 'profile' && typeof loadProfile === 'function') loadProfile();
     if (tab === 'dashboard' && typeof fetchDashboardData === 'function') fetchDashboardData();
     // 阶段三：业务占位页进入即真实探测后端空壳接口

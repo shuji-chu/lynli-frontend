@@ -1,5 +1,5 @@
 /* ============================================================
-   LynLi 管理中枢 · 蓝白熊猫主题（v20261026m）
+   LynLi 管理中枢 · 蓝白熊猫主题（v20261026n）
    - 蓝白渐变背景 + 缓慢漂浮熊猫（Lottie / CSS 剪影）
    - 白色半透明毛玻璃卡片 rgba(255,255,255,.85)
    - 滑动修复：min-height:100dvh + 底部 padding 100px
@@ -924,7 +924,7 @@ body:not(.logged-in) .ai-fab { display: none; }
 }
 
 /* ============================================================
-   阶段三/四新增样式（v20261026m）
+   阶段三/四新增样式（v20261026n）
    电商自动化 / 极客工具箱占位页 · 海报生成器 · AI 弹窗
    ============================================================ */
 
@@ -1160,3 +1160,73 @@ select.biz-input { cursor: pointer; }
 .sd-status-on { color: var(--green); }
 .sd-status-off { color: var(--danger); }
 .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; }
+
+/* ========== 机器人矩阵（bots-matrix） ========== */
+.bot-tabs { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+.bot-tab {
+  height: 38px; padding: 0 20px; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--stroke-bright); background: rgba(255,255,255,.7);
+  color: var(--text-secondary); font-size: 13px; font-weight: 600;
+  display: flex; align-items: center; gap: 6px;
+  transition: all .18s ease; backdrop-filter: blur(10px);
+}
+.bot-tab:hover { background: #fff; color: var(--blue-primary); }
+.bot-tab.active {
+  background: linear-gradient(135deg, #2f7bff, #5d9bff); color: #fff; border-color: transparent;
+  box-shadow: 0 6px 16px -6px rgba(47,123,255,.55);
+}
+.bot-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.bot-online { font-size: 13px; font-weight: 700; }
+.bot-online-yes { color: var(--green); }
+.bot-online-no { color: var(--danger); }
+.bot-users-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+.bot-search { position: relative; display: flex; align-items: center; }
+.bot-search svg { position: absolute; left: 10px; width: 15px; height: 15px; color: var(--text-tertiary); pointer-events: none; }
+.bot-search .input { padding-left: 32px; height: 34px; width: 220px; font-size: 13px; }
+.bot-user-list { display: flex; flex-direction: column; gap: 8px; max-height: 480px; overflow-y: auto; }
+.bot-user-item {
+  display: flex; align-items: center; gap: 12px; padding: 10px 12px;
+  border-radius: var(--radius-md); background: rgba(255,255,255,.65); border: 1px solid var(--stroke);
+  transition: background .15s ease;
+}
+.bot-user-item:hover { background: #fff; }
+.bot-user-banned { opacity: .55; }
+.bot-avatar-sm { width: 36px; height: 36px; font-size: 14px; }
+.bot-ban-badge { font-size: 11px; font-weight: 700; color: var(--danger); background: var(--danger-soft); padding: 2px 8px; border-radius: 999px; }
+.bot-modal { width: min(440px, calc(100% - 40px)); }
+.ba-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 2px; border-bottom: 1px solid var(--stroke); font-size: 13px; }
+.ba-label { color: var(--text-tertiary); }
+.ba-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+.ba-grant-btn { width: 100%; margin-top: 10px; }
+
+/* 实时对话 */
+.bot-chat-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.bot-chat-meta { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-tertiary); }
+.bot-live-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); animation: botPulse 1.6s infinite; }
+@keyframes botPulse { 0%,100% { box-shadow: 0 0 0 0 rgba(16,150,110,.4);} 50% { box-shadow: 0 0 0 5px rgba(16,150,110,0);} }
+.bot-chat-uids { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; max-height: 66px; overflow-y: auto; }
+.bot-uid-chip {
+  font-size: 12px; padding: 4px 12px; border-radius: 999px; cursor: pointer;
+  background: rgba(255,255,255,.7); border: 1px solid var(--stroke); color: var(--text-secondary);
+}
+.bot-uid-chip.active { background: var(--blue-primary); color: #fff; border-color: transparent; }
+.bot-chat-window {
+  height: 320px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px;
+  background: rgba(240,246,255,.6); border: 1px solid var(--stroke); border-radius: var(--radius-md); padding: 14px;
+}
+.bot-msg { display: flex; flex-direction: column; max-width: 75%; }
+.bot-msg-left { align-self: flex-start; }
+.bot-msg-right { align-self: flex-end; align-items: flex-end; }
+.bot-msg-bubble {
+  padding: 9px 13px; border-radius: 14px; font-size: 13px; line-height: 1.5; word-break: break-word;
+  background: #fff; border: 1px solid var(--stroke); color: var(--text-primary);
+  box-shadow: 0 2px 8px -4px rgba(15,40,90,.15);
+}
+.bot-msg-right .bot-msg-bubble {
+  background: linear-gradient(135deg, #2f7bff, #5d9bff); color: #fff; border: none;
+}
+.bot-msg-meta { font-size: 10px; color: var(--text-tertiary); margin-top: 3px; }
+.bot-chat-send { display: flex; gap: 8px; margin-top: 12px; }
+.bot-chat-send .input { height: 36px; font-size: 13px; }
+.bot-chat-send .input:first-child { width: 130px; flex-shrink: 0; }
+.bot-chat-input { flex: 1; }

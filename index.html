@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>LynLi · 超级管理中枢</title>
   <!-- 品牌图标 -->
-  <link rel="icon" type="image/png" href="./favicon.png?v=20261026m">
-  <link rel="apple-touch-icon" href="./apple-touch-icon.png?v=20261026m">
+  <link rel="icon" type="image/png" href="./favicon.png?v=20261026n">
+  <link rel="apple-touch-icon" href="./apple-touch-icon.png?v=20261026n">
   <!-- 蓝白主题（相对路径，解决 GitHub Pages 白屏） -->
-  <link rel="stylesheet" href="./css/style.css?v=20261026m">
+  <link rel="stylesheet" href="./css/style.css?v=20261026n">
   <!-- Leaflet 地图库（jsdelivr 主源 + cdnjs 容灾） -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" onerror="this.onerror=null;this.href='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css'">
   <!-- Anime.js 丝滑动画 -->
@@ -920,6 +920,105 @@
         </div>
       </section>
 
+      <!-- ========== 系统设置 · 机器人矩阵 ========== -->
+      <section class="sub-page" id="page-bots-matrix">
+        <div class="page-header">
+          <div>
+            <h2 class="page-title">机器人矩阵</h2>
+            <p class="page-sub">三端机器人遥控 · 数据互相隔离</p>
+          </div>
+        </div>
+
+        <!-- 平台胶囊 Tab -->
+        <div class="bot-tabs" id="bot-tabs">
+          <button class="bot-tab active" data-bot="safew" onclick="BotMX.switchBot('safew')">签到机器人</button>
+          <button class="bot-tab" data-bot="mivra" onclick="BotMX.switchBot('mivra')">综合机器人</button>
+          <button class="bot-tab" data-bot="qingtian" onclick="BotMX.switchBot('qingtian')">晴天机器人</button>
+          <button class="bot-tab bot-tab-chat" data-bot="chat" onclick="BotMX.switchBot('chat')">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12a8 8 0 0 1-8 8H5l-2 2V12a8 8 0 0 1 8-8h2a8 8 0 0 1 8 8z"/></svg>
+            实时对话
+          </button>
+        </div>
+
+        <!-- KPI 卡片 -->
+        <div class="bot-kpis" id="bot-kpis"></div>
+
+        <!-- 用户列表 / 聊天面板 -->
+        <div class="card bot-users-card">
+          <div class="bot-users-head">
+            <h3 class="card-title" id="bot-users-title">用户列表</h3>
+            <div class="bot-search">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+              <input class="input" id="bot-search-input" placeholder="搜索 ID / 昵称 / 账号" oninput="BotMX.search()" />
+            </div>
+          </div>
+          <div class="bot-user-list" id="bot-user-list"><div class="empty-tip">加载中...</div></div>
+        </div>
+
+        <!-- 实时对话面板（默认隐藏） -->
+        <div class="card bot-chat-card" id="bot-chat-card" style="display:none">
+          <div class="bot-chat-head">
+            <h3 class="card-title">实时对话监控</h3>
+            <div class="bot-chat-meta">
+              <span class="bot-live-dot"></span><span id="bot-chat-status">轮询中 · 每 3 秒刷新</span>
+            </div>
+          </div>
+          <div class="bot-chat-uids" id="bot-chat-uids"></div>
+          <div class="bot-chat-window" id="bot-chat-window"></div>
+          <div class="bot-chat-send">
+            <input class="input" id="bot-chat-uid" placeholder="对方 TG ID" />
+            <input class="input bot-chat-input" id="bot-chat-text" placeholder="人工接管发送消息..." onkeydown="if(event.key==='Enter')BotMX.sendChat()" />
+            <button class="btn btn-primary btn-sm" onclick="BotMX.sendChat()">发送</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 机器人操作弹窗 -->
+      <div class="modal-mask" id="bot-action-mask" style="display:none">
+        <div class="modal glass-modal bot-modal">
+          <div class="staff-detail-head">
+            <div class="staff-avatar" id="ba-avatar">--</div>
+            <div>
+              <div class="sd-nickname" id="ba-nick">--</div>
+              <div class="sd-email" id="ba-meta">--</div>
+            </div>
+            <span class="bot-ban-badge" id="ba-banned" style="display:none">已封禁</span>
+          </div>
+          <input type="hidden" id="ba-uid" value="" />
+          <div class="ba-row">
+            <span class="ba-label">封禁状态</span>
+            <button class="btn btn-ghost btn-xs" id="ba-ban-toggle" onclick="BotMX.doBan()">封禁</button>
+          </div>
+          <div class="ba-row">
+            <span class="ba-label">踢下线（群组）</span>
+            <button class="btn btn-ghost btn-xs" onclick="BotMX.doAction('kick')">执行</button>
+          </div>
+          <div class="ba-grid">
+            <div class="field"><label class="field-label">增加流量 (GB)</label><input class="input" id="ba-gb" type="number" min="0" placeholder="如 10" /></div>
+            <div class="field"><label class="field-label">增加时间 (天)</label><input class="input" id="ba-days" type="number" min="0" placeholder="如 30" /></div>
+          </div>
+          <button class="btn btn-primary btn-sm ba-grant-btn" onclick="BotMX.doGrant()">到账</button>
+          <div class="field"><label class="field-label">发送私信</label><textarea class="input" id="ba-msg" rows="2" placeholder="输入要发给该用户的消息"></textarea></div>
+          <button class="btn btn-primary btn-sm ba-grant-btn" onclick="BotMX.doSend()">发送私信</button>
+          <div class="modal-actions">
+            <button class="btn btn-ghost btn-sm" onclick="BotMX.closeAction()">关闭</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 全站群发弹窗 -->
+      <div class="modal-mask" id="bot-broadcast-mask" style="display:none">
+        <div class="modal glass-modal bot-modal">
+          <h3 class="card-title">全站群发</h3>
+          <p class="card-sub" id="bb-sub">将向该机器人全部未封禁用户发送消息</p>
+          <div class="field"><label class="field-label">群发内容</label><textarea class="input" id="bb-text" rows="4" placeholder="支持 HTML 格式"></textarea></div>
+          <div class="modal-actions">
+            <button class="btn btn-ghost btn-sm" onclick="BotMX.closeBroadcast()">取消</button>
+            <button class="btn btn-primary btn-sm" id="bb-send" onclick="BotMX.doBroadcast()">启动群发</button>
+          </div>
+        </div>
+      </div>
+
       <!-- ========== 系统设置 · 员工权限 ========== -->
       <section class="sub-page" id="page-staff">
         <div class="page-header">
@@ -1211,13 +1310,14 @@
   <!-- Leaflet JS（jsdelivr 主源 + cdnjs 容灾） -->
   <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js" onerror="document.write('<script src=\"https:\/\/cdnjs.cloudflare.com\/ajax\/libs\/leaflet\/1.9.4\/leaflet.min.js\"><\/script>')"></script>
   <!-- 全局用户信息同步中心（所有子站复用）：必须先于业务脚本加载 -->
-  <script src="./js/user-store.js?v=20261026m"></script>
-  <script src="./js/app.js?v=20261026m"></script>
-  <script src="./js/map-page.js?v=20261026m"></script>
-  <script src="./js/profile-page.js?v=20261026m"></script>
-  <script src="./js/ai-widget.js?v=20261026m"></script>
-  <script src="./js/biz-pages.js?v=20261026m"></script>
-  <script src="./js/sysconfig.js?v=20261026m"></script>
-  <script src="./js/staff.js?v=20261026m"></script>
+  <script src="./js/user-store.js?v=20261026n"></script>
+  <script src="./js/app.js?v=20261026n"></script>
+  <script src="./js/map-page.js?v=20261026n"></script>
+  <script src="./js/profile-page.js?v=20261026n"></script>
+  <script src="./js/ai-widget.js?v=20261026n"></script>
+  <script src="./js/biz-pages.js?v=20261026n"></script>
+  <script src="./js/sysconfig.js?v=20261026n"></script>
+  <script src="./js/staff.js?v=20261026n"></script>
+  <script src="./js/bots_matrix.js?v=20261026n"></script>
 </body>
 </html>
