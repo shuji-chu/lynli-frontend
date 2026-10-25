@@ -475,8 +475,8 @@ body {
   position: fixed; top: 24px; left: 50%; transform: translate(-50%, -16px);
   z-index: 200; display: flex; align-items: center; gap: 10px;
   padding: 11px 18px; border-radius: 14px; font-size: 13.5px; font-weight: 500;
-  background: rgba(255,255,255,.92); color: var(--text-primary);
-  border: 1px solid var(--stroke-bright);
+  background: rgba(13,20,38,.92); color: rgba(255,255,255,.96);
+  border: 1px solid rgba(255,255,255,.14);
   backdrop-filter: blur(18px) saturate(1.4); -webkit-backdrop-filter: blur(18px) saturate(1.4);
   box-shadow: 0 12px 36px -10px rgba(30,64,175,.35);
   opacity: 0; pointer-events: none; transition: opacity .3s ease, transform .3s cubic-bezier(.22,1,.36,1);
@@ -1592,3 +1592,104 @@ select.biz-input { cursor: pointer; }
   .gs-stats { grid-template-columns: repeat(2, 1fr); }
   .wx-grid { grid-template-columns: repeat(2, 1fr); }
 }
+
+/* ================================================================
+   v20261026u 运营四页 + 电商自动化五模块 + 物流时间轴
+   ================================================================ */
+.input-sm { height: 32px; padding: 0 10px; font-size: 12.5px; border-radius: 9px; }
+.card-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 16px 10px; flex-wrap: wrap; }
+.card-head h4 { margin: 0; font-size: 15px; font-weight: 700; color: var(--text-primary); }
+.card-head-sub { font-size: 12px; color: var(--text-tertiary); }
+.card-head-ops { display: flex; align-items: center; gap: 8px; }
+.tk-muted { color: var(--text-tertiary); font-weight: 400; }
+.delta { font-weight: 700; }
+.delta.up { color: var(--green); }
+.delta.down { color: var(--danger); }
+.delta.warn { color: var(--gold-deep); }
+.delta.err { color: var(--danger); }
+.delta.flat { color: var(--text-tertiary); }
+.delta.ok { color: var(--blue-primary); }
+
+/* ---------- API 分发 ---------- */
+.ak-kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
+.ak-kpi { background: var(--bg-card); border: 1px solid var(--stroke-soft); border-radius: var(--radius-md); padding: 14px 18px; box-shadow: var(--shadow-card); }
+.ak-kpi b { display: block; font-size: 24px; font-weight: 800; color: var(--blue-deep); }
+.ak-kpi span { font-size: 12px; color: var(--text-tertiary); }
+.ak-key { font-size: 12px; color: var(--text-secondary); }
+.ak-key-reveal { display: flex; flex-direction: column; gap: 10px; }
+.ak-key-reveal code { word-break: break-all; background: var(--bg-inset); border: 1px dashed var(--stroke-bright); border-radius: 10px; padding: 12px; font-size: 13px; color: var(--blue-deep); user-select: all; }
+
+/* ---------- 服务器探针 ---------- */
+.probe-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 14px; }
+.probe-card { background: var(--bg-card); border: 1px solid var(--stroke-soft); border-radius: var(--radius-md); padding: 18px; box-shadow: var(--shadow-card); position: relative; overflow: hidden; }
+.probe-card::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 3px; background: var(--text-muted); }
+.probe-card.good::before { background: var(--green); }
+.probe-card.fair::before { background: var(--gold); }
+.probe-card.poor::before { background: #f97316; }
+.probe-card.bad::before { background: var(--danger); }
+.probe-name { font-size: 14.5px; font-weight: 700; color: var(--text-primary); margin-bottom: 6px; }
+.probe-host { font-size: 12px; color: var(--text-tertiary); margin-bottom: 10px; }
+.probe-lat { font-size: 22px; font-weight: 800; color: var(--blue-deep); }
+.probe-card.bad .probe-lat { color: var(--danger); font-size: 16px; }
+.probe-region { margin-top: 6px; font-size: 12px; color: var(--text-secondary); }
+.probe-hint { margin: 14px 2px 0; font-size: 12.5px; color: var(--text-tertiary); line-height: 1.7; }
+
+/* ---------- 工单 ---------- */
+.tk-layout { display: grid; grid-template-columns: 1.15fr 1fr; gap: 16px; align-items: start; }
+@media (max-width: 980px) { .tk-layout { grid-template-columns: 1fr; } }
+.tk-list-card { padding: 6px 8px; }
+.tk-detail-card { padding: 18px 20px; min-height: 320px; position: sticky; top: 76px; }
+.tk-detail-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.tk-detail-head h3 { margin: 0; font-size: 16px; }
+.tk-detail-meta { margin: 8px 0 14px; font-size: 12.5px; color: var(--text-tertiary); }
+.tk-detail-content { font-size: 13.5px; line-height: 1.8; color: var(--text-primary); background: var(--bg-inset); border-radius: 10px; padding: 14px; white-space: pre-wrap; }
+.tk-detail-reply { margin-top: 12px; font-size: 13.5px; line-height: 1.8; color: var(--blue-deep); background: var(--blue-soft); border-radius: 10px; padding: 14px; }
+.tk-detail-ops { margin-top: 16px; }
+.tk-reply-box { width: 100%; min-height: 88px; resize: vertical; font-family: inherit; line-height: 1.6; }
+.tk-reply-btns { display: flex; gap: 8px; margin-top: 10px; }
+
+/* ---------- 签到分销 ---------- */
+.dist-kpis { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 16px; }
+@media (max-width: 860px) { .dist-kpis { grid-template-columns: repeat(2, 1fr); } }
+.dist-kpi { background: var(--bg-card); border: 1px solid var(--stroke-soft); border-radius: var(--radius-md); padding: 14px 16px; box-shadow: var(--shadow-card); }
+.dist-kpi b { display: block; font-size: 22px; font-weight: 800; color: var(--blue-deep); }
+.dist-kpi.warn b { color: var(--gold-deep); }
+.dist-kpi span { font-size: 12px; color: var(--text-tertiary); }
+.dist-grid { display: grid; grid-template-columns: 1.35fr 1fr; gap: 16px; align-items: start; margin-bottom: 16px; }
+@media (max-width: 980px) { .dist-grid { grid-template-columns: 1fr; } }
+
+/* ---------- 电商自动化 ---------- */
+.ecom-grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 16px; align-items: start; }
+@media (max-width: 980px) { .ecom-grid { grid-template-columns: 1fr; } }
+.ecom-panel { padding: 6px 8px 12px; }
+.ecom-panel > .card-head { padding: 14px 10px 10px; }
+.ecom-form { padding: 4px 10px 10px; }
+.ecom-form-ops { display: flex; gap: 8px; margin-top: 14px; }
+.ecom-sync-ops { display: flex; gap: 10px; padding: 10px; border-top: 1px dashed var(--stroke-soft); margin-top: 6px; }
+.express-result, .ocr-result { padding: 10px; }
+.ocr-amount { display: flex; align-items: baseline; gap: 10px; margin-bottom: 10px; }
+.ocr-amount span { font-size: 12.5px; color: var(--text-tertiary); }
+.ocr-amount b { font-size: 26px; font-weight: 800; color: var(--blue-deep); }
+.ocr-match { display: grid; grid-template-columns: repeat(2, auto); gap: 6px 16px; font-size: 13px; margin-bottom: 12px; }
+.ocr-match span { color: var(--text-tertiary); }
+.ocr-match b { color: var(--text-primary); }
+.ocr-verdict { border-radius: 10px; padding: 10px 14px; font-size: 13.5px; font-weight: 700; }
+.ocr-verdict.ok { background: var(--green-soft); color: var(--green); }
+.ocr-verdict.bad { background: var(--danger-soft); color: var(--danger); }
+.ocr-raw { margin-top: 12px; font-size: 12px; color: var(--text-secondary); background: var(--bg-inset); border-radius: 10px; padding: 12px; max-height: 180px; overflow: auto; white-space: pre-wrap; }
+
+/* ---------- 物流时间轴（订单详情 + 快递追踪共用） ---------- */
+.sd-tracking { padding: 4px 2px; }
+.tl-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; font-size: 12.5px; color: var(--text-tertiary); }
+.tl-state { font-weight: 700; padding: 3px 10px; border-radius: 999px; background: var(--blue-soft); color: var(--blue-primary); }
+.tl-state.s3 { background: var(--green-soft); color: var(--green); }
+.tl-state.s4 { background: var(--danger-soft); color: var(--danger); }
+.timeline { position: relative; padding-left: 20px; }
+.timeline::before { content: ""; position: absolute; left: 5px; top: 6px; bottom: 6px; width: 2px; background: linear-gradient(180deg, var(--blue-primary), var(--stroke-bright)); border-radius: 2px; }
+.tl-item { position: relative; padding: 0 0 16px 8px; }
+.tl-item:last-child { padding-bottom: 0; }
+.tl-dot { position: absolute; left: -19px; top: 5px; width: 10px; height: 10px; border-radius: 50%; background: #fff; border: 2px solid var(--stroke-bright); }
+.tl-item.tl-latest .tl-dot { background: var(--blue-primary); border-color: var(--blue-primary); box-shadow: 0 0 0 4px var(--blue-soft); }
+.tl-time { font-size: 12px; color: var(--text-tertiary); margin-bottom: 2px; }
+.tl-desc { font-size: 13px; line-height: 1.6; color: var(--text-primary); }
+.tl-item.tl-latest .tl-desc { font-weight: 600; }

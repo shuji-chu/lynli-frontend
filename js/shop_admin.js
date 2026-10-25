@@ -382,6 +382,13 @@ window.ShopAdmin = {
             ${d.tracking_no ? `<div class="sd-full"><label>快递单号</label><span>${escapeHtml(d.tracking_no)}${d.tracking_company ? '（' + escapeHtml(d.tracking_company) + '）' : ''}</span></div>` : ''}
           </div>
         </div>
+        ${d.tracking_no ? `
+        <div class="sd-block">
+          <div class="sd-block-title">物流轨迹</div>
+          <div class="sd-tracking" id="sd-tracking">
+            <div class="poster-loading"><div class="poster-spinner"></div><p>快递鸟查询中…</p></div>
+          </div>
+        </div>` : ''}
         <div class="sd-block">
           <div class="sd-block-title">商品清单（${d.item_count || 0} 件）</div>
           ${itemsHtml}
@@ -397,8 +404,50 @@ window.ShopAdmin = {
       if (d.status === 2) ops += `<button class="btn btn-ghost btn-sm" onclick="ShopAdmin.setStatus('${escapeHtml(d.trade_no)}',3)">${SHOP_SVG.check} 标记完结</button>`;
       foot.innerHTML = ops;
       modal.classList.add("show");
+      // 已发货订单：异步拉取真实物流时间轴（快递鸟接口）
+      if (d.tracking_no) this.loadTracking(d.tracking_no, d.tracking_company || "");
     } catch (e) {
       showToast(e.message, "error");
+    }
+  },
+
+  // 订单详情物流时间轴（真实快递鸟轨迹，与「快递追踪」页同源）
+  async loadTracking(trackingNo, company) {
+    const box = document.getElementById("sd-tracking");
+    if (!box) return;
+    try {
+      const API = (location.hostname === "web.lynli.me") ? "/api/v1" : "https://api.lynli.me/api/v1";
+      const res = await fetch(API + "/ecom/express", {
+        method: "POST",
+        headers: {
+          "Authorization": "Bearer " + ((window.LynliUser && LynliUser.get().token) || ""),
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ tracking_no: trackingNo, company: company }),
+      });
+      const json = await res.json().catch(() => null);
+      if (json && json.code === 1 && json.data) {
+        const traces = (json.data.traces || []).slice().reverse();
+        const stateText = { 2: "在途", 3: "已签收", 4: "问题件" }[json.data.state] || "";
+        if (!traces.length) {
+          box.innerHTML = '<div class="empty-tip">暂无轨迹' + (stateText ? "（" + stateText + "）" : "") + "</div>";
+          return;
+        }
+        box.innerHTML =
+          (stateText ? '<div class="tl-head"><span class="tl-state s' + json.data.state + '">' + stateText + "</span></div>" : "") +
+          '<div class="timeline">' + traces.map((t, i) => `
+            <div class="tl-item${i === traces.length - 1 ? " tl-latest" : ""}">
+              <div class="tl-dot"></div>
+              <div class="tl-body">
+                <div class="tl-time">${escapeHtml(t.time)}</div>
+                <div class="tl-desc">${escapeHtml(t.desc)}</div>
+              </div>
+            </div>`).join("") + "</div>";
+      } else {
+        box.innerHTML = '<div class="empty-tip">轨迹查询失败：' + escapeHtml((json && json.msg) || "未知错误") + "</div>";
+      }
+    } catch (e) {
+      box.innerHTML = '<div class="empty-tip">轨迹查询异常：' + escapeHtml(String(e).slice(0, 60)) + "</div>";
     }
   },
 

@@ -514,11 +514,17 @@ function switchTab(tab, el) {
     // 系统配置中枢：邮件/支付配置页进入即真实拉取后端配置（非假数据）
     if (tab === 'mail' && typeof MailCfg === 'object') MailCfg.load();
     if (tab === 'payment' && typeof PayCfg === 'object') PayCfg.load();
+    // 运营四页：API 分发 / 服务器探针 / 工单 / 签到分销（进入即真实拉取）
+    if (tab === 'apikeys' && typeof ApiKeys === 'object') ApiKeys.load();
+    if (tab === 'probe' && typeof Probe === 'object') Probe.load();
+    if (tab === 'tickets' && typeof Tickets === 'object') Tickets.load();
+    if (tab === 'distribution' && typeof Distribution === 'object') Distribution.load();
+    // 电商自动化五模块：进入即加载真实数据（ecom-pages.js）
+    if (tab.indexOf('ecom-') === 0 && typeof Ecom === 'object') Ecom.enter(tab);
 }
 
-// 阶段三业务占位页签（进入时探测后端接口联调状态）
-const BIZ_TABS = ['ecom-pull', 'ecom-express', 'ecom-price', 'ecom-sentinel', 'ecom-ocr',
-                  'geek-ip', 'geek-speed', 'geek-forex', 'geek-qrcode'];
+// 阶段三业务占位页签（极客工具箱：进入时探测后端接口联调状态）
+const BIZ_TABS = ['geek-ip', 'geek-speed', 'geek-forex', 'geek-qrcode'];
 
 // ---------- 按钮涟漪微动效（事件委托） ----------
 document.addEventListener('click', (e) => {
