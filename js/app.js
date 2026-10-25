@@ -127,60 +127,78 @@ const MENU_GROUPS = [
   { label: "工作台", icon: ICONS.grid, items: [
     { id: "dashboard", label: "数据大盘", icon: ICONS.grid },
     { id: "map", label: "全域可视化地图", icon: ICONS.map },
-    { id: "logs", label: "系统日志", icon: ICONS.logs, roles: ["super", "operator"] },
+  ]},
+  { label: "数字资产（TGX）", icon: ICONS.layers, items: [
+    { id: "tgx", label: "TGX 账号库", icon: ICONS.database, roles: ["super", "operator"] },
+    { id: "nodes", label: "节点与订阅", icon: ICONS.globe },
+    { id: "apikeys", label: "API 接口市场", icon: ICONS.key, roles: ["super", "operator"] },
   ]},
   { label: "电商业务", icon: ICONS.box, items: [
     { id: "products", label: "商品管理", icon: ICONS.box, roles: ["super", "operator"] },
-    { id: "orders", label: "订单代发", icon: ICONS.receipt, roles: ["super", "operator"] },
+    { id: "orders", label: "订单与代发", icon: ICONS.receipt, roles: ["super", "operator"] },
+  ], children: [
+    { label: "电商自动化", icon: ICONS.download, items: [
+      { id: "ecom-pull", label: "上游挂机拉单", icon: ICONS.download, roles: ["super", "operator"] },
+      { id: "ecom-express", label: "快递追踪", icon: ICONS.truck, roles: ["super", "operator"] },
+      { id: "ecom-price", label: "全网比价", icon: ICONS.pricetag, roles: ["super", "operator"] },
+      { id: "ecom-sentinel", label: "哨兵监控", icon: ICONS.radar, roles: ["super", "operator"] },
+      { id: "ecom-ocr", label: "财务OCR对账", icon: ICONS.scan, roles: ["super", "operator"] },
+    ]},
   ]},
-  { label: "TGX 业务", icon: ICONS.layers, items: [
-    { id: "tgx", label: "TGX 账号库", icon: ICONS.database, roles: ["super", "operator"] },
-    { id: "nodes", label: "节点与订阅", icon: ICONS.globe },
-    { id: "sms", label: "接码池", icon: ICONS.sms, roles: ["super", "operator"] },
-    { id: "apikeys", label: "API 分发", icon: ICONS.key, roles: ["super", "operator"] },
-  ]},
-  { label: "网络基建", icon: ICONS.server, items: [
+  { label: "网络与工具", icon: ICONS.server, items: [
     { id: "monitor", label: "节点监控", icon: ICONS.activity },
     { id: "dns", label: "域名管理", icon: ICONS.dns, roles: ["super", "operator"] },
     { id: "probe", label: "服务器探针", icon: ICONS.radar, roles: ["super", "operator"] },
+  ], children: [
+    { label: "极客工具箱", icon: ICONS.gauge, items: [
+      { id: "geek-ip", label: "IP归属地查询", icon: ICONS.ip },
+      { id: "geek-speed", label: "网络测速", icon: ICONS.gauge },
+      { id: "geek-forex", label: "天气/汇率", icon: ICONS.cloud },
+      { id: "geek-qrcode", label: "二维码生成", icon: ICONS.qrcode },
+    ]},
   ]},
   { label: "营销与客服", icon: ICONS.megaphone, items: [
     { id: "poster", label: "海报生成器", icon: ICONS.poster },
     { id: "ai", label: "AI 客服", icon: ICONS.robot },
-    { id: "tickets", label: "工单", icon: ICONS.ticket, roles: ["super", "operator", "support"] },
+    { id: "tickets", label: "工单系统", icon: ICONS.ticket, roles: ["super", "operator", "support"] },
     { id: "distribution", label: "签到分销", icon: ICONS.gift, roles: ["super", "operator"] },
   ]},
-  { label: "电商自动化", icon: ICONS.download, items: [
-    { id: "ecom-pull", label: "上游挂机拉单", icon: ICONS.download, roles: ["super", "operator"] },
-    { id: "ecom-express", label: "快递追踪", icon: ICONS.truck, roles: ["super", "operator"] },
-    { id: "ecom-price", label: "全网比价", icon: ICONS.pricetag, roles: ["super", "operator"] },
-    { id: "ecom-sentinel", label: "哨兵监控", icon: ICONS.radar, roles: ["super", "operator"] },
-    { id: "ecom-ocr", label: "财务OCR对账", icon: ICONS.scan, roles: ["super", "operator"] },
-  ]},
-  { label: "极客工具箱", icon: ICONS.gauge, items: [
-    { id: "geek-ip", label: "IP归属地查询", icon: ICONS.ip },
-    { id: "geek-speed", label: "网络测速", icon: ICONS.gauge },
-    { id: "geek-forex", label: "天气/汇率", icon: ICONS.cloud },
-    { id: "geek-qrcode", label: "二维码生成", icon: ICONS.qrcode },
-  ]},
   { label: "系统设置", icon: ICONS.gear, items: [
-    { id: "staff", label: "员工账号权限分配", icon: ICONS.users, roles: ["super"] },
+    { id: "staff", label: "员工权限", icon: ICONS.users, roles: ["super"] },
     { id: "payment", label: "支付配置", icon: ICONS.credit, roles: ["super"] },
     { id: "mail", label: "邮件配置", icon: ICONS.mail, roles: ["super"] },
     { id: "profile", label: "个人中心", icon: ICONS.user },
   ]},
 ];
+// 折叠状态持久化键
+const DRAWER_FOLD_KEY = "lynli_drawer_folds";
+function _drawerFolds() { try { return JSON.parse(localStorage.getItem(DRAWER_FOLD_KEY) || "{}"); } catch (e) { return {}; } }
+function _saveDrawerFolds(f) { try { localStorage.setItem(DRAWER_FOLD_KEY, JSON.stringify(f)); } catch (e) {} }
+// 一级分组折叠/展开
+function toggleDrawerGroup(idx) {
+    const el = document.querySelector(`.dgroup[data-g="${idx}"]`);
+    if (!el) return;
+    el.classList.toggle("collapsed");
+    const f = _drawerFolds(); f["g" + idx] = el.classList.contains("collapsed"); _saveDrawerFolds(f);
+}
+// 嵌套子分组折叠/展开
+function toggleDrawerSub(idx, si) {
+    const el = document.querySelector(`.dsub[data-g="${idx}-${si}"]`);
+    if (!el) return;
+    el.classList.toggle("collapsed");
+    const f = _drawerFolds(); f["s" + idx + "-" + si] = el.classList.contains("collapsed"); _saveDrawerFolds(f);
+}
 // 页面标题映射（顶栏显示）
 const PAGE_TITLES = {
-  dashboard: "数据大盘", map: "全域可视化地图", logs: "系统日志",
-  products: "商品管理", orders: "订单代发",
-  tgx: "TGX 账号库", nodes: "节点与订阅", sms: "接码池", apikeys: "API 分发",
+  dashboard: "数据大盘", map: "全域可视化地图",
+  products: "商品管理", orders: "订单与代发",
+  tgx: "TGX 账号库", nodes: "节点与订阅", apikeys: "API 接口市场",
   monitor: "节点监控", dns: "域名管理", probe: "服务器探针",
-  ai: "AI 客服", tickets: "工单", distribution: "签到分销", poster: "海报生成器",
+  ai: "AI 客服", tickets: "工单系统", distribution: "签到分销", poster: "海报生成器",
   "ecom-pull": "上游挂机拉单", "ecom-express": "快递追踪", "ecom-price": "全网比价",
   "ecom-sentinel": "哨兵监控", "ecom-ocr": "财务OCR对账",
   "geek-ip": "IP归属地查询", "geek-speed": "网络测速", "geek-forex": "天气/汇率", "geek-qrcode": "二维码生成",
-  staff: "员工账号权限分配", payment: "支付配置", mail: "邮件配置",
+  staff: "员工权限", payment: "支付配置", mail: "邮件配置",
   profile: "个人中心",
 };
 
@@ -360,7 +378,8 @@ async function doLogin() {
     }
 }
 
-// ---------- 抽屉导航：渲染六大分类（RBAC） ----------
+// ---------- 抽屉导航：渲染六大分类（可折叠 + 嵌套子分组 + RBAC） ----------
+const DG_ARROW = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>';
 function renderDrawer() {
     const nav = document.getElementById('drawer-nav');
     if (!nav) return;
@@ -368,18 +387,45 @@ function renderDrawer() {
     // 自愈：旧会话缺 role 但后端标记过 isAdmin 时，按超管渲染
     if (role === 'user' && localStorage.getItem('lynli_admin_isadmin') === '1') role = 'super';
 
-    let html = '';
-    MENU_GROUPS.forEach(group => {
-        const items = group.items.filter(it => !it.roles || it.roles.includes(role));
-        if (!items.length) return; // 整组无权限则隐藏
-        html += `<div class="drawer-group-label"><span class="dg-icon">${group.icon}</span>${group.label}</div>`;
-        items.forEach(it => {
-            html += `
+    const folds = _drawerFolds();
+    const itemHtml = it => `
             <a class="drawer-item" data-page="${it.id}" href="javascript:void(0)" onclick="switchTab('${it.id}', this)">
               <span class="di-icon">${it.icon}</span>
               <span class="di-label">${it.label}</span>
             </a>`;
+
+    let html = '';
+    MENU_GROUPS.forEach((group, gi) => {
+        const items = group.items.filter(it => !it.roles || it.roles.includes(role));
+        const subs = (group.children || []).map(sub => ({
+            ...sub,
+            items: sub.items.filter(it => !it.roles || it.roles.includes(role)),
+        })).filter(sub => sub.items.length);
+        if (!items.length && !subs.length) return; // 整组无权限则隐藏
+        const collapsed = folds["g" + gi] ? " collapsed" : "";
+        html += `
+        <div class="dgroup${collapsed}" data-g="${gi}">
+          <a class="drawer-group-label dg-toggle" href="javascript:void(0)" onclick="toggleDrawerGroup(${gi})">
+            <span class="dg-icon">${group.icon}</span><span class="dgt-label">${group.label}</span>
+            <span class="dg-arrow">${DG_ARROW}</span>
+          </a>
+          <div class="dg-body">`;
+        items.forEach(it => { html += itemHtml(it); });
+        subs.forEach((sub, si) => {
+            const scollapsed = folds["s" + gi + "-" + si] ? " collapsed" : "";
+            html += `
+            <div class="dsub${scollapsed}" data-g="${gi}-${si}">
+              <a class="drawer-sub-label dg-toggle" href="javascript:void(0)" onclick="toggleDrawerSub(${gi}, ${si})">
+                <span class="dg-icon">${sub.icon}</span><span class="dgt-label">${sub.label}</span>
+                <span class="dg-arrow">${DG_ARROW}</span>
+              </a>
+              <div class="dg-body">`;
+            sub.items.forEach(it => { html += itemHtml(it); });
+            html += `</div>
+            </div>`;
         });
+        html += `</div>
+        </div>`;
     });
     nav.innerHTML = html;
 

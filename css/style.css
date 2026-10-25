@@ -1,5 +1,5 @@
 /* ============================================================
-   LynLi 管理中枢 · 蓝白熊猫主题（v20261026i）
+   LynLi 管理中枢 · 蓝白熊猫主题（v20261026j）
    - 蓝白渐变背景 + 缓慢漂浮熊猫（Lottie / CSS 剪影）
    - 白色半透明毛玻璃卡片 rgba(255,255,255,.85)
    - 滑动修复：min-height:100dvh + 底部 padding 100px
@@ -274,6 +274,30 @@ body {
   padding: 14px 10px 7px;
 }
 .drawer-group-label .dg-icon { display: flex; color: var(--blue-primary); opacity: .85; }
+
+/* ---------- 折叠分组（大中台导航层级） ---------- */
+.dg-toggle { cursor: pointer; user-select: none; text-decoration: none; }
+.dg-toggle .dgt-label { flex: 1; }
+.dg-toggle .dg-arrow {
+  display: flex; color: var(--text-muted); opacity: .7;
+  transition: transform .25s cubic-bezier(.22,1,.36,1);
+}
+.dg-toggle:hover .dg-arrow { opacity: 1; color: var(--blue-primary); }
+.dgroup.collapsed > .dg-toggle .dg-arrow,
+.dsub.collapsed > .dg-toggle .dg-arrow { transform: rotate(-90deg); }
+.dg-body { overflow: hidden; }
+.dgroup.collapsed > .dg-body,
+.dsub.collapsed > .dg-body { display: none; }
+/* 嵌套子分组（电商自动化 / 极客工具箱） */
+.dsub { margin: 2px 0 4px; }
+.drawer-sub-label {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 11.5px; font-weight: 600; letter-spacing: .8px; color: var(--text-tertiary);
+  padding: 7px 10px 5px 18px; border-top: 1px dashed var(--stroke-soft); margin-top: 6px;
+}
+.drawer-sub-label .dg-icon { display: flex; color: var(--blue-primary); opacity: .7; }
+.dsub > .dg-body { padding-left: 14px; border-left: 2px solid var(--stroke-soft); margin: 0 0 4px 16px; }
+.dsub > .dg-body .drawer-item { font-size: 13.5px; padding: 8px 10px; }
 .drawer-item {
   display: flex; align-items: center; gap: 11px; padding: 10px 12px; margin-bottom: 2px;
   border-radius: 12px; color: var(--text-secondary); text-decoration: none; font-size: 14px; font-weight: 500;
@@ -900,7 +924,7 @@ body:not(.logged-in) .ai-fab { display: none; }
 }
 
 /* ============================================================
-   阶段三/四新增样式（v20261026i）
+   阶段三/四新增样式（v20261026j）
    电商自动化 / 极客工具箱占位页 · 海报生成器 · AI 弹窗
    ============================================================ */
 

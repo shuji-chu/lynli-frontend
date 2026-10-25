@@ -112,8 +112,21 @@
     payload = payload || {};
     _set(KEYS.token, payload.token || "");
     _set(KEYS.email, account || payload.email || "");
-    _set(KEYS.role, payload.role || "user");
     _set(KEYS.isadmin, payload.isAdmin ? "1" : "0");
+    // 角色兜底：后端未返回 role 或返回 user 时，用真实 token 探测管理接口自愈，
+    // 防止超管被显示成「普通用户」
+    let role = payload.role || "";
+    if (role !== "super" && role !== "admin" && role !== "operator" && role !== "support" && role !== "service") {
+      role = "user";
+      try {
+        const ar = await fetch(`${API_BASE}/admin/dashboard`, {
+          headers: { "Authorization": "Bearer " + payload.token },
+        });
+        const aj = await ar.json().catch(() => null);
+        if (aj && (aj.code === 1 || aj.status === "success")) role = "admin";
+      } catch (e) { /* 探测失败按普通用户 */ }
+    }
+    _set(KEYS.role, role || "user");
     // user_id / short_id / nickname / avatar：login 不返回，立即向真实来源补齐
     await refresh(true);
     _emit();
