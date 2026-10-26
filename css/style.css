@@ -1736,3 +1736,18 @@ input, textarea { scroll-margin-bottom: 120px; }
 
 /* 5. 防止图片加载时撑开布局抖动（占位底色） */
 img { background-color: rgba(148, 172, 214, 0.08); }
+
+/* 弹窗白色盒子以弹性动画入场 */
+.modal-layer.show .modal-box {
+  animation: modalPopIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+@keyframes modalPopIn {
+  0% { opacity: 0; transform: translate(-50%, -45%) scale(0.92); }
+  100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+/* 禁止长按图片弹出保存菜单（防误触，让APP感更强，如果不想要可以删掉这行） */
+img { -webkit-touch-callout: none; }
+
+/* 优化滚动回弹的边界表现 */
+body { overscroll-behavior-y: none; }

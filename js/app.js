@@ -473,6 +473,7 @@ function enterMainApp() {
 
 // ---------- 子页面切换（抽屉导航） ----------
 function switchTab(tab, el) {
+    window.scrollTo(0, 0); // 切换页面瞬间回到顶部
     document.querySelectorAll('.drawer-item').forEach(n => n.classList.remove('active'));
     if (el) el.classList.add('active');
     else {
