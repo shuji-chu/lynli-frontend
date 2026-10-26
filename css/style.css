@@ -1911,3 +1911,53 @@ html, body {
   min-height: 0 !important;
   overflow-y: auto !important;
 }
+
+/* ================= 绝对纯净的自然长流全局滚动 ================= */
+/* 1. 释放页面级滚动 */
+html, body {
+  height: auto !important;
+  min-height: 100% !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  touch-action: pan-y !important;
+}
+
+/* 2. 拆掉主骨架的 Flex 锁，让它自然长高 */
+#main-app, .console-shell {
+  display: block !important;
+  height: auto !important;
+  min-height: 100vh !important;
+  overflow: visible !important;
+}
+
+/* 3. 干掉主内容区的内部滚动，交还给全局 body */
+.console-main {
+  display: block !important;
+  flex: none !important;
+  height: auto !important;
+  min-height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+  padding-bottom: 120px !important;
+}
+
+/* 4. 把所有导致只有卡片能滑的容器全给扬了 */
+.sub-page, .card, .bot-users-card, .bot-user-list, .bot-kpis, .table-wrap {
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+/* 5. 唯独保留侧边栏抽屉内部独立滚动，不影响主页 */
+.drawer {
+  height: 100dvh !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+.drawer-nav {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
+}
