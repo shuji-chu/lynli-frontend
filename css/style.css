@@ -1705,3 +1705,34 @@ button:active, .drawer-item:active, .stat-card:active, .btn:active, .action-btn:
 .drawer, .modal-layer, .toast { will-change: transform, opacity; transform: translateZ(0); }
 /* 5. 锁死背景滚动（防止侧边栏打开时，主页面跟着滑） */
 body.no-scroll { overflow: hidden !important; touch-action: none; }
+
+/* ======================= 极致丝滑细节打磨 ======================= */
+/* 1. 隐藏丑陋的滚动条（保留滑动能力） */
+::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
+html { scrollbar-width: none !important; -ms-overflow-style: none !important; }
+
+/* 2. 修复移动端 :hover 粘滞（仅在真有鼠标的设备上开启 hover 效果） */
+@media (hover: hover) {
+  .drawer-item:hover { transform: translateX(3px); background: var(--blue-soft); }
+  button:hover, .btn:hover { filter: brightness(1.05); }
+}
+@media (hover: none) {
+  .drawer-item:hover { transform: none; background: transparent; }
+  .drawer-item.active:hover { background: linear-gradient(135deg, rgba(37,99,235,.14), rgba(99,102,241,.12)); }
+}
+
+/* 3. 键盘弹起时防止输入框被遮挡 */
+html { scroll-padding-bottom: 120px; }
+input, textarea { scroll-margin-bottom: 120px; }
+
+/* 4. 页面切换（Tab）过渡动画增强 */
+.sub-page.active {
+  animation: pageFadeIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+@keyframes pageFadeIn {
+  from { opacity: 0; transform: translateY(10px) scale(0.99); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* 5. 防止图片加载时撑开布局抖动（占位底色） */
+img { background-color: rgba(148, 172, 214, 0.08); }
