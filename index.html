@@ -8,7 +8,7 @@
   <link rel="icon" type="image/png" href="./favicon.png?v=20261026u">
   <link rel="apple-touch-icon" href="./apple-touch-icon.png?v=20261026u">
   <!-- 蓝白主题（相对路径，解决 GitHub Pages 白屏） -->
-  <link rel="stylesheet" href="./css/style.css?v=20261026u">
+  <link rel="stylesheet" href="./css/style.css?v=20261026p1">
   <!-- Leaflet 地图库（jsdelivr 主源 + cdnjs 容灾） -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" onerror="this.onerror=null;this.href='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css'">
   <!-- Anime.js 丝滑动画 -->
@@ -1495,6 +1495,74 @@
         </div>
       </div>
 
+      <!-- ========== 晴天支付 · 数据大盘 ========== -->
+      <section class="sub-page" id="page-pay-dashboard">
+        <div class="page-header">
+          <div>
+            <h2 class="page-title">晴天支付 · 数据大盘</h2>
+            <p class="page-sub">多商户聚合支付 · 平台流水与费率收益</p>
+          </div>
+          <div class="page-actions">
+            <button class="btn btn-primary btn-sm" onclick="PayPlat.loadDashboard()">刷新</button>
+          </div>
+        </div>
+        <div id="pp-dash"><div class="empty-tip">加载中...</div></div>
+      </section>
+
+      <!-- ========== 晴天支付 · 商户审批 ========== -->
+      <section class="sub-page" id="page-pay-merchants">
+        <div class="page-header">
+          <div>
+            <h2 class="page-title">晴天支付 · 商户审批</h2>
+            <p class="page-sub">入驻申请审核 · 通过后生成 app_id / app_secret</p>
+          </div>
+          <div class="page-actions">
+            <select class="input select-inline" id="pp-m-status" onchange="PayPlat.loadMerchants()">
+              <option value="">全部状态</option>
+              <option value="0">待审核</option>
+              <option value="1">已通过</option>
+              <option value="2">已拒绝</option>
+            </select>
+            <button class="btn btn-primary btn-sm" onclick="PayPlat.loadMerchants()">查询</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table class="table" id="pp-m-table">
+              <thead><tr><th>ID</th><th>站点名称</th><th>绑定用户</th><th>站点地址</th><th>余额</th><th>状态</th><th>操作 / 密钥</th></tr></thead>
+              <tbody><tr><td colspan="7" class="empty-tip">加载中...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== 晴天支付 · 提现审核 ========== -->
+      <section class="sub-page" id="page-pay-withdrawals">
+        <div class="page-header">
+          <div>
+            <h2 class="page-title">晴天支付 · 提现审核</h2>
+            <p class="page-sub">商户提现申请 · 确认打款或拒绝退回</p>
+          </div>
+          <div class="page-actions">
+            <select class="input select-inline" id="pp-w-status" onchange="PayPlat.loadWithdrawals()">
+              <option value="">全部状态</option>
+              <option value="0">待审核</option>
+              <option value="1">已打款</option>
+              <option value="2">已拒绝</option>
+            </select>
+            <button class="btn btn-primary btn-sm" onclick="PayPlat.loadWithdrawals()">查询</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table class="table" id="pp-w-table">
+              <thead><tr><th>ID</th><th>商户</th><th>金额</th><th>收款方式</th><th>收款账号</th><th>状态</th><th>操作</th></tr></thead>
+              <tbody><tr><td colspan="7" class="empty-tip">加载中...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
       <!-- ========== 系统设置 · 支付配置 ========== -->
       <section class="sub-page" id="page-payment">
         <div class="page-header"><div><h2 class="page-title">支付配置</h2><p class="page-sub">支付通道 · 密钥与费率</p></div></div>
@@ -1702,7 +1770,7 @@
   <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js" onerror="document.write('<script src=\"https:\/\/cdnjs.cloudflare.com\/ajax\/libs\/leaflet\/1.9.4\/leaflet.min.js\"><\/script>')"></script>
   <!-- 全局用户信息同步中心（所有子站复用）：必须先于业务脚本加载 -->
   <script src="./js/user-store.js?v=20261026u"></script>
-  <script src="./js/app.js?v=20261026u"></script>
+  <script src="./js/app.js?v=20261026p1"></script>
   <script src="./js/map-page.js?v=20261026u"></script>
   <script src="./js/profile-page.js?v=20261026u"></script>
   <script src="./js/geek-tools.js?v=20261026u"></script>
@@ -1711,6 +1779,7 @@
   <script src="./js/biz-pages.js?v=20261026u"></script>
   <script src="./js/ecom-pages.js?v=20261026u"></script>
   <script src="./js/ops-pages.js?v=20261026u"></script>
+  <script src="./js/payplat.js?v=20261026p1"></script>
   <script src="./js/sysconfig.js?v=20261026u"></script>
   <script src="./js/staff.js?v=20261026u"></script>
   <script src="./js/bots_matrix.js?v=20261026u"></script>

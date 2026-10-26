@@ -1961,3 +1961,19 @@ html, body {
   min-height: 0 !important;
   overflow-y: auto !important;
 }
+/* ============ 晴天支付平台（payplat） ============ */
+.pp-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-bottom: 16px; }
+.pp-kpi { padding: 18px 20px; }
+.pp-kpi b { display: block; font-size: 26px; font-weight: 700; background: linear-gradient(120deg, #1e6fd9, #4aa3ff); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.pp-kpi span { display: block; margin-top: 6px; font-size: 13px; color: #5a7ba6; font-weight: 600; }
+.pp-kpi small { display: block; margin-top: 4px; font-size: 12px; color: #8aa3c4; }
+.pp-chart { padding: 18px 20px; }
+.pp-chart h3 { margin: 0 0 14px; font-size: 15px; color: #274b78; }
+.pp-bars { display: flex; align-items: flex-end; gap: 8px; height: 180px; }
+.pp-bar { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%; min-width: 0; }
+.pp-bar i { display: block; width: 100%; max-width: 34px; border-radius: 6px 6px 2px 2px; background: linear-gradient(180deg, #4aa3ff, #1e6fd9); min-height: 4px; transition: height .4s ease; }
+.pp-bar em { font-style: normal; font-size: 11px; color: #8aa3c4; margin-top: 6px; white-space: nowrap; }
+.pp-user b { display: block; font-size: 13px; color: #274b78; }
+.pp-user small { color: #8aa3c4; font-size: 11px; }
+.pp-code { font-size: 12px; background: rgba(30,111,217,.08); padding: 2px 8px; border-radius: 6px; color: #1e6fd9; }
+.pp-amount { color: #1e6fd9; }

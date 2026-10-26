@@ -163,6 +163,11 @@ const MENU_GROUPS = [
     { id: "tickets", label: "工单系统", icon: ICONS.ticket, roles: ["super", "operator", "support"] },
     { id: "distribution", label: "签到分销", icon: ICONS.gift, roles: ["super", "operator"] },
   ]},
+  { label: "晴天支付", icon: ICONS.credit, items: [
+    { id: "pay-dashboard", label: "支付大盘", icon: ICONS.grid, roles: ["super"] },
+    { id: "pay-merchants", label: "商户审批", icon: ICONS.users, roles: ["super"] },
+    { id: "pay-withdrawals", label: "提现审核", icon: ICONS.credit, roles: ["super"] },
+  ]},
   { label: "系统设置", icon: ICONS.gear, items: [
     { id: "bots-matrix", label: "机器人矩阵", icon: ICONS.robot, roles: ["super"] },
     { id: "staff", label: "员工权限", icon: ICONS.users, roles: ["super"] },
@@ -199,6 +204,7 @@ const PAGE_TITLES = {
   "ecom-pull": "上游挂机拉单", "ecom-express": "快递追踪", "ecom-price": "全网比价",
   "ecom-sentinel": "哨兵监控", "ecom-ocr": "财务OCR对账",
   "geek-ip": "IP归属地查询", "geek-speed": "网络测速", "geek-forex": "天气/汇率", "geek-qrcode": "二维码生成",
+  "pay-dashboard": "晴天支付 · 数据大盘", "pay-merchants": "晴天支付 · 商户审批", "pay-withdrawals": "晴天支付 · 提现审核",
   staff: "员工权限", payment: "支付配置", mail: "邮件配置",
   "bots-matrix": "机器人矩阵",
   profile: "个人中心",
@@ -523,6 +529,10 @@ function switchTab(tab, el) {
     if (tab === 'distribution' && typeof Distribution === 'object') Distribution.load();
     // 电商自动化五模块：进入即加载真实数据（ecom-pages.js）
     if (tab.indexOf('ecom-') === 0 && typeof Ecom === 'object') Ecom.enter(tab);
+    // 晴天支付平台三页：进入即真实拉取（payplat.js，仅超管）
+    if (tab === 'pay-dashboard' && typeof PayPlat === 'object') PayPlat.tab('dashboard');
+    if (tab === 'pay-merchants' && typeof PayPlat === 'object') PayPlat.tab('merchants');
+    if (tab === 'pay-withdrawals' && typeof PayPlat === 'object') PayPlat.tab('withdrawals');
 }
 
 // 阶段三业务占位页签（极客工具箱：进入时探测后端接口联调状态）
