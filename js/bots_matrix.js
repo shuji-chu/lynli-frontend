@@ -60,12 +60,22 @@ window.BotMX = {
             const online = cur.online
                 ? '<span class="bot-online bot-online-yes">在线运行</span>'
                 : '<span class="bot-online bot-online-no">未检测到进程</span>';
-            box.innerHTML = `
-              <div class="card stat-card"><div class="stat-label">${escapeHtml(cur.name || '--')} · 总用户</div><div class="stat-num">${cur.total_users ?? 0}</div></div>
-              <div class="card stat-card"><div class="stat-label">今日签到</div><div class="stat-num">${cur.today_sign ?? 0}</div></div>
-              <div class="card stat-card"><div class="stat-label">付费用户</div><div class="stat-num">${cur.paid_users ?? 0}</div></div>
+            // 根据机器人类型动态渲染 KPI，分离签到与付费业务线
+            let cards = `<div class="card stat-card"><div class="stat-label">${escapeHtml(cur.name || '--')} · 总用户</div><div class="stat-num">${cur.total_users ?? 0}</div></div>`;
+            
+            if (cur.bot === 'safew') {
+              // 签到机器人专属
+              cards += `<div class="card stat-card"><div class="stat-label">今日签到</div><div class="stat-num">${cur.today_sign ?? 0}</div></div>`;
+            } else {
+              // 综合/晴天机器人走付费体系
+              cards += `<div class="card stat-card"><div class="stat-label">付费用户</div><div class="stat-num">${cur.paid_users ?? 0}</div></div>`;
+            }
+
+            cards += `
               <div class="card stat-card"><div class="stat-label">封禁中</div><div class="stat-num">${cur.banned ?? 0}</div></div>
               <div class="card stat-card"><div class="stat-label">进程状态</div><div style="margin-top:8px">${online}</div></div>`;
+              
+            box.innerHTML = cards;
         } catch (e) {
             box.innerHTML = `<div class="empty-tip">KPI 加载失败：${escapeHtml(e.message)}</div>`;
             showToast('机器人状态加载失败：' + e.message, 'error');
