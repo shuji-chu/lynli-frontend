@@ -1563,6 +1563,75 @@
         </div>
       </section>
 
+      <!-- ========== 晴天资源站 · 商品与卡密 ========== -->
+      <section class="sub-page" id="page-qt-products">
+        <div class="page-header">
+          <div>
+            <h2 class="page-title">晴天资源站 · 商品与卡密</h2>
+            <p class="page-sub">虚拟资源商品上下架 · 卡池导入与库存管理</p>
+          </div>
+          <div class="page-actions">
+            <button class="btn btn-primary btn-sm" onclick="Qt.openNew()">新增商品</button>
+            <button class="btn btn-ghost btn-sm" onclick="Qt.loadProducts()">刷新</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table class="table" id="qt-p-table">
+              <thead><tr><th>ID</th><th>商品</th><th>分类</th><th>类型</th><th>单价 / 数量</th><th>状态</th><th>操作</th></tr></thead>
+              <tbody><tr><td colspan="7" class="empty-tip">加载中...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== 晴天资源站 · 订单管理 ========== -->
+      <section class="sub-page" id="page-qt-orders">
+        <div class="page-header">
+          <div>
+            <h2 class="page-title">晴天资源站 · 订单管理</h2>
+            <p class="page-sub">发卡订单查询 · 未完成订单补发卡密</p>
+          </div>
+          <div class="page-actions">
+            <select class="input select-inline" id="qt-o-status" onchange="Qt.loadOrders()">
+              <option value="">全部状态</option>
+              <option value="0">待支付</option>
+              <option value="1">已完成</option>
+            </select>
+            <button class="btn btn-primary btn-sm" onclick="Qt.loadOrders()">查询</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table class="table" id="qt-o-table">
+              <thead><tr><th>订单号</th><th>用户</th><th>商品</th><th>金额</th><th>支付方式</th><th>状态</th><th>时间</th><th>卡密 / 操作</th></tr></thead>
+              <tbody><tr><td colspan="8" class="empty-tip">加载中...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== 晴天资源站 · 用户 ========== -->
+      <section class="sub-page" id="page-qt-users">
+        <div class="page-header">
+          <div>
+            <h2 class="page-title">晴天资源站 · 用户</h2>
+            <p class="page-sub">资源站下单用户与消费排行</p>
+          </div>
+          <div class="page-actions">
+            <button class="btn btn-primary btn-sm" onclick="Qt.loadUsers()">刷新</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table class="table" id="qt-u-table">
+              <thead><tr><th>#</th><th>用户</th><th>UID</th><th>订单数</th><th>累计消费</th><th>最近下单</th></tr></thead>
+              <tbody><tr><td colspan="6" class="empty-tip">加载中...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
       <!-- ========== 系统设置 · 支付配置 ========== -->
       <section class="sub-page" id="page-payment">
         <div class="page-header"><div><h2 class="page-title">支付配置</h2><p class="page-sub">支付通道 · 密钥与费率</p></div></div>
@@ -1780,6 +1849,7 @@
   <script src="./js/ecom-pages.js?v=20261026u"></script>
   <script src="./js/ops-pages.js?v=20261026u"></script>
   <script src="./js/payplat.js?v=20261026p1"></script>
+  <script src="./js/qingtian.js?v=20261026q1"></script>
   <script src="./js/sysconfig.js?v=20261026u"></script>
   <script src="./js/staff.js?v=20261026u"></script>
   <script src="./js/bots_matrix.js?v=20261026u"></script>

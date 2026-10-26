@@ -168,6 +168,11 @@ const MENU_GROUPS = [
     { id: "pay-merchants", label: "商户审批", icon: ICONS.users, roles: ["super"] },
     { id: "pay-withdrawals", label: "提现审核", icon: ICONS.credit, roles: ["super"] },
   ]},
+  { label: "晴天资源站", icon: ICONS.tag, items: [
+    { id: "qt-products", label: "商品与卡密", icon: ICONS.grid, roles: ["super"] },
+    { id: "qt-orders", label: "订单管理", icon: ICONS.credit, roles: ["super"] },
+    { id: "qt-users", label: "资源站用户", icon: ICONS.users, roles: ["super"] },
+  ]},
   { label: "系统设置", icon: ICONS.gear, items: [
     { id: "bots-matrix", label: "机器人矩阵", icon: ICONS.robot, roles: ["super"] },
     { id: "staff", label: "员工权限", icon: ICONS.users, roles: ["super"] },
@@ -205,6 +210,7 @@ const PAGE_TITLES = {
   "ecom-sentinel": "哨兵监控", "ecom-ocr": "财务OCR对账",
   "geek-ip": "IP归属地查询", "geek-speed": "网络测速", "geek-forex": "天气/汇率", "geek-qrcode": "二维码生成",
   "pay-dashboard": "晴天支付 · 数据大盘", "pay-merchants": "晴天支付 · 商户审批", "pay-withdrawals": "晴天支付 · 提现审核",
+  "qt-products": "晴天资源站 · 商品与卡密", "qt-orders": "晴天资源站 · 订单管理", "qt-users": "晴天资源站 · 用户",
   staff: "员工权限", payment: "支付配置", mail: "邮件配置",
   "bots-matrix": "机器人矩阵",
   profile: "个人中心",
@@ -533,6 +539,10 @@ function switchTab(tab, el) {
     if (tab === 'pay-dashboard' && typeof PayPlat === 'object') PayPlat.tab('dashboard');
     if (tab === 'pay-merchants' && typeof PayPlat === 'object') PayPlat.tab('merchants');
     if (tab === 'pay-withdrawals' && typeof PayPlat === 'object') PayPlat.tab('withdrawals');
+    // 晴天资源站三页：进入即真实拉取（qingtian.js，仅超管）
+    if (tab === 'qt-products' && typeof Qt === 'object') Qt.loadProducts();
+    if (tab === 'qt-orders' && typeof Qt === 'object') Qt.loadOrders();
+    if (tab === 'qt-users' && typeof Qt === 'object') Qt.loadUsers();
 }
 
 // 阶段三业务占位页签（极客工具箱：进入时探测后端接口联调状态）
