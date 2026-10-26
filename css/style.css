@@ -1834,3 +1834,34 @@ body { overscroll-behavior-y: none; }
     -webkit-overflow-scrolling: touch;
   }
 }
+
+/* ================= 终极全屏顺滑（绝对安全版） ================= */
+html, body {
+  height: auto !important;
+  min-height: 100% !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  -webkit-overflow-scrolling: touch !important;
+  touch-action: pan-y !important;
+}
+
+.console-shell {
+  display: block !important;
+  height: auto !important;
+  min-height: 100vh !important;
+}
+
+.console-main {
+  display: block !important;
+  height: auto !important;
+  min-height: auto !important;
+  overflow: visible !important;
+  padding-bottom: 100px !important;
+}
+
+/* 核心修复：解除卡片内部滚动死锁，把整页交还给手机原生滑动 */
+.bot-user-list, .bot-users-card {
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
