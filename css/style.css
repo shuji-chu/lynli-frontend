@@ -46,6 +46,7 @@ body {
 /* ======================= 清爽浅蓝→白渐变背景 + 漂浮熊猫（纯 CSS，z-index:-1） ======================= */
 .bg-panda {
   position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden;
+  will-change: transform; transform: translateZ(0);
 }
 
 /* 缓慢流动的蓝白光斑（点缀氛围，不参与熊猫形态） */
@@ -168,7 +169,7 @@ body {
 @keyframes appIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
 
 /* ======================= 中台外壳：顶栏 + 抽屉 + 内容区 ======================= */
-.console-shell { min-height: 100dvh; display: flex; flex-direction: column; }
+.console-shell { height: 100vh; height: 100dvh; min-height: 0; display: flex; flex-direction: column; }
 
 /* ---------- 顶部栏（白色玻璃） ---------- */
 .topbar {
@@ -320,7 +321,7 @@ body {
 /* ---------- 内容区（滑动修复：100dvh + 底部安全 padding） ---------- */
 .console-main {
   flex: 1; width: 100%;
-  min-height: calc(100dvh - var(--topbar-height));
+  flex: 1 1 auto; min-height: 0; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
   overflow-y: auto; overflow-x: hidden;
   padding: 20px 24px 100px; /* 底部 100px：保证任何手机都能滑到最底端 */
   -webkit-overflow-scrolling: touch;
