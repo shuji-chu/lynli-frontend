@@ -1238,7 +1238,7 @@ select.biz-input { cursor: pointer; }
 .bot-search { position: relative; display: flex; align-items: center; }
 .bot-search svg { position: absolute; left: 10px; width: 15px; height: 15px; color: var(--text-tertiary); pointer-events: none; }
 .bot-search .input { padding-left: 32px; height: 34px; width: 220px; font-size: 13px; }
-.bot-user-list { display: flex; flex-direction: column; gap: 8px; max-height: 480px; overflow-y: auto; }
+.bot-user-list { display: flex; flex-direction: column; gap: 8px; }
 .bot-user-item {
   display: flex; align-items: center; gap: 12px; padding: 10px 12px;
   border-radius: var(--radius-md); background: rgba(255,255,255,.65); border: 1px solid var(--stroke);
@@ -1815,5 +1815,22 @@ body { overscroll-behavior-y: none; }
   .bot-im-chat-main {
     flex: 1;
     min-height: 250px !important;
+  }
+}
+
+/* ======================= 移动端：强制解除页面主体的局部滚动 ======================= */
+@media (max-width: 768px) {
+  /* 强制解除所有普通卡片、列表、表格的内部滚动，交还给全局页面 */
+  .card, .bot-users-card, .bot-user-list, .shop-list, .probe-card, .sub-page > div {
+    max-height: none !important;
+    overflow-y: visible !important;
+  }
+  
+  /* 豁免名单：必须保留内部滚动的组件 */
+  /* 弹窗、抽屉、AI聊天、聊天记录区 保持内部滚动，否则无法关掉或无限撑长 */
+  .modal-box, .drawer-nav, .ai-messages, .bot-im-list, .bot-im-stream, .bot-chat-history, .shop-dialog-body {
+    max-height: 86dvh !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
   }
 }
