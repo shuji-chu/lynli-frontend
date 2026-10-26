@@ -1791,3 +1791,29 @@ body { overscroll-behavior-y: none; }
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
+
+/* ======================= 修复机器人矩阵页面的局部卡死 ======================= */
+/* 1. 解除用户列表的固定高度和内部滚动，交还给全局页面滚动 */
+.bot-user-list {
+  max-height: none !important;
+  overflow-y: visible !important;
+}
+
+/* 2. 移动端适配：实时对话面板（原本写死 520px，在手机上容易卡死） */
+@media (max-width: 768px) {
+  .bot-im-body {
+    display: flex !important;
+    flex-direction: column !important;
+    height: auto !important;
+    max-height: 70vh !important; /* 限制最高不能超过屏幕70%，防止遮天蔽日 */
+  }
+  .bot-im-list {
+    height: 200px !important;
+    border-right: none !important;
+    border-bottom: 1px solid var(--stroke) !important;
+  }
+  .bot-im-chat-main {
+    flex: 1;
+    min-height: 250px !important;
+  }
+}
