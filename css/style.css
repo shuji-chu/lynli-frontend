@@ -1865,3 +1865,49 @@ html, body {
   max-height: none !important;
   overflow: visible !important;
 }
+
+/* ================= 终极架构：强制全屏原生滚动 ================= */
+html, body {
+  height: auto !important;
+  min-height: 100vh !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+#main-app, .console-shell {
+  display: block !important; /* 彻底废弃 flex，变成自然流 */
+  height: auto !important;
+  min-height: 100vh !important;
+  overflow: visible !important;
+}
+
+.console-main {
+  display: block !important; /* 不再充当内部滚动容器 */
+  flex: none !important;
+  height: auto !important;
+  min-height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+  padding: 20px 16px 120px !important;
+}
+
+/* 干掉所有内容的局部滚动 */
+.sub-page, .card, .bot-users-card, .bot-user-list, .dashboard-grid {
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+/* 但抽屉（侧边栏）必须保留满屏和内部独立滚动 */
+.drawer {
+  height: 100vh !important;
+  height: 100dvh !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+.drawer-nav {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
+}
