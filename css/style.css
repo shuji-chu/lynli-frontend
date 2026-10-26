@@ -1689,3 +1689,19 @@ select.biz-input { cursor: pointer; }
 .tl-time { font-size: 12px; color: var(--text-tertiary); margin-bottom: 2px; }
 .tl-desc { font-size: 13px; line-height: 1.6; color: var(--text-primary); }
 .tl-item.tl-latest .tl-desc { font-weight: 600; }
+
+/* ======================= 移动端丝滑体验全面优化 ======================= */
+/* 1. 彻底消除移动端点击高亮灰块 */
+* { -webkit-tap-highlight-color: transparent !important; }
+/* 2. 防误触选中文字（仅允许输入框选中） */
+body { user-select: none; -webkit-user-select: none; }
+input, textarea, .allow-select { user-select: auto !important; -webkit-user-select: auto !important; }
+/* 3. 触控反馈：按钮/卡片按压缩放，增加物理质感 */
+button:active, .drawer-item:active, .stat-card:active, .btn:active, .action-btn:active {
+  transform: scale(0.96) !important;
+  transition: transform 0.1s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+}
+/* 4. 弹窗/侧边栏入场动画 GPU 加速，避免掉帧 */
+.drawer, .modal-layer, .toast { will-change: transform, opacity; transform: translateZ(0); }
+/* 5. 锁死背景滚动（防止侧边栏打开时，主页面跟着滑） */
+body.no-scroll { overflow: hidden !important; touch-action: none; }

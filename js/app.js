@@ -443,6 +443,7 @@ function renderDrawer() {
 
 // ---------- 抽屉开关 ----------
 function toggleDrawer(force) {
+  document.body.classList.toggle("no-scroll", !!show);
     const drawer = document.getElementById('drawer');
     const mask = document.getElementById('drawer-mask');
     if (!drawer || !mask) return;
