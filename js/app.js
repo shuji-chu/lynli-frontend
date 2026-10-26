@@ -1164,3 +1164,35 @@ window.onload = async function () {
         if (typeof initDashMap === 'function') setTimeout(initDashMap, 200);
     }
 };
+
+
+// ===== 全局图片懒加载与骨架屏处理 =====
+document.addEventListener('DOMContentLoaded', () => {
+  const addLazyLoad = () => {
+    document.querySelectorAll('img:not([loading])').forEach(img => {
+      img.setAttribute('loading', 'lazy');
+      img.setAttribute('decoding', 'async');
+      img.classList.add('img-skeleton');
+      img.addEventListener('load', () => img.classList.remove('img-skeleton'));
+      img.addEventListener('error', () => img.classList.remove('img-skeleton'));
+    });
+  };
+  
+  addLazyLoad();
+  
+  // 劫持 DOM 变化，任何新插入的图片自动懒加载
+  const observer = new MutationObserver((mutations) => {
+    let hasNewImg = false;
+    mutations.forEach(m => {
+      if (m.addedNodes.length) {
+        m.addedNodes.forEach(n => {
+          if (n.nodeName === 'IMG' || (n.querySelectorAll && n.querySelectorAll('img').length)) {
+            hasNewImg = true;
+          }
+        });
+      }
+    });
+    if (hasNewImg) setTimeout(addLazyLoad, 50);
+  });
+  observer.observe(document.body, { childList: true, subtree: true });
+});

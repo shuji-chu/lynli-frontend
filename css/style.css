@@ -1778,3 +1778,16 @@ body { overscroll-behavior-y: none; }
 .drawer-foot {
   padding-bottom: calc(16px + var(--safe-bottom)) !important;
 }
+
+/* ======================= 图片加载骨架屏 ======================= */
+.img-skeleton {
+  background: linear-gradient(90deg, rgba(240, 245, 255, 0.8) 25%, rgba(220, 230, 250, 0.9) 50%, rgba(240, 245, 255, 0.8) 75%);
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.5s infinite linear;
+  color: transparent !important;
+  border-radius: inherit;
+}
+@keyframes skeletonShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
