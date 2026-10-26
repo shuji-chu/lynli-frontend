@@ -1751,3 +1751,30 @@ img { -webkit-touch-callout: none; }
 
 /* 优化滚动回弹的边界表现 */
 body { overscroll-behavior-y: none; }
+
+/* ======================= 移动端安全区 (Safe Area) 适配 ======================= */
+:root {
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* 顶部吸顶栏避让刘海 */
+.topbar {
+  padding-top: var(--safe-top);
+  height: calc(60px + var(--safe-top)); /* 假设原高度60px，自适应增高 */
+}
+
+/* 底部内容避让小条，确保滑到最底端不被挡住 */
+.console-main {
+  padding-bottom: calc(100px + var(--safe-bottom)) !important;
+}
+
+/* 右下角 AI 悬浮球向上偏移避让 */
+.ai-fab {
+  bottom: calc(24px + var(--safe-bottom)) !important;
+}
+
+/* 侧边栏底部状态栏避让 */
+.drawer-foot {
+  padding-bottom: calc(16px + var(--safe-bottom)) !important;
+}
